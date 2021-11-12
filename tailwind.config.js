@@ -110,16 +110,44 @@ module.exports = {
         dark: "#16192C"
       },
       input: {
-        default: {
-          border: "#E7E7E7",
-          bg: "#FFFFFF",
-          placeholder: "#B5B5BD",
-          txt: "#494949"
-        },
-        active: {
-          border: "#FFFFFF"
-        }
+        border: "#E7E7E7",
+        placeholder: "#B5B5BD",
+        txt: "#494949"
       }
+    },
+    fontSize: {
+      "8xl": "80px",
+      "7xl": "72px",
+      "6xl": "64px",
+      "5xl": "56px",
+      "4xl": "48px",
+      "3xl": "40px",
+      "2xl": "36px",
+      "xl": "28px",
+      "lg": "20px",
+      "md": "18px",
+      "sm": "16px",
+      "xs": "14px",
+      "2xs": "12px",
+      "3xs": "11px",
+      "4xs": "10px",
+    },
+    fontWeight: {
+      "light": 300,
+      "normal": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700,
+    },
+    borderRadius: {
+      "none": "0px",
+      "xs": "2px",
+      "sm": "4px",
+      "md": "6px",
+      "lg": "8px",
+      "xl": "12px",
+      "2xl": "16px",
+      "full": "999px",
     },
     extend: {},
   },

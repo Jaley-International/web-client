@@ -4,7 +4,7 @@ import App from "next/app";
 
 class MyApp extends App {
     render() {
-        const {Component, pageProps, router} = this.props;
+        const {Component, pageProps} = this.props;
         return (
             <>
                 <Head>
@@ -26,7 +26,7 @@ class MyApp extends App {
                     <meta property="twitter:image" content="/banner.png" />
                 </Head>
                 <div>
-                    <Component {...pageProps} key={router.route} />
+                    <Component {...pageProps} />
                 </div>
             </>
         );
