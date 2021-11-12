@@ -1,0 +1,130 @@
+module.exports = {
+  purge: [
+    "./src/**/*.tsx"
+  ],
+  darkMode: "class",
+  theme: {
+    colors: {
+      black: '#000000',
+      white: '#ffffff',
+      blue: {
+        DEFAULT: "#4C6FFF",
+        dark: "#3754DB",
+        light: "#7895FF",
+        soft: "#E1E8FF",
+        gradient: {
+          from: "#BB65FF",
+          to: "#4C6FFF"
+        }
+      },
+      silver: {
+        DEFAULT: "#E4ECF7",
+        dark: "#A6B7D4",
+        light: "#EBF2FA",
+        gradient: {
+          from: "#F1F1F5",
+          to: "#E4ECF7"
+        }
+      },
+      green: {
+        DEFAULT: "#66CB9F",
+        dark: "#4AAE8C",
+        light: "#8CDFB3",
+        soft: "#DEFFEE",
+        gradient: {
+          from: "#67E9F1",
+          to: "#24E795"
+        }
+      },
+      orange: {
+        DEFAULT: "#F7936F",
+        dark: "#D46A51",
+        light: "#FAB592",
+        soft: "#FFEDE3",
+        gradient: {
+          from: "#FFEF5E",
+          to: "#F7936F"
+        }
+      },
+      red: {
+        DEFAULT: "#F16063",
+        dark: "#CF4655",
+        light: "#F68E87",
+        soft: "#FFE6E4",
+        gradient: {
+          from: "#FFC656",
+          to: "#F16063"
+        }
+      },
+      cyan: {
+        DEFAULT: "#68DBF2",
+        dark: "#4CAFD0",
+        light: "#8DEDF7",
+        soft: "#E5FDFF",
+        gradient: {
+          from: "#68DBF2",
+          to: "#509CF5"
+        }
+      },
+      dark: {
+        DEFAULT: "#16192C",
+        dark: "#101225",
+        light: "#505780",
+        gradient: {
+          from: "#29272E",
+          to: "#27272E"
+        }
+      },
+      grey: {
+        75: "#FAFAFA",
+        100: "#F7FAFC",
+        200: "#EDF2F7",
+        300: "#E2E8F0",
+        400: "#CBD5E0",
+        500: "#A0AEC0",
+        600: "#718096",
+        700: "#4A5568",
+        800: "#2D3748",
+        900: "#1A202C"
+      },
+      txt: {
+        heading: {
+          DEFAULT: "#27272E",
+          light: "#FFFFFF"
+        },
+        body: {
+          DEFAULT: "#425466",
+          muted: "#7A7A9D",
+          lightmuted: "#8492A6",
+          light: "#F2F2F2"
+        }
+      },
+      bg: {
+        DEFAULT: "#FFFFFF",
+        light: "#F7FAFC",
+        grey: "#D5D5DC",
+        dark: "#17171B"
+      },
+      border: {
+        DEFAULT: "#EDF2F7",
+        dark: "#16192C"
+      },
+      input: {
+        default: {
+          border: "#E7E7E7",
+          bg: "#FFFFFF",
+          placeholder: "#B5B5BD",
+          txt: "#494949"
+        },
+        active: {
+          border: "#FFFFFF"
+        }
+      }
+    },
+    extend: {},
+  },
+  variants: {
+    extend: {},
+  },
+  plugins: [],
+};
