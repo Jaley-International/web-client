@@ -7,16 +7,17 @@ interface Props {
     name: string;
     value?: any;
     placeholder?: string;
+    required?: boolean;
     className?: string;
     hint?: string;
 }
 
-function TextInput({type, autocomplete, label, name, value, placeholder, className, hint}: Props): JSX.Element {
+function TextInput({type, autocomplete, label, required, name, value, placeholder, className, hint}: Props): JSX.Element {
     const id = randomString(8);
     return (
         <div className={className}>
             <label className="text-txt-body text-xs" htmlFor={id}>{label}</label><br />
-            <input className="min-w-full py-1 px-3 h-11 bg-gray-100 bg-opacity-50 focus:bg-white rounded-lg border border-input-border focus:border-blue focus:ring-2 focus:ring-blue-soft outline-none leading-8 transition-colors duration-200 ease-in-out" type={type} autoComplete={autocomplete} id={id} name={name} value={value} placeholder={placeholder} />
+            <input className="min-w-full py-1 px-3 h-11 bg-gray-100 bg-opacity-50 focus:bg-white rounded-lg border border-input-border focus:border-blue focus:ring-2 focus:ring-blue-soft outline-none leading-8 transition-colors duration-200 ease-in-out" type={type} required={required} autoComplete={autocomplete} id={id} name={name} value={value} placeholder={placeholder} />
             {hint &&
                 <span className="text-txt-body-muted text-3xs">{hint}</span>
             }

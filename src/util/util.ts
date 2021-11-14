@@ -7,7 +7,7 @@
  */
 export function randomString(length: number): string {
     let result = "";
-    let pool = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const pool = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     for (let i = 0 ; i < length ; ++i)
         result += pool.charAt(Math.floor(Math.random() * pool.length));
     return result;
