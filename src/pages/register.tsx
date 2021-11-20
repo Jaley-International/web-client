@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCloud} from "@fortawesome/free-solid-svg-icons";
 import {Display6} from "../components/text/Displays";
@@ -6,8 +6,15 @@ import {Heading2, Heading3} from "../components/text/Headings";
 import TextInput from "../components/inputs/TextInput";
 import Button from "../components/Button";
 import Checkbox from "../components/inputs/Checkbox";
+import {register} from "../logic/security";
 
 function RegisterPage(): JSX.Element {
+
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [passwordConfirm, setPasswordConfirm] = useState("");
+
     return (
         <section className="flex">
             <div className="hidden lg:inline flex-auto w-5/12 bg-blue-soft">
@@ -37,7 +44,7 @@ function RegisterPage(): JSX.Element {
             </div>
             <div className="flex-auto w-7/12 min-h-screen bg-bg-light">
 
-                <div className="py-12 px-20 lg:px-36 xl:px-48">
+                <div className="px-20 lg:px-36 xl:px-48">
 
                     <div className="my-12 h-12 inline-flex space-x-3 lg:invisible">
                         <div className="w-12 h-12 rounded-2lg bg-gradient-to-bl from-blue-gradient-from to-blue-gradient-to text-center text-2lg text-txt-heading-light py-1">
@@ -50,15 +57,19 @@ function RegisterPage(): JSX.Element {
                     <span className="text-txt-heading">All fields are required.</span>
 
                     <form className="py-10 space-y-7">
-                        <TextInput type="email" autocomplete="email" label="Email address" name="email" hint="Please use your company email address." placeholder="*********@company.com" required={true} />
-                        <TextInput type="password" autocomplete="new-password" label="Password" name="password" hint="Must be at least 12 characters long, with numbers, upper and lower case letters." required={true} />
-                        <TextInput type="password" autocomplete="new-password" label="Confirm password" name="password2" hint="Must match the password you entered above." required={true} />
+                        <TextInput type="text" autocomplete="username" label="Username" name="username" required={true} onChange={(e) => setUsername(e.target.value)} />
+                        <TextInput type="email" autocomplete="email" label="Email address" name="email" hint="Please use your company email address." placeholder="*********@company.com" required={true} onChange={(e) => setEmail(e.target.value)} />
+                        <TextInput type="password" autocomplete="new-password" label="Password" name="password" hint="Must be at least 12 characters long, with numbers, upper and lower case letters." required={true} onChange={(e) => setPassword(e.target.value)} />
+                        <TextInput type="password" autocomplete="new-password" label="Confirm password" name="password2" hint="Must match the password you entered above." required={true} onChange={(e) => setPasswordConfirm(e.target.value)} />
                         <Checkbox name="tos" check={false} required={true}>
                             <span className="text-txt-body">
                                 By creating an account you agree to the <a href="#" className="font-semibold">Terms and Conditions</a>, and the <a href="#" className="font-semibold">Privacy Policy</a>.
                             </span>
                         </Checkbox>
-                        <Button size="large" type="regular" colour="blue" className="w-full" onClick={() => alert("TODO")}>
+                        <Button size="large" type="regular" colour="blue" className="w-full" onClick={(e) => {
+                            e.preventDefault();
+                            register(email, username, password, passwordConfirm).then(_ => {});
+                        }}>
                             Register
                         </Button>
                         <br />

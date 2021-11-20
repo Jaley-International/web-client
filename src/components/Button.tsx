@@ -1,10 +1,12 @@
+import {MouseEventHandler} from "react";
+
 interface Props {
     children: JSX.Element | JSX.Element[] | string;
     size: "large" | "medium" | "small";
     type: "regular" | "soft" | "outline";
     action?: "submit" | "reset" | "button";
     colour: "blue" | "green" | "orange" | "red" | "cyan" | "dark";
-    onClick?: () => void;
+    onClick?: MouseEventHandler<HTMLButtonElement>;
     className?: string;
 }
 
