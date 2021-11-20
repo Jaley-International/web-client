@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCloud} from "@fortawesome/free-solid-svg-icons";
 import {Display6} from "../components/text/Displays";
@@ -10,10 +10,10 @@ import {register} from "../logic/security";
 
 function RegisterPage(): JSX.Element {
 
-    const [username, setUsername] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [passwordConfirm, setPasswordConfirm] = useState("");
+    const usernameRef = useRef<HTMLInputElement>(null);
+    const emailRef = useRef<HTMLInputElement>(null);
+    const passwordRef = useRef<HTMLInputElement>(null);
+    const passwordConfirmRef = useRef<HTMLInputElement>(null);
 
     return (
         <section className="flex">
@@ -57,10 +57,10 @@ function RegisterPage(): JSX.Element {
                     <span className="text-txt-heading">All fields are required.</span>
 
                     <form className="py-10 space-y-7">
-                        <TextInput type="text" autocomplete="username" label="Username" name="username" required={true} onChange={(e) => setUsername(e.target.value)} />
-                        <TextInput type="email" autocomplete="email" label="Email address" name="email" hint="Please use your company email address." placeholder="*********@company.com" required={true} onChange={(e) => setEmail(e.target.value)} />
-                        <TextInput type="password" autocomplete="new-password" label="Password" name="password" hint="Must be at least 12 characters long, with numbers, upper and lower case letters." required={true} onChange={(e) => setPassword(e.target.value)} />
-                        <TextInput type="password" autocomplete="new-password" label="Confirm password" name="password2" hint="Must match the password you entered above." required={true} onChange={(e) => setPasswordConfirm(e.target.value)} />
+                        <TextInput ref={usernameRef} type="text" autocomplete="username" label="Username" name="username" hint="Must be between 3 and 16 characters long." required={true} />
+                        <TextInput ref={emailRef} type="email" autocomplete="email" label="Email address" name="email" hint="Please use your company email address." placeholder="*********@company.com" required={true} />
+                        <TextInput ref={passwordRef} type="password" autocomplete="new-password" label="Password" name="password" hint="Must be at least 12 characters long, with numbers, upper and lower case letters." required={true} />
+                        <TextInput ref={passwordConfirmRef} type="password" autocomplete="new-password" label="Confirm password" name="password2" hint="Must match the password you entered above." required={true} />
                         <Checkbox name="tos" check={false} required={true}>
                             <span className="text-txt-body">
                                 By creating an account you agree to the <a href="#" className="font-semibold">Terms and Conditions</a>, and the <a href="#" className="font-semibold">Privacy Policy</a>.
@@ -68,7 +68,7 @@ function RegisterPage(): JSX.Element {
                         </Checkbox>
                         <Button size="large" type="regular" colour="blue" className="w-full" onClick={(e) => {
                             e.preventDefault();
-                            register(email, username, password, passwordConfirm).then(_ => {});
+                            register(emailRef.current?.value, usernameRef.current?.value, passwordRef.current?.value, passwordConfirmRef.current?.value).then(s => alert(s));
                         }}>
                             Register
                         </Button>

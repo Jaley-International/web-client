@@ -88,7 +88,25 @@ function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: Hex, str: Hex):
  * @param {string}      passwordConfirm New account's password (confirmation).
  * @return {void}
  */
-export async function register(email: string, username: string, password: string, passwordConfirm: string): Promise<void> {
+export async function register(email?: string, username?: string, password?: string, passwordConfirm?: string): Promise<string> {
+
+    // Checking input data
+    if (!email)
+        return "MISSING_EMAIL";
+    else if (!username)
+        return "MISSING_USERNAME";
+    else if (!password)
+        return "MISSING_PASSWORD";
+    else if (!passwordConfirm)
+        return "MISSING_PASSWORDCONFIRM";
+    else if (!/\S+@\S+\.\S+/.test(email)) // TODO Improve verification
+        return "INVALID_EMAIL";
+    else if (username.length < 3 || username.length > 16)
+        return "INVALID_USERNAME";
+    else if (password.length < 12) // TODO Improve verification
+        return "INVALID_PASSWORD";
+    else if (passwordConfirm != password)
+        return "INVALID_PASSWORD_CONFIRM";
 
     // Generate AES MasterKey (128 bits)
     const masterKey = forge.util.bytesToHex(forge.random.getBytesSync(16));
@@ -122,4 +140,5 @@ export async function register(email: string, username: string, password: string
     console.log(hashedAuthenticationKey);
     console.log(encryptedPrivateSharingKey);
     console.log(publicSharingKey);
+    return "DONE";
 }

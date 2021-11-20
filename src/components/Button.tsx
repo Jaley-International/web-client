@@ -17,11 +17,11 @@ function Button({children, size, type, action, colour, onClick, className}: Prop
     else if (size === "small")
         sizeClass = "rounded-sm px-3 py-1 text-4xs";
 
-    let typeClass = `text-white bg-${colour} hover:bg-opacity-90 focus:bg-opacity-80`;
+    let typeClass = `text-white bg-${colour} hover:bg-opacity-90 active:bg-opacity-80`;
     if (type === "soft")
-        typeClass = `text-${colour} bg-${colour}-soft hover:bg-${colour} focus:bg-${colour} hover:bg-opacity-20 focus:bg-opacity-30`;
+        typeClass = `text-${colour} bg-${colour}-soft hover:bg-${colour} active:bg-${colour} hover:bg-opacity-20 active:bg-opacity-30`;
     else if (type === "outline")
-        typeClass = `text-${colour} border border-${colour} bg-${colour}-soft bg-opacity-0 hover:bg-opacity-50 focus:bg-opacity-70`;
+        typeClass = `text-${colour} border border-${colour} bg-${colour}-soft bg-opacity-0 hover:bg-opacity-50 active:bg-opacity-70`;
 
     return (
         <button type={action} onClick={onClick} className={`font-semibold transition-colors duration-100 ease-in-out ${sizeClass} ${typeClass} ${className}`}>
