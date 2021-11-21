@@ -65,21 +65,21 @@ function RegisterPage(): JSX.Element {
                         <Heading2>Create your account</Heading2>
                         <span className="text-txt-heading">All fields are required.</span>
 
-                        <form className="py-10 space-y-7">
-                            <TextInput ref={usernameRef} type="text" autocomplete="username" label="Username" name="username" hint="Must be between 3 and 16 characters long." required={true} validator={(str) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
-                            <TextInput ref={emailRef} type="email" autocomplete="email" label="Email address" name="email" hint="Please use your company email address." placeholder="*********@company.com" required={true} validator={(str) => /\S+@\S+\.\S+/.test(str)} />
-                            <TextInput ref={passwordRef} type="password" autocomplete="new-password" label="Password" name="password" hint="Must be at least 12 characters long, with numbers, upper and lower case letters." required={true} validator={(str) => str.length >= 12} />
-                            <TextInput ref={passwordConfirmRef} type="password" autocomplete="new-password" label="Confirm password" name="password2" hint="Must match the password you entered above." required={true} validator={(str) => str === passwordRef.current?.value} />
+                        <form className="py-10 space-y-7" onSubmit={async (e) => {
+                            e.preventDefault();
+                            await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string);
+                            addToast({type: "success", title: "Account created", message: "Please check your emails to finalize your registration."});
+                        }}>
+                            <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" hint="Must be between 3 and 16 characters long." required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
+                            <TextInput ref={emailRef} type="email" autoComplete="email" label="Email address" name="email" hint="Please use your company email address." placeholder="*********@company.com" required={true} validator={(str: string) => /\S+@\S+\.\S+/.test(str)} />
+                            <TextInput ref={passwordRef} type="password" autoComplete="new-password" label="Password" name="password" hint="Must be at least 12 characters long, with numbers, upper and lower case letters." required={true} minLength={12} validator={(str: string) => str.length >= 12} onChange={() => passwordRef.current?.value !== passwordConfirmRef.current?.value ? passwordConfirmRef.current?.setCustomValidity("Passwords don't match.") : passwordConfirmRef.current?.setCustomValidity("")} />
+                            <TextInput ref={passwordConfirmRef} type="password" autoComplete="new-password" label="Confirm password" name="password2" hint="Must match the password you entered above." required={true} validator={(str: string) => str === passwordRef.current?.value} onChange={() => passwordRef.current?.value !== passwordConfirmRef.current?.value ? passwordConfirmRef.current?.setCustomValidity("Passwords don't match.") : passwordConfirmRef.current?.setCustomValidity("")} />
                             <Checkbox ref={tosRef} name="tos" check={false} required={true}>
                                 <span className="text-txt-body">
                                     By creating an account you agree to the <a href="#" className="font-semibold">Terms and Conditions</a>, and the <a href="#" className="font-semibold">Privacy Policy</a>.
                                 </span>
                             </Checkbox>
-                            <Button size="large" type="regular" colour="blue" className="w-full" onClick={async (e) => {
-                                e.preventDefault();
-                                await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string);
-                                addToast({type: "success", title: "Account created", message: "Please check your emails to finalize your registration."})
-                            }}>
+                            <Button size="large" type="regular" colour="blue" className="w-full">
                                     Register
                             </Button>
                             <br />
