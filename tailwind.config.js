@@ -151,7 +151,27 @@ module.exports = {
       "2xl": "16px",
       "full": "999px",
     },
-    extend: {},
+    extend: {
+      animation: {
+        fadeIn: "fadeIn 0.1s ease-in-out",
+        fadeOut: "fadeOut 0.1s ease-in-out",
+        backProgress: "backProgress 10s linear 1",
+      },
+      keyframes: {
+        fadeIn: {
+          "0%": {opacity: 0},
+          "100%": {opacity: 1},
+        },
+        fadeOut: {
+          "0%": {opacity: 1},
+          "100%": {opacity: 0},
+        },
+        backProgress: {
+          "0%": {width: "100%"},
+          "100%": {width: "0%"},
+        }
+      }
+    },
   },
   variants: {
     extend: {

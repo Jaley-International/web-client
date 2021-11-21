@@ -82,31 +82,11 @@ function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: Hex, str: Hex):
  * User registration client-side process
  * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
  *
- * @param {string}      email           New account's email address.
  * @param {string}      username        New account's username.
+ * @param {string}      email           New account's email address.
  * @param {string}      password        New account's password.
- * @param {string}      passwordConfirm New account's password (confirmation).
- * @return {void}
  */
-export async function register(email?: string, username?: string, password?: string, passwordConfirm?: string): Promise<string> {
-
-    // Checking input data
-    if (!email)
-        return "MISSING_EMAIL";
-    else if (!username)
-        return "MISSING_USERNAME";
-    else if (!password)
-        return "MISSING_PASSWORD";
-    else if (!passwordConfirm)
-        return "MISSING_PASSWORDCONFIRM";
-    else if (!/\S+@\S+\.\S+/.test(email)) // TODO Improve verification
-        return "INVALID_EMAIL";
-    else if (username.length < 3 || username.length > 16)
-        return "INVALID_USERNAME";
-    else if (password.length < 12) // TODO Improve verification
-        return "INVALID_PASSWORD";
-    else if (passwordConfirm != password)
-        return "INVALID_PASSWORD_CONFIRM";
+export async function register(username: string, email: string, password: string): Promise<void> {
 
     // Generate AES MasterKey (128 bits)
     const masterKey = forge.util.bytesToHex(forge.random.getBytesSync(16));
@@ -140,5 +120,4 @@ export async function register(email?: string, username?: string, password?: str
     console.log(hashedAuthenticationKey);
     console.log(encryptedPrivateSharingKey);
     console.log(publicSharingKey);
-    return "DONE";
 }
