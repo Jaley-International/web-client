@@ -9,6 +9,7 @@ import Checkbox from "../components/inputs/Checkbox";
 import {register} from "../logic/security";
 import ToastPortal, {ToastRef} from "../components/toast/ToastPortal";
 import {ToastProps} from "../components/toast/Toast";
+import NewPasswordInput from "../components/inputs/NewPasswordInput";
 
 function RegisterPage(): JSX.Element {
 
@@ -34,6 +35,7 @@ function RegisterPage(): JSX.Element {
             (passwordConfirmRef.current as HTMLInputElement).disabled = true;
             (tosRef.current as HTMLInputElement).disabled = true;
             (submitRef.current as HTMLButtonElement).disabled = true;
+            (submitRef.current as HTMLButtonElement).classList.add("animate-pulse");
         } else {
             (usernameRef.current as HTMLInputElement).disabled = false;
             (emailRef.current as HTMLInputElement).disabled = false;
@@ -41,6 +43,7 @@ function RegisterPage(): JSX.Element {
             (passwordConfirmRef.current as HTMLInputElement).disabled = false;
             (tosRef.current as HTMLInputElement).disabled = false;
             (submitRef.current as HTMLButtonElement).disabled = false;
+            (submitRef.current as HTMLButtonElement).classList.remove("animate-pulse");
             (passwordRef.current as HTMLInputElement).value = "";
             (passwordConfirmRef.current as HTMLInputElement).value = "";
         }
@@ -99,7 +102,7 @@ function RegisterPage(): JSX.Element {
                         }}>
                             <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" hint="Must be between 3 and 16 characters long." required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
                             <TextInput ref={emailRef} type="email" autoComplete="email" label="Email address" name="email" hint="Please use your company email address." placeholder="*********@company.com" required={true} validator={(str: string) => /\S+@\S+\.\S+/.test(str)} />
-                            <TextInput ref={passwordRef} type="password" autoComplete="new-password" label="Password" name="password" hint="Must be at least 12 characters long, with numbers, upper and lower case letters." required={true} minLength={12} validator={(str: string) => str.length >= 12} onChange={() => passwordRef.current?.value !== passwordConfirmRef.current?.value ? passwordConfirmRef.current?.setCustomValidity("Passwords don't match.") : passwordConfirmRef.current?.setCustomValidity("")} />
+                            <NewPasswordInput ref={passwordRef} label="Password" name="password" required={true} />
                             <TextInput ref={passwordConfirmRef} type="password" autoComplete="new-password" label="Confirm password" name="password2" hint="Must match the password you entered above." required={true} validator={(str: string) => str === passwordRef.current?.value} onChange={() => passwordRef.current?.value !== passwordConfirmRef.current?.value ? passwordConfirmRef.current?.setCustomValidity("Passwords don't match.") : passwordConfirmRef.current?.setCustomValidity("")} />
                             <Checkbox ref={tosRef} name="tos" check={false} required={true}>
                                 <span className="text-txt-body">

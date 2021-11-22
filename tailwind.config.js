@@ -156,6 +156,7 @@ module.exports = {
         fadeIn: "fadeIn 0.1s ease-in-out",
         fadeOut: "fadeOut 0.1s ease-in-out",
         backProgress: "backProgress 10s linear 1",
+        pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
       },
       keyframes: {
         fadeIn: {
@@ -169,6 +170,11 @@ module.exports = {
         backProgress: {
           "0%": {width: "100%"},
           "100%": {width: "0%"},
+        },
+        pulse: {
+          "0%": {opacity: 1},
+          "50%": {opacity: 0.7},
+          "100%": {opacity: 1}
         }
       }
     },
