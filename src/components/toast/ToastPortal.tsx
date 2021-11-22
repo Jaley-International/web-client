@@ -39,4 +39,5 @@ const ToastPortal = forwardRef((props, ref: Ref<ToastRef>) => {
     );
 });
 
+ToastPortal.displayName = "ToastPortal";
 export default ToastPortal;

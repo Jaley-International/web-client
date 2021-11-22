@@ -1,5 +1,6 @@
 import {randomString} from "../../util/util";
 import React, {LegacyRef, useState} from "react";
+import Button from "../Button";
 
 interface Props {
     children: JSX.Element | JSX.Element[] | string;
@@ -24,4 +25,5 @@ const Checkbox = React.forwardRef((props: Props, ref: LegacyRef<HTMLInputElement
     );
 });
 
+Checkbox.displayName = "Checkbox";
 export default Checkbox;

@@ -58,4 +58,5 @@ const NewPasswordInput = React.forwardRef((props: Props, ref: LegacyRef<HTMLInpu
     );
 });
 
+NewPasswordInput.displayName = "NewPasswordInput";
 export default NewPasswordInput;
