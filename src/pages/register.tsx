@@ -1,4 +1,4 @@
-import React, {useRef} from "react";
+import React, {Ref, useEffect, useRef, useState} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCloud} from "@fortawesome/free-solid-svg-icons";
 import {Display6} from "../components/text/Displays";
@@ -22,6 +22,29 @@ function RegisterPage(): JSX.Element {
     const passwordRef = useRef<HTMLInputElement>(null);
     const passwordConfirmRef = useRef<HTMLInputElement>(null);
     const tosRef = useRef<HTMLInputElement>(null);
+    const submitRef = useRef<HTMLButtonElement>(null);
+
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (submitting) {
+            (usernameRef.current as HTMLInputElement).disabled = true;
+            (emailRef.current as HTMLInputElement).disabled = true;
+            (passwordRef.current as HTMLInputElement).disabled = true;
+            (passwordConfirmRef.current as HTMLInputElement).disabled = true;
+            (tosRef.current as HTMLInputElement).disabled = true;
+            (submitRef.current as HTMLButtonElement).disabled = true;
+        } else {
+            (usernameRef.current as HTMLInputElement).disabled = false;
+            (emailRef.current as HTMLInputElement).disabled = false;
+            (passwordRef.current as HTMLInputElement).disabled = false;
+            (passwordConfirmRef.current as HTMLInputElement).disabled = false;
+            (tosRef.current as HTMLInputElement).disabled = false;
+            (submitRef.current as HTMLButtonElement).disabled = false;
+            (passwordRef.current as HTMLInputElement).value = "";
+            (passwordConfirmRef.current as HTMLInputElement).value = "";
+        }
+    }, [submitting]);
 
     return (
         <>
@@ -67,8 +90,12 @@ function RegisterPage(): JSX.Element {
 
                         <form className="py-10 space-y-7" onSubmit={async (e) => {
                             e.preventDefault();
-                            await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string);
-                            addToast({type: "success", title: "Account created", message: "Please check your emails to finalize your registration."});
+                            if (!submitting) {
+                                setSubmitting(true);
+                                await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string);
+                                setSubmitting(false);
+                                addToast({type: "success", title: "Account created", message: "Please check your emails to finalize your registration."});
+                            }
                         }}>
                             <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" hint="Must be between 3 and 16 characters long." required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
                             <TextInput ref={emailRef} type="email" autoComplete="email" label="Email address" name="email" hint="Please use your company email address." placeholder="*********@company.com" required={true} validator={(str: string) => /\S+@\S+\.\S+/.test(str)} />
@@ -79,7 +106,7 @@ function RegisterPage(): JSX.Element {
                                     By creating an account you agree to the <a href="#" className="font-semibold">Terms and Conditions</a>, and the <a href="#" className="font-semibold">Privacy Policy</a>.
                                 </span>
                             </Checkbox>
-                            <Button size="large" type="regular" colour="blue" className="w-full">
+                            <Button ref={submitRef} size="large" type="regular" colour="blue" className="w-full">
                                     Register
                             </Button>
                             <br />

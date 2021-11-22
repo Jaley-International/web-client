@@ -36,6 +36,24 @@ function addPadding(str: string, length: number): string {
 
 
 /**
+ * Derives a password to a key using PBKDF Version 2
+ * @param {string}      password        Password to be derived.
+ * @param {Hex}         salt            Salt.
+ * @return {Hex}
+ */
+function pbkdf2(password: string, salt: string): Promise<Hex> {
+    return new Promise((resolve, reject) => {
+        forge.pkcs5.pbkdf2(password, salt, 100000, 32, (err, derivedKey) => {
+            if (err || !derivedKey)
+                reject(err);
+            else
+                resolve(forge.util.bytesToHex(derivedKey));
+        });
+    });
+}
+
+
+/**
  * Hash using SHA256 the input string
  * @param {string}      str             String to be hashed.
  * @return {string}
@@ -87,7 +105,6 @@ function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: Hex, str: Hex):
  * @param {string}      password        New account's password.
  */
 export async function register(username: string, email: string, password: string): Promise<void> {
-
     // Generate AES MasterKey (128 bits)
     const masterKey = forge.util.bytesToHex(forge.random.getBytesSync(16));
 
@@ -103,7 +120,7 @@ export async function register(username: string, email: string, password: string
     const salt = sha256(addPadding(username + INSTANCE_ID + clientRandomValue, 128));
 
     // PPF
-    const derivedKey = forge.util.bytesToHex(forge.pkcs5.pbkdf2(password, salt, 100000, 32));
+    const derivedKey = await pbkdf2(password, salt);
     const derivedEncryptionKey = derivedKey.substr(0, 32);
     const derivedAuthenticationKey = derivedKey.substr(32);
 

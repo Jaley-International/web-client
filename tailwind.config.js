@@ -175,8 +175,13 @@ module.exports = {
   },
   variants: {
     extend: {
-      backgroundColor: ["active"],
-      backgroundOpacity: ["active"]
+      backgroundColor: ["active", "disabled"],
+      backgroundOpacity: ["active", "disabled"],
+      textColor: ["disabled"],
+      cursor: ["disabled"],
+      opacity: ["disabled"],
+      borderColor: ["disabled"],
+      borderOpacity: ["disabled"]
     },
   },
   plugins: [],
