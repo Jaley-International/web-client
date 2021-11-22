@@ -79,13 +79,14 @@ function RegisterPage(): JSX.Element {
                 </div>
                 <div className="flex-auto w-7/12 min-h-screen bg-bg-light">
 
-                    <div className="px-20 lg:px-36 xl:px-48">
+                    <div className="px-8 md:px-20 lg:px-36 xl:px-48">
 
                         <div className="my-12 h-12 inline-flex space-x-3 lg:invisible">
                             <div className="w-12 h-12 rounded-2lg bg-gradient-to-bl from-blue-gradient-from to-blue-gradient-to text-center text-2lg text-txt-heading-light py-1">
                                 <FontAwesomeIcon icon={faCloud} /> {/* TODO Change icon */}
                             </div>
-                            <Heading3 className="text-blue h-12 py-2">Private Encrypted Cloud</Heading3>
+                            <Heading3 className="hidden md:flex text-blue h-12 py-2">Private Encrypted Cloud</Heading3>
+                            <Heading3 className="flex md:hidden text-blue h-12 py-2">PEC</Heading3>
                         </div>
 
                         <Heading2>Create your account</Heading2>

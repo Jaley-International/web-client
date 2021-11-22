@@ -32,11 +32,12 @@ const NewPasswordInput = React.forwardRef((props: Props, ref: LegacyRef<HTMLInpu
     const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         if (props.onChange)
             props.onChange(e);
-        setPasswordStrength(passwordMeter(e.target.value));
-        if (passwordStrength.level < 4)
-            e.target.setCustomValidity("Password is too weak.");
-        else if (passwordStrength.level === 4)
+        const result = passwordMeter(e.target.value);
+        setPasswordStrength(result);
+        if (result.level === 4)
             e.target.setCustomValidity("");
+        else
+            e.target.setCustomValidity("Password is too weak.");
     }
 
     const bars = (level: number): JSX.Element[] => {
