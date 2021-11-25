@@ -152,6 +152,12 @@ module.exports = {
       "full": "999px",
     },
     extend: {
+      width: {
+        "0.75": "0.1875rem"
+      },
+      screens: {
+        "3xl": "1766px"
+      },
       animation: {
         fadeIn: "fadeIn 0.1s ease-in-out",
         fadeOut: "fadeOut 0.1s ease-in-out",
