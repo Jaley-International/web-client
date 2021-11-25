@@ -1,3 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    * {
+        font-family: "Inter", sans-serif;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    .curve-divider {
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        overflow: hidden;
+        line-height: 0;
+        transform: rotate(180deg);
+    }
+    .curve-divider svg {
+        position: relative;
+        display: block;
+        width: calc(118% + 1.3px);
+        height: 90px;
+    }
+}

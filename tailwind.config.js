@@ -110,21 +110,85 @@ module.exports = {
         dark: "#16192C"
       },
       input: {
-        default: {
-          border: "#E7E7E7",
-          bg: "#FFFFFF",
-          placeholder: "#B5B5BD",
-          txt: "#494949"
+        border: "#E7E7E7",
+        placeholder: "#B5B5BD",
+        txt: "#494949"
+      }
+    },
+    fontSize: {
+      "8xl": "80px",
+      "7xl": "72px",
+      "6xl": "64px",
+      "5xl": "56px",
+      "4xl": "48px",
+      "3xl": "40px",
+      "2xl": "36px",
+      "xl": "28px",
+      "2lg": "24px",
+      "lg": "20px",
+      "md": "18px",
+      "sm": "16px",
+      "xs": "14px",
+      "2xs": "12px",
+      "3xs": "11px",
+      "4xs": "10px",
+    },
+    fontWeight: {
+      "light": 300,
+      "normal": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700,
+    },
+    borderRadius: {
+      "none": "0px",
+      "xs": "2px",
+      "sm": "4px",
+      "md": "6px",
+      "lg": "8px",
+      "2lg": "10px",
+      "xl": "12px",
+      "2xl": "16px",
+      "full": "999px",
+    },
+    extend: {
+      animation: {
+        fadeIn: "fadeIn 0.1s ease-in-out",
+        fadeOut: "fadeOut 0.1s ease-in-out",
+        backProgress: "backProgress 10s linear 1",
+        pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+      },
+      keyframes: {
+        fadeIn: {
+          "0%": {opacity: 0},
+          "100%": {opacity: 1},
         },
-        active: {
-          border: "#FFFFFF"
+        fadeOut: {
+          "0%": {opacity: 1},
+          "100%": {opacity: 0},
+        },
+        backProgress: {
+          "0%": {width: "100%"},
+          "100%": {width: "0%"},
+        },
+        pulse: {
+          "0%": {opacity: 1},
+          "50%": {opacity: 0.7},
+          "100%": {opacity: 1}
         }
       }
     },
-    extend: {},
   },
   variants: {
-    extend: {},
+    extend: {
+      backgroundColor: ["active", "disabled"],
+      backgroundOpacity: ["active", "disabled"],
+      textColor: ["disabled"],
+      cursor: ["disabled"],
+      opacity: ["disabled"],
+      borderColor: ["disabled"],
+      borderOpacity: ["disabled"]
+    },
   },
   plugins: [],
 };
