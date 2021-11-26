@@ -13,9 +13,9 @@ interface Props {
 
 function NavbarItem(props: Props): JSX.Element {
     return (
-        <div className="flex space-x-2 md:space-x-4 py-3 my-1 cursor-pointer">
-            <div className={`w-0.75 h-5 my-auto min-h-max mr-0 md:mr-1 ${props.active ? "bg-blue" : ""}`} />
-            <div className="w-full text-center pr-2 md:w-4 md:text-left md:pr-0">
+        <div className="flex space-x-2 lg:space-x-4 py-3 my-1 cursor-pointer">
+            <div className={`w-0.75 h-5 my-auto min-h-max mr-0 lg:mr-1 ${props.active ? "bg-blue" : ""}`} />
+            <div className="w-full text-center pr-2 lg:w-4 lg:text-left lg:pr-0">
                 <span className="relative inline-block">
                     <FontAwesomeIcon className="my-auto text-grey-500" icon={props.icon} />
                     {props.badge &&
@@ -23,7 +23,7 @@ function NavbarItem(props: Props): JSX.Element {
                     }
                 </span>
             </div>
-            <span className={`hidden md:flex pl-1 font-semibold my-auto text-xs ${props.active ? "text-blue" : "text-txt-heading"}`}>{props.name}</span>
+            <span className={`hidden lg:flex pl-1 font-semibold my-auto text-xs ${props.active ? "text-blue" : "text-txt-heading"}`}>{props.name}</span>
             {props.badge &&
                 <div className="hidden xl:block w-full text-right pr-4">
                     <Badge text={props.badge} size="small" colour="blue" className="rounded-lg" />

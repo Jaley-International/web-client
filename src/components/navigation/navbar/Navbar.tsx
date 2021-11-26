@@ -8,15 +8,15 @@ import Link from "next/link";
 
 function Navbar(): JSX.Element {
     return (
-        <nav className="w-2/12 min-h-screen bg-white border-r-2 border-border">
+        <nav className="w-2/12 min-h-screen bg-white border-r-2 border-border relative inline-block">
 
             <Link href="/">
-                <div className="inline-flex space-x-3 px-1 md:px-4 py-8 w-full cursor-pointer">
-                    <div className="w-9 h-9 mx-auto md:mx-0 rounded-2lg bg-gradient-to-bl from-blue-gradient-from to-blue-gradient-to text-center text-md text-white py-1">
+                <div className="inline-flex space-x-3 px-1 lg:px-4 py-8 w-full cursor-pointer">
+                    <div className="w-9 h-9 mx-auto lg:mx-0 rounded-2lg bg-gradient-to-bl from-blue-gradient-from to-blue-gradient-to text-center text-md text-white py-1">
                         <FontAwesomeIcon icon={faCloud} /> {/* TODO Change icon */}
                     </div>
                     <Heading3 className="hidden 3xl:flex text-blue my-auto tracking-tighter">Private Encrypted Cloud</Heading3>
-                    <Heading3 className="hidden md:flex 3xl:hidden text-blue my-auto tracking-tighter">PEC</Heading3>
+                    <Heading3 className="hidden lg:flex 3xl:hidden text-blue my-auto tracking-tighter">PEC</Heading3>
                 </div>
             </Link>
 
@@ -32,7 +32,7 @@ function Navbar(): JSX.Element {
             <NavbarItem name="Settings" icon={faSlidersH} />
             <NavbarItem name="My&nbsp;account" icon={faUserCircle} />
 
-            <div className="fixed bottom-4">
+            <div className="absolute bottom-4 inline-block bottom-4">
                 <NavbarItem name="File&nbsp;transfers" icon={faExchangeAlt} />
             </div>
 

@@ -7,7 +7,7 @@ interface Props {
 
 function Header(props: Props): JSX.Element {
     return (
-        <div className="w-full py-8 px-10 border-b border-grey-200">
+        <div className="w-full py-7 px-5 md:px-10 border-b border-grey-200">
             <Heading2>{props.title}</Heading2>
             {props.children &&
                 <div className="mt-4">
