@@ -12,7 +12,7 @@ function BreadcrumbItem(props: BreadcrumbItemProps): JSX.Element {
     return (
         <>
             {props.href
-                    ?   <Link href={props.href}>
+                    ?   <Link href={props.href} passHref={true}>
                             <a className="text-blue-light font-semibold space-x-2">
                                 {props.icon &&
                                     <FontAwesomeIcon icon={props.icon} />
