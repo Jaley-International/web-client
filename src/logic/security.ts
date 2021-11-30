@@ -43,7 +43,7 @@ function addPadding(str: string, length: number): string {
  */
 function pbkdf2(password: string, salt: string): Promise<Hex> {
     return new Promise((resolve, reject) => {
-        forge.pkcs5.pbkdf2(password, salt, 100000, 32, (err, derivedKey) => {
+        forge.pkcs5.pbkdf2(password, salt, 100000, 64, (err, derivedKey) => {
             if (err || !derivedKey)
                 reject(err);
             else
@@ -64,6 +64,16 @@ function sha256(str: string): Hex {
 
 
 /**
+ * Hash using SHA512 the input string
+ * @param {string}      str             String to be hashed.
+ * @return {string}
+ */
+function sha512(str: string): Hex {
+    return forge.md.sha512.create().update(str).digest().toHex();
+}
+
+
+/**
  * Encrypts a string using AES
  * @param {string}      operation       Cipher and block mode of operation
  * @param {Hex}         key             Encryption key
@@ -72,7 +82,7 @@ function sha256(str: string): Hex {
  * @return {Hex}                        Encrypted string
  */
 function encrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: string): Hex {
-    const cipher = forge.cipher.createCipher(operation, key);
+    const cipher = forge.cipher.createCipher(operation, forge.util.hexToBytes(key));
     cipher.start({iv: iv});
     cipher.update(forge.util.createBuffer(str));
     cipher.finish();
@@ -89,7 +99,7 @@ function encrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: st
  * @return {string}                     Decrypted string
  */
 function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: Hex, str: Hex): string {
-    const decipher = forge.cipher.createDecipher(operation, key);
+    const decipher = forge.cipher.createDecipher(operation, forge.util.hexToBytes(key));
     decipher.start({iv: iv});
     decipher.update(forge.util.createBuffer(forge.util.hexToBytes(str)));
     return forge.util.hexToBytes(decipher.output.toHex());
@@ -105,8 +115,8 @@ function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: Hex, str: Hex):
  * @param {string}      password        New account's password.
  */
 export async function register(username: string, email: string, password: string): Promise<void> {
-    // Generate AES MasterKey (128 bits)
-    const masterKey = forge.util.bytesToHex(forge.random.getBytesSync(16));
+    // Generate AES MasterKey (256 bits)
+    const masterKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
 
     // Generate Client Random Value (128 bits)
     const clientRandomValue = forge.util.bytesToHex(forge.random.getBytesSync(16));
@@ -121,13 +131,13 @@ export async function register(username: string, email: string, password: string
 
     // PPF
     const derivedKey = await pbkdf2(password, salt);
-    const derivedEncryptionKey = derivedKey.substr(0, 32);
-    const derivedAuthenticationKey = derivedKey.substr(32);
+    const derivedEncryptionKey = derivedKey.substr(0, 64);
+    const derivedAuthenticationKey = derivedKey.substr(64);
 
     // Encrypting data before sending to the API
     const encryptedPrivateSharingKey = encrypt("AES-CTR", masterKey, salt, privateSharingKey);
     const encryptedMasterKey = encrypt("AES-CTR", derivedEncryptionKey, salt, masterKey);
-    const hashedAuthenticationKey = sha256(derivedAuthenticationKey);
+    const hashedAuthenticationKey = sha512(derivedAuthenticationKey);
 
     // TODO Send the following data to the API :
     console.log(email);
