@@ -1,5 +1,7 @@
 import forge, {Hex} from "node-forge";
 import assert from "assert";
+import {useEffect} from "react";
+import {request} from "./communication";
 
 
 // TODO : Change instance ID to be unique for each instance
@@ -117,6 +119,18 @@ function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: Hex, str: Hex):
 
 
 /**
+ * Decrypts a string using RSA (private key)
+ * @param {Hex}         key             RSA Private key
+ * @param {Hex}         value           String to decrypt
+ * @return {Hex}                        Decrypted value
+ */
+export function rsaPrivateDecrypt(key: string, value: Hex): Hex {
+    const privateKey = forge.pki.privateKeyFromPem(key);
+    return forge.util.bytesToHex(privateKey.decrypt(forge.util.hexToBytes(value)));
+}
+
+
+/**
  * User registration client-side process
  * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
  *
@@ -158,4 +172,42 @@ export async function register(username: string, email: string, password: string
         encryptedRsaPrivateSharingKey: encryptedPrivateSharingKey,
         rsaPublicSharingKey: publicSharingKey
     };
+}
+
+
+/**
+ * User authentication client-side process
+ * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit (from step 3)
+ *
+ * @param {string}      username        Account's username.
+ * @param {string}      password        Account's password.
+ * @param {string}      salt            Account's salt.
+ *
+ */
+export async function authenticate(username: string, password: string, salt: string): Promise<boolean> {
+
+    // PPF
+    const derivedKey = await pbkdf2(password, salt);
+    const derivedEncryptionKey = derivedKey.substr(0, 64);
+    const derivedAuthenticationKey = derivedKey.substr(64);
+
+    const response = await request("POST", "http://localhost:3001/api/users/login", {
+        username: username,
+        derivedAuthenticationKey: derivedAuthenticationKey
+    });
+
+    if (response.status === 401)
+        return false;
+
+    const masterKey = decrypt("AES-CTR", derivedEncryptionKey, salt, response.data.encryptedMasterKey);
+    const privateSharingKey = decrypt("AES-CTR", masterKey, salt, response.data.encryptedRsaPrivateSharingKey);
+    const sessionIdentifier = rsaPrivateDecrypt(privateSharingKey, response.data.encryptedSessionIdentifier);
+
+
+    // TODO Save :
+    console.log("Master key", masterKey);
+    console.log("RSA Key pair", response.data.rsaPublicSharingKey, privateSharingKey);
+    console.log("Session identifier", sessionIdentifier);
+
+    return true;
 }
