@@ -1,4 +1,4 @@
-import React, {Ref, useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCloud} from "@fortawesome/free-solid-svg-icons";
 import {Display6} from "../components/text/Displays";
@@ -6,11 +6,12 @@ import {Heading2, Heading3} from "../components/text/Headings";
 import TextInput from "../components/inputs/TextInput";
 import Button from "../components/Button";
 import Checkbox from "../components/inputs/Checkbox";
-import {register} from "../logic/security";
+import {register} from "../util/security";
 import ToastPortal, {ToastRef} from "../components/toast/ToastPortal";
 import {ToastProps} from "../components/toast/Toast";
 import NewPasswordInput from "../components/inputs/NewPasswordInput";
 import Link from "next/link";
+import {request} from "../util/communication";
 
 function RegisterPage(): JSX.Element {
 
@@ -97,9 +98,15 @@ function RegisterPage(): JSX.Element {
                             e.preventDefault();
                             if (!submitting) {
                                 setSubmitting(true);
-                                await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string);
+                                const registerData = await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string);
+                                const response = await request("POST", "http://localhost:3001/api/users", registerData);  {/* TODO change URL to config URL */}
                                 setSubmitting(false);
-                                addToast({type: "success", title: "Account created", message: "Please check your emails to finalize your registration."});
+                                if (response.status === 201)
+                                    addToast({type: "success", title: "Account created", message: "Please check your emails to finalize your registration."});
+                                else if (response.status === 409)
+                                    addToast({type: "error", title: "Failed to create an account", message: "Email or username already in use."});
+                                else
+                                    addToast({type: "error", title: "Failed to create an account", message: "An unknown error occurred while creating your account."});
                             }
                         }}>
                             <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" hint="Must be between 3 and 16 characters long." required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
