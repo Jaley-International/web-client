@@ -9,11 +9,12 @@ interface Props {
     action?: () => void;
     active?: boolean;
     badge?: string;
+    className?: string;
 }
 
 function NavbarItem(props: Props): JSX.Element {
     return (
-        <div className="flex space-x-2 lg:space-x-4 py-3 my-1 cursor-pointer">
+        <div className={`flex space-x-2 lg:space-x-4 py-3 my-1 cursor-pointer ${props.className}`}>
             <div className={`w-0.75 h-5 my-auto min-h-max mr-0 lg:mr-1 ${props.active ? "bg-blue" : ""}`} />
             <div className="w-full text-center pr-2 lg:w-4 lg:text-left lg:pr-0">
                 <span className="relative inline-block">

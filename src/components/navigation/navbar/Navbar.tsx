@@ -8,7 +8,7 @@ import Link from "next/link";
 
 function Navbar(): JSX.Element {
     return (
-        <nav className="w-2/12 min-h-screen bg-white border-r-2 border-border relative inline-block">
+        <nav className="w-14 lg:w-2/12 max-w-xs min-h-screen bg-white border-r-2 border-border relative">
 
             <Link href="/">
                 <div className="inline-flex space-x-3 px-1 lg:px-4 py-8 w-full cursor-pointer">
@@ -32,9 +32,7 @@ function Navbar(): JSX.Element {
             <NavbarItem name="Settings" icon={faSlidersH} />
             <NavbarItem name="My&nbsp;account" icon={faUserCircle} />
 
-            <div className="absolute bottom-4 inline-block bottom-4">
-                <NavbarItem name="File&nbsp;transfers" icon={faExchangeAlt} />
-            </div>
+            <NavbarItem name="File&nbsp;transfers" icon={faExchangeAlt} className="absolute inset-x-0 bottom-2" badge="3" />
 
         </nav>
     );
