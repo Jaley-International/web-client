@@ -6,8 +6,17 @@ import {Heading2, Heading3} from "../components/text/Headings";
 import TextInput from "../components/inputs/TextInput";
 import Button from "../components/Button";
 import Link from 'next/link';
+import {request} from "../util/communication";
+import {authenticate} from "../util/security";
+import ToastPortal, {ToastRef} from "../components/toast/ToastPortal";
+import {ToastProps} from "../components/toast/Toast";
 
 function LoginPage(): JSX.Element {
+
+    const toastRef = useRef<ToastRef>(null);
+    const addToast = (toast: ToastProps) => {
+        toastRef.current?.addMessage(toast);
+    };
 
     const usernameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
@@ -77,8 +86,22 @@ function LoginPage(): JSX.Element {
                             e.preventDefault();
                             if (!submitting) {
                                 setSubmitting(true);
-                                // TODO add login process and remove test delay
-                                setTimeout(() => setSubmitting(false), 3000);
+
+                                const username = usernameRef.current?.value as string;
+                                const password = passwordRef.current?.value as string;
+
+                                // Salt request
+                                const response = await request("POST", "http://localhost:3001/api/users/getSalt", {username: username});
+                                const salt = response.data;
+
+                                // Authentication request
+                                const result = await authenticate(username, password, salt);
+                                if (result)
+                                    addToast({type: "success", title: "Welcome!", message: "Successfully authenticated."});
+                                else
+                                    addToast({type: "error", title: "Invalid credentials", message: "Please check your username and password and try again."});
+
+                                setSubmitting(false);
                             }
                         }}>
                             <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
@@ -94,6 +117,7 @@ function LoginPage(): JSX.Element {
                     </div>
                 </div>
             </section>
+            <ToastPortal ref={toastRef} />
         </>
     );
 }
