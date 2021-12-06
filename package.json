@@ -14,6 +14,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.16",
     "autoprefixer": "^10.4.0",
+    "axios": "^0.24.0",
     "next": "12.0.3",
     "node-forge": "^0.10.0",
     "postcss": "^8.3.11",
@@ -23,6 +24,7 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/node": "^16.11.7",
     "@types/node-forge": "^0.10.10",
     "@types/react": "^17.0.34",
