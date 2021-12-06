@@ -5,6 +5,16 @@ import assert from "assert";
 // TODO : Change instance ID to be unique for each instance
 export const INSTANCE_ID = "PEC-4Kua7tTa5XAb";
 
+export interface RegisterReqData {
+    username: string;
+    email: string;
+    clientRandomValue: string;
+    encryptedMasterKey: string;
+    hashedAuthenticationKey: string;
+    encryptedRsaPrivateSharingKey: string;
+    rsaPublicSharingKey: string;
+}
+
 
 /**
  * Generate a 2048-bits RSA key pair
@@ -114,7 +124,7 @@ function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: Hex, str: Hex):
  * @param {string}      email           New account's email address.
  * @param {string}      password        New account's password.
  */
-export async function register(username: string, email: string, password: string): Promise<void> {
+export async function register(username: string, email: string, password: string): Promise<RegisterReqData> {
     // Generate AES MasterKey (256 bits)
     const masterKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
 
@@ -139,12 +149,13 @@ export async function register(username: string, email: string, password: string
     const encryptedMasterKey = encrypt("AES-CTR", derivedEncryptionKey, salt, masterKey);
     const hashedAuthenticationKey = sha512(derivedAuthenticationKey);
 
-    // TODO Send the following data to the API :
-    console.log(email);
-    console.log(username);
-    console.log(clientRandomValue);
-    console.log(encryptedMasterKey);
-    console.log(hashedAuthenticationKey);
-    console.log(encryptedPrivateSharingKey);
-    console.log(publicSharingKey);
+    return {
+        username: username,
+        email: email,
+        clientRandomValue: clientRandomValue,
+        encryptedMasterKey: encryptedMasterKey,
+        hashedAuthenticationKey: hashedAuthenticationKey,
+        encryptedRsaPrivateSharingKey: encryptedPrivateSharingKey,
+        rsaPublicSharingKey: publicSharingKey
+    };
 }
