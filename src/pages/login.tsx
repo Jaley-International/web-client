@@ -92,14 +92,18 @@ function LoginPage(): JSX.Element {
 
                                 // Salt request
                                 const response = await request("POST", "http://localhost:3001/api/users/getSalt", {username: username});
-                                const salt = response.data;
+                                if (response.status === 200) {
+                                    const salt = response.data;
 
-                                // Authentication request
-                                const result = await authenticate(username, password, salt);
-                                if (result)
-                                    addToast({type: "success", title: "Welcome!", message: "Successfully authenticated."});
-                                else
-                                    addToast({type: "error", title: "Invalid credentials", message: "Please check your username and password and try again."});
+                                    // Authentication request
+                                    const result = await authenticate(username, password, salt);
+                                    if (result)
+                                        addToast({type: "success", title: "Welcome!", message: "Successfully authenticated."});
+                                    else
+                                        addToast({type: "warning", title: "Invalid credentials", message: "Please check your username and password then try again."});
+                                } else {
+                                    addToast({type: "error", title: "Could not authenticate", message: "An unexpected error occurred. Please try again later."});
+                                }
 
                                 setSubmitting(false);
                             }

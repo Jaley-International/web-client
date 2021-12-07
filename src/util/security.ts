@@ -196,7 +196,7 @@ export async function authenticate(username: string, password: string, salt: str
         derivedAuthenticationKey: derivedAuthenticationKey
     });
 
-    if (response.status === 401)
+    if (response.status !== 200)
         return false;
 
     const masterKey = decrypt("AES-CTR", derivedEncryptionKey, salt, response.data.encryptedMasterKey);
@@ -204,7 +204,12 @@ export async function authenticate(username: string, password: string, salt: str
     const sessionIdentifier = rsaPrivateDecrypt(privateSharingKey, response.data.encryptedSessionIdentifier);
 
 
-    // TODO Save :
+    sessionStorage.setItem("masterKey", masterKey);
+    sessionStorage.setItem("publicSharingKey", response.data.rsaPublicSharingKey);
+    sessionStorage.setItem("privateSharingKey", privateSharingKey);
+    sessionStorage.setItem("sessionIdentifier", sessionIdentifier);
+
+    // TODO Remove temporary prints :
     console.log("Master key", masterKey);
     console.log("RSA Key pair", response.data.rsaPublicSharingKey, privateSharingKey);
     console.log("Session identifier", sessionIdentifier);
