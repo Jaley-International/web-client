@@ -1,6 +1,5 @@
 import forge, {Hex} from "node-forge";
 import assert from "assert";
-import {useEffect} from "react";
 import {request} from "./communication";
 
 
@@ -191,6 +190,7 @@ export async function authenticate(username: string, password: string, salt: str
     const derivedEncryptionKey = derivedKey.substr(0, 64);
     const derivedAuthenticationKey = derivedKey.substr(64);
 
+    // Authenticating (session identifier request with encrypted keys)
     const response = await request("POST", "http://localhost:3001/api/users/login", {
         username: username,
         derivedAuthenticationKey: derivedAuthenticationKey
@@ -199,20 +199,16 @@ export async function authenticate(username: string, password: string, salt: str
     if (response.status !== 200)
         return false;
 
+    // Decrypting keys
     const masterKey = decrypt("AES-CTR", derivedEncryptionKey, salt, response.data.encryptedMasterKey);
     const privateSharingKey = decrypt("AES-CTR", masterKey, salt, response.data.encryptedRsaPrivateSharingKey);
     const sessionIdentifier = rsaPrivateDecrypt(privateSharingKey, response.data.encryptedSessionIdentifier);
 
-
+    // Storing keys to the session storage
     sessionStorage.setItem("masterKey", masterKey);
     sessionStorage.setItem("publicSharingKey", response.data.rsaPublicSharingKey);
     sessionStorage.setItem("privateSharingKey", privateSharingKey);
     sessionStorage.setItem("sessionIdentifier", sessionIdentifier);
-
-    // TODO Remove temporary prints :
-    console.log("Master key", masterKey);
-    console.log("RSA Key pair", response.data.rsaPublicSharingKey, privateSharingKey);
-    console.log("Session identifier", sessionIdentifier);
 
     return true;
 }
