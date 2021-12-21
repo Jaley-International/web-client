@@ -6,11 +6,13 @@ import {faServer, faEllipsisV, faUserFriends} from "@fortawesome/free-solid-svg-
 import {faFile, faFileWord, faCalendar} from "@fortawesome/free-regular-svg-icons";
 import Card from "../components/containers/Card";
 import Button from "../components/Button";
+import TransferList from "../components/transfers/TransferList";
 
 function HomePage(): JSX.Element {
     return (
         <div className="flex">
             <Navbar />
+            <TransferList />
             <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
                 <Header title="Files">
                     <Breadcrumb items={[

@@ -32,7 +32,7 @@ function Navbar(): JSX.Element {
             <NavbarItem name="Settings" icon={faSlidersH} />
             <NavbarItem name="My&nbsp;account" icon={faUserCircle} />
 
-            <NavbarItem name="File&nbsp;transfers" icon={faExchangeAlt} className="absolute inset-x-0 bottom-2" badge="3" />
+            <NavbarItem name="File&nbsp;transfers" icon={faExchangeAlt} className="absolute inset-x-0 bottom-2" badge="3" action={() => alert("TODO")} />
 
         </nav>
     );
