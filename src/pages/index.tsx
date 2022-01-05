@@ -12,7 +12,6 @@ function HomePage(): JSX.Element {
     return (
         <div className="flex">
             <Navbar />
-            <TransferList />
             <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
                 <Header title="Files">
                     <Breadcrumb items={[
