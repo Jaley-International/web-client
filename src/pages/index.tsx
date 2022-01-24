@@ -6,7 +6,6 @@ import {faServer, faEllipsisV, faUserFriends} from "@fortawesome/free-solid-svg-
 import {faFile, faFileWord, faCalendar} from "@fortawesome/free-regular-svg-icons";
 import Card from "../components/containers/Card";
 import Button from "../components/Button";
-import TransferList from "../components/transfers/TransferList";
 
 function HomePage(): JSX.Element {
     return (
