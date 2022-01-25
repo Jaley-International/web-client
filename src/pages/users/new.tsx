@@ -59,8 +59,8 @@ function NewUser(): JSX.Element {
 
                     <div className="mb-10">
                         <div className="flex space-x-4">
-                            <div className="grid rounded-full w-32 h-32 bg-silver my-auto">
-                                <FontAwesomeIcon className="m-auto text-silver-dark text-6xl" icon={faUser} />
+                            <div className="grid rounded-full w-24 lg:w-32 h-24 lg:h-32 bg-silver my-auto">
+                                <FontAwesomeIcon className="m-auto text-silver-dark text-4xl lg:text-6xl" icon={faUser} />
                             </div>
                             <div>
                                 <p ref={previewName} className="text-xl font-semibold text-txt-heading">&nbsp;</p>
@@ -83,29 +83,29 @@ function NewUser(): JSX.Element {
                         alert(`TODO Submit form\n\n${firstname}\n${lastname}\n${username}\n${email}\n${group}\n${job}\n${accessLevel}`)
                     }}>
 
-                        <div className="flex">
-                            <TextInput ref={firstnameRef} className="w-1/2 pr-4" type="text" autoComplete="given-name" label="First name" name="firstname" required={true} minLength={1} maxLength={32} validator={(str: string) => /^[0-9a-zA-Z-]{1,32}$/.test(str)} onChange={() => {updatePreview();updateDefaultUsername();}} />
-                            <TextInput ref={lastnameRef} className="w-1/2 pl-4" type="text" autoComplete="family-name" label="Last name" name="lastname" required={true} minLength={1} maxLength={32} validator={(str: string) => /^[0-9a-zA-Z-]{1,32}$/.test(str)} onChange={() => {updatePreview();updateDefaultUsername();}} />
+                        <div className="lg:flex">
+                            <TextInput ref={firstnameRef} className="lg:w-1/2 lg:pr-4" type="text" autoComplete="given-name" label="First name" name="firstname" required={true} minLength={1} maxLength={32} validator={(str: string) => /^[0-9a-zA-Z-]{1,32}$/.test(str)} onChange={() => {updatePreview();updateDefaultUsername();}} />
+                            <TextInput ref={lastnameRef} className="lg:w-1/2 lg:pl-4" type="text" autoComplete="family-name" label="Last name" name="lastname" required={true} minLength={1} maxLength={32} validator={(str: string) => /^[0-9a-zA-Z-]{1,32}$/.test(str)} onChange={() => {updatePreview();updateDefaultUsername();}} />
                         </div>
-                        <div className="flex">
-                            <TextInput ref={usernameRef} className="w-1/2 pr-4" type="text" autoComplete="username" label="Username" name="username" required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} onChange={updatePreview} />
-                            <TextInput ref={emailRef} className="w-1/2 pl-4" type="email" autoComplete="email" label="Email address" name="email" required={true} validator={(str: string) => /\S+@\S+\.\S+/.test(str)} onChange={updatePreview} />
+                        <div className="lg:flex">
+                            <TextInput ref={usernameRef} className="lg:w-1/2 lg:pr-4" type="text" autoComplete="username" label="Username" name="username" required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} onChange={updatePreview} />
+                            <TextInput ref={emailRef} className="lg:w-1/2 lg:pl-4" type="email" autoComplete="email" label="Email address" name="email" required={true} validator={(str: string) => /\S+@\S+\.\S+/.test(str)} onChange={updatePreview} />
                         </div>
-                        <div className="flex">
-                            <Select ref={groupRef} className="w-1/3 pr-4" label="Group" required={true} onChange={updatePreview}>
+                        <div className="lg:flex">
+                            <Select ref={groupRef} className="lg:w-1/3 lg:pr-4" label="Group" required={true} onChange={updatePreview}>
                                 <option>Clients</option>
                                 <option>Debt recovery department</option>
                                 <option>Human resources</option>
                                 <option>Legal department</option>
                             </Select>
-                            <Select ref={jobRef} className="w-1/3 px-2" label="Job title" required={true} onChange={updatePreview}>
+                            <Select ref={jobRef} className="lg:w-1/3 lg:px-2" label="Job title" required={true} onChange={updatePreview}>
                                 <option>CEO</option>
                                 <option>Debt Collection Officer</option>
                                 <option>HR director</option>
                                 <option>Individuals Litigation Collection Officer</option>
                                 <option>Legal expert / Lawyer</option>
                             </Select>
-                            <Select ref={accessLevelRef} className="w-1/3 pl-4" label="Access level" required={true}>
+                            <Select ref={accessLevelRef} className="lg:w-1/3 lg:pl-4" label="Access level" required={true}>
                                 <option>1 - Guest</option>
                                 <option>2 - User</option>
                                 <option>3 - Administrator</option>
