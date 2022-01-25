@@ -1,9 +1,10 @@
-import Navbar from "../components/navigation/navbar/Navbar";
-import Header from "../components/sections/Header";
+import Navbar from "../../components/navigation/navbar/Navbar";
+import Header from "../../components/sections/Header";
 import {faEllipsisV, faPlus, faUser, faUserFriends, faIdCardAlt} from "@fortawesome/free-solid-svg-icons";
-import Card from "../components/containers/Card";
+import Card from "../../components/containers/Card";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import Button from "../components/Button";
+import Button from "../../components/Button";
+import Link from "next/link";
 
 function UserList(): JSX.Element {
     return (
@@ -11,9 +12,11 @@ function UserList(): JSX.Element {
             <Navbar />
             <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
                 <Header title="User management">
-                    <Button size="small" type="regular" colour="green" onClick={() => alert("TODO")}>
-                            <span><FontAwesomeIcon icon={faPlus} />&nbsp;&nbsp;New user</span>
-                    </Button>
+                    <Link href="/users/new">
+                        <Button size="small" type="regular" colour="green">
+                                <span><FontAwesomeIcon icon={faPlus} />&nbsp;&nbsp;New user</span>
+                        </Button>
+                    </Link>
                 </Header>
 
                 <div className="w-full p-8">
