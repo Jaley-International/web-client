@@ -5,8 +5,15 @@ import Card from "../../components/containers/Card";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Button from "../../components/Button";
 import Link from "next/link";
+import {useState} from "react";
+import DeleteUserModal from "../../components/containers/modals/DeleteUserModal";
+import User from "../../model/User";
 
 function UserList(): JSX.Element {
+
+    const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+    const [modalUserTarget, setModalUserTarget] = useState<User | null>(null);
+
     return (
         <div className="flex">
             <Navbar />
@@ -60,7 +67,10 @@ function UserList(): JSX.Element {
                                 </td>
                                 <td className="py-2 px-4">
                                     <div className="w-full">
-                                        <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
+                                        <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500" onClick={() => {
+                                            setModalUserTarget(new User(123, "asanders", "Alicia", "Sanders"));
+                                            setShowDeleteModal(true);
+                                        }}>
                                             <FontAwesomeIcon icon={faEllipsisV} />
                                         </Button>
                                     </div>
@@ -84,7 +94,10 @@ function UserList(): JSX.Element {
                                 </td>
                                 <td className="py-2 px-4">
                                     <div className="w-full">
-                                        <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
+                                        <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500" onClick={() => {
+                                            setModalUserTarget(new User(456, "emcroberts", "Eva", "McRoberts"));
+                                            setShowDeleteModal(true);
+                                        }}>
                                             <FontAwesomeIcon icon={faEllipsisV} />
                                         </Button>
                                     </div>
@@ -108,7 +121,10 @@ function UserList(): JSX.Element {
                                 </td>
                                 <td className="py-2 px-4">
                                     <div className="w-full">
-                                        <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
+                                        <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500" onClick={() => {
+                                            setModalUserTarget(new User(789, "cbarnett", "Charles", "Barnett"));
+                                            setShowDeleteModal(true);
+                                        }}>
                                             <FontAwesomeIcon icon={faEllipsisV} />
                                         </Button>
                                     </div>
@@ -132,7 +148,10 @@ function UserList(): JSX.Element {
                                 </td>
                                 <td className="py-2 px-4">
                                     <div className="w-full">
-                                        <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
+                                        <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500" onClick={() => {
+                                            setModalUserTarget(new User(321, "ehill", "Eve", "Hill"));
+                                            setShowDeleteModal(true);
+                                        }}>
                                             <FontAwesomeIcon icon={faEllipsisV} />
                                         </Button>
                                     </div>
@@ -156,7 +175,10 @@ function UserList(): JSX.Element {
                                 </td>
                                 <td className="py-2 px-4">
                                     <div className="w-full">
-                                        <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
+                                        <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500" onClick={() => {
+                                            setModalUserTarget(new User(654, "jcharlton", "Joshua", "Charlton"));
+                                            setShowDeleteModal(true);
+                                        }}>
                                             <FontAwesomeIcon icon={faEllipsisV} />
                                         </Button>
                                     </div>
@@ -182,7 +204,10 @@ function UserList(): JSX.Element {
                                 </td>
                                 <td className="py-2 px-4">
                                     <div className="w-full">
-                                        <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
+                                        <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500" onClick={() => {
+                                            setModalUserTarget(new User(987, "ncook", "Nathan", "Cook"));
+                                            setShowDeleteModal(true);
+                                        }}>
                                             <FontAwesomeIcon icon={faEllipsisV} />
                                         </Button>
                                     </div>
@@ -194,6 +219,13 @@ function UserList(): JSX.Element {
                 </div>
 
             </div>
+                {showDeleteModal && modalUserTarget !== null &&
+                    <DeleteUserModal user={modalUserTarget} closeCallback={() => {
+                        setShowDeleteModal(false);
+                        setModalUserTarget(null);
+                    }
+                } />
+            }
         </div>
     );
 }
