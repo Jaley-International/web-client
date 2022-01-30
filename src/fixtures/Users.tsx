@@ -1,0 +1,58 @@
+import User, {UserAccountType} from "../model/User";
+
+export default [
+    new User(
+        123,
+        "asanders",
+        "Alicia",
+        "Sanders",
+        "https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
+        "CEO",
+        "Executive",
+        UserAccountType.ADMINISTRATOR),
+    new User(
+        456,
+        "emcroberts",
+        "Eva",
+        "McRoberts",
+        "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=750&q=80",
+        "HR Director",
+        "Human resources",
+        UserAccountType.ADMINISTRATOR),
+    new User(
+        789,
+        "cbarnett",
+        "Charles",
+        "Barnett",
+        "https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60",
+        "Individuals Litigation Collection Officer",
+        "Debt recovery department",
+        UserAccountType.USER),
+    new User(
+        321,
+        "ehill",
+        "Emily",
+        "Hill",
+        "https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
+        "Debt Collection Officer",
+        "Debt recovery department",
+        UserAccountType.USER),
+    new User(
+        654,
+        "jcharlton",
+        "Joshua",
+        "Charlton",
+        "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=750&q=80",
+        "Legal expert / Lawyer",
+        "Legal department",
+        UserAccountType.USER),
+    new User(
+        987,
+        "ncook",
+        "Nathan",
+        "Cook",
+        null,
+        "Business owner",
+        "Clients",
+        UserAccountType.GUEST),
+];

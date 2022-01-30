@@ -1,15 +1,25 @@
+export enum UserAccountType {GUEST = "Guest", USER = "User", ADMINISTRATOR = "Administrator"}
+
 class User {
 
     private readonly _userId: number;
     private readonly _username: string;
     private _firstName: string;
     private _lastName: string;
+    private _profilePicture: string | null;
+    private _job: string;
+    private _group: string;
+    private _accountType: UserAccountType;
 
-    public constructor(userId: number, username: string, firstName: string, lastName: string) {
+    public constructor(userId: number, username: string, firstName: string, lastName: string, profilePicture: string | null = null, job: string, group: string, accountType: UserAccountType) {
         this._userId = userId;
         this._username = username;
         this._firstName = firstName;
         this._lastName = lastName;
+        this._profilePicture = profilePicture;
+        this._job = job;
+        this._group = group;
+        this._accountType = accountType;
     }
 
     public get userId(): number {
@@ -26,6 +36,22 @@ class User {
 
     public get lastName(): string {
         return this._lastName;
+    }
+
+    public get profilePicture(): string | null {
+        return this._profilePicture;
+    }
+
+    public get job(): string {
+        return this._job;
+    }
+
+    public get group(): string {
+        return this._group;
+    }
+
+    public get accountType(): UserAccountType {
+        return this._accountType;
     }
 }
 
