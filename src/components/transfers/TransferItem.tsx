@@ -1,6 +1,6 @@
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEllipsisV, faArrowCircleUp, faArrowCircleDown} from "@fortawesome/free-solid-svg-icons";
-import Button from "../Button";
+import Button from "../buttons/Button";
 import ProgressBar from "../ProgressBar";
 
 interface Props {

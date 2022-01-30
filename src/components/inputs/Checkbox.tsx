@@ -1,6 +1,6 @@
 import {randomString} from "../../util/util";
 import React, {LegacyRef, useState} from "react";
-import Button from "../Button";
+import Button from "../buttons/Button";
 
 interface Props {
     children: JSX.Element | JSX.Element[] | string;

@@ -1,11 +1,11 @@
 import Navbar from "../../components/navigation/navbar/Navbar";
 import Header from "../../components/sections/Header";
 import Link from "next/link";
-import Button from "../../components/Button";
+import Button from "../../components/buttons/Button";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowLeft, faUser} from "@fortawesome/free-solid-svg-icons";
 import TextInput from "../../components/inputs/TextInput";
-import React, {useEffect, useRef} from "react";
+import React, {useRef} from "react";
 import Select from "../../components/inputs/Select";
 
 function NewUser(): JSX.Element {

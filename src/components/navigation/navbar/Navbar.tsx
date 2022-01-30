@@ -32,9 +32,9 @@ function Navbar(): JSX.Element {
                     </div>
                 </Link>
 
-                <NavbarItem name="Files" icon={faFile} active={true} />
+                <NavbarItem name="Files" icon={faFile} active={true} href="/" />
                 <NavbarItem name="Tracked&nbsp;folders" icon={faFolderOpen} />
-                <NavbarItem name="Admin&nbsp;panel" icon={faUserShield} />
+                <NavbarItem name="Admin&nbsp;panel" icon={faUserShield} href="/users" />
 
                 <div className="w-full py-6">
                     <hr className="mx-auto w-2/3 text-grey-200" />

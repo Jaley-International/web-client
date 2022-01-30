@@ -4,7 +4,7 @@ import {faCloud} from "@fortawesome/free-solid-svg-icons";
 import {Display6} from "../components/text/Displays";
 import {Heading2, Heading3} from "../components/text/Headings";
 import TextInput from "../components/inputs/TextInput";
-import Button from "../components/Button";
+import Button from "../components/buttons/Button";
 import Checkbox from "../components/inputs/Checkbox";
 import {register} from "../util/security";
 import ToastPortal, {ToastRef} from "../components/toast/ToastPortal";

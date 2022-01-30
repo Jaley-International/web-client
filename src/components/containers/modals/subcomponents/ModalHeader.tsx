@@ -1,4 +1,4 @@
-import Button from "../../../Button";
+import Button from "../../../buttons/Button";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faTimes} from "@fortawesome/free-solid-svg-icons";
 
