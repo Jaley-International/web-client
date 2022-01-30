@@ -19,7 +19,7 @@ function UserList(): JSX.Element {
     const [modalUserTarget, setModalUserTarget] = useState<User | null>(null);
 
     return (
-        <div className="flex">
+        <div className="flex bg-bg-light">
             <Navbar />
             <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
                 <Header title="User management">

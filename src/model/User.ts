@@ -4,6 +4,7 @@ class User {
 
     private readonly _userId: number;
     private readonly _username: string;
+    private readonly _email: string;
     private _firstName: string;
     private _lastName: string;
     private _profilePicture: string | null;
@@ -11,9 +12,10 @@ class User {
     private _group: string;
     private _accountType: UserAccountType;
 
-    public constructor(userId: number, username: string, firstName: string, lastName: string, profilePicture: string | null = null, job: string, group: string, accountType: UserAccountType) {
+    public constructor(userId: number, username: string, email: string, firstName: string, lastName: string, profilePicture: string | null = null, job: string, group: string, accountType: UserAccountType) {
         this._userId = userId;
         this._username = username;
+        this._email = email;
         this._firstName = firstName;
         this._lastName = lastName;
         this._profilePicture = profilePicture;
@@ -28,6 +30,10 @@ class User {
 
     public get username(): string {
         return this._username;
+    }
+
+    public get email(): string {
+        return this._email;
     }
 
     public get firstName(): string {
