@@ -14,7 +14,7 @@ function ContextMenuItem(props: Props): JSX.Element {
         <Link href={props.href ? props.href : "#"}>
             <div className="context flex text-xs hover:bg-grey-100 py-1.5 px-6 cursor-pointer transition duration-100" onClick={props.action ? props.action : () => {}}>
                 {props.icon &&
-                    <span className="w-6 text-center pr-2">
+                    <span className="w-6 text-center mr-2.5">
                         <FontAwesomeIcon icon={props.icon}/>
                     </span>
                 }
