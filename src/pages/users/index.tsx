@@ -240,12 +240,11 @@ function UserList(): JSX.Element {
                 </div>
 
             </div>
-                {showDeleteModal && modalUserTarget !== null &&
-                    <DeleteUserModal user={modalUserTarget} closeCallback={() => {
-                        setShowDeleteModal(false);
-                        setModalUserTarget(null);
-                    }
-                } />
+            {showDeleteModal && modalUserTarget !== null &&
+                <DeleteUserModal user={modalUserTarget} closeCallback={() => {
+                    setShowDeleteModal(false);
+                    setModalUserTarget(null);
+                }} />
             }
         </div>
     );

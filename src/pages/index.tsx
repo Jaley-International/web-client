@@ -2,12 +2,28 @@ import Navbar from "../components/navigation/navbar/Navbar";
 import Header from "../components/sections/Header";
 import Breadcrumb from "../components/navigation/breadcrumb/Breadcrumb";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faServer, faEllipsisV, faUserFriends} from "@fortawesome/free-solid-svg-icons";
-import {faFile, faFileWord, faCalendar} from "@fortawesome/free-regular-svg-icons";
+import {
+    faServer,
+    faUserFriends,
+    faCloudDownloadAlt,
+    faShareAlt,
+    faUsersCog, faFileImport
+} from "@fortawesome/free-solid-svg-icons";
+import {faFile, faFileWord, faCalendar, faEye, faTimesCircle} from "@fortawesome/free-regular-svg-icons";
 import Card from "../components/containers/Card";
-import Button from "../components/buttons/Button";
+import ContextMenuItem from "../components/containers/contextmenu/ContextMenuItem";
+import OptionsButton from "../components/buttons/OptionsButton";
+import {useState} from "react";
+import File from "../model/File";
+import DeleteFileModal from "../components/containers/modals/DeleteFileModals";
+import OverwriteFileModal from "../components/containers/modals/OverwriteFileModal";
 
 function HomePage(): JSX.Element {
+
+    const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+    const [showOverwriteModal, setShowOverwriteModal] = useState<boolean>(false);
+    const [modalFileTarget, setModalFileTarget] = useState<File | null>(null);
+
     return (
         <div className="flex">
             <Navbar />
@@ -73,9 +89,20 @@ function HomePage(): JSX.Element {
                                     </td>
                                     <td className="py-2 px-4">
                                         <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
+                                            <OptionsButton>
+                                                <ContextMenuItem name="Preview" icon={faEye} action={() => alert("TODO File preview")} />
+                                                <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={() => alert("TODO File download")} />
+                                                <ContextMenuItem name="Share" icon={faShareAlt} action={() => alert("TODO File sharing")} />
+                                                <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => alert("TODO Permission modal")} />
+                                                <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
+                                                    setModalFileTarget(new File(0, "Creditor bank details.pdf"));
+                                                    setShowOverwriteModal(true);
+                                                }} />
+                                                <ContextMenuItem name="Delete" icon={faTimesCircle} action={() => {
+                                                    setModalFileTarget(new File(0, "Creditor bank details.pdf"));
+                                                    setShowDeleteModal(true);
+                                                }} />
+                                            </OptionsButton>
                                         </div>
                                     </td>
                                 </tr>
@@ -108,9 +135,20 @@ function HomePage(): JSX.Element {
                                     </td>
                                     <td className="py-2 px-4">
                                         <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
+                                            <OptionsButton>
+                                                <ContextMenuItem name="Preview" icon={faEye} action={() => alert("TODO File preview")} />
+                                                <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={() => alert("TODO File download")} />
+                                                <ContextMenuItem name="Share" icon={faShareAlt} action={() => alert("TODO File sharing")} />
+                                                <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => alert("TODO Permission modal")} />
+                                                <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
+                                                    setModalFileTarget(new File(0, "Creditor bank details.pdf"));
+                                                    setShowOverwriteModal(true);
+                                                }} />
+                                                <ContextMenuItem name="Delete" icon={faTimesCircle} action={() => {
+                                                    setModalFileTarget(new File(0, "Creditor bank details.pdf"));
+                                                    setShowDeleteModal(true);
+                                                }} />
+                                            </OptionsButton>
                                         </div>
                                     </td>
                                 </tr>
@@ -143,429 +181,20 @@ function HomePage(): JSX.Element {
                                     </td>
                                     <td className="py-2 px-4">
                                         <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className="border-b border-grey-200">
-                                    <td className="py-2 px-4">
-                                        <div className="flex space-x-3">
-                                            <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
-                                            </div>
-                                            <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
-                                                <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className="border-b border-grey-200">
-                                    <td className="py-2 px-4">
-                                        <div className="flex space-x-3">
-                                            <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
-                                            </div>
-                                            <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
-                                                <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className="border-b border-grey-200">
-                                    <td className="py-2 px-4">
-                                        <div className="flex space-x-3">
-                                            <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
-                                            </div>
-                                            <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
-                                                <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className="border-b border-grey-200">
-                                    <td className="py-2 px-4">
-                                        <div className="flex space-x-3">
-                                            <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
-                                            </div>
-                                            <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
-                                                <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className="border-b border-grey-200">
-                                    <td className="py-2 px-4">
-                                        <div className="flex space-x-3">
-                                            <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
-                                            </div>
-                                            <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
-                                                <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className="border-b border-grey-200">
-                                    <td className="py-2 px-4">
-                                        <div className="flex space-x-3">
-                                            <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
-                                            </div>
-                                            <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
-                                                <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className="border-b border-grey-200">
-                                    <td className="py-2 px-4">
-                                        <div className="flex space-x-3">
-                                            <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
-                                            </div>
-                                            <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
-                                                <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className="border-b border-grey-200">
-                                    <td className="py-2 px-4">
-                                        <div className="flex space-x-3">
-                                            <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
-                                            </div>
-                                            <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
-                                                <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className="border-b border-grey-200">
-                                    <td className="py-2 px-4">
-                                        <div className="flex space-x-3">
-                                            <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
-                                            </div>
-                                            <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
-                                                <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className="border-b border-grey-200">
-                                    <td className="py-2 px-4">
-                                        <div className="flex space-x-3">
-                                            <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
-                                            </div>
-                                            <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
-                                                <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className="border-b border-grey-200">
-                                    <td className="py-2 px-4">
-                                        <div className="flex space-x-3">
-                                            <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
-                                            </div>
-                                            <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
-                                                <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className="border-b border-grey-200">
-                                    <td className="py-2 px-4">
-                                        <div className="flex space-x-3">
-                                            <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
-                                            </div>
-                                            <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
-                                                <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
-                                        </div>
-                                    </td>
-                                    <td className="py-2 px-4">
-                                        <div className="w-full">
-                                            <Button size="medium" type="soft" colour="dark" className="pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500">
-                                                <FontAwesomeIcon icon={faEllipsisV} />
-                                            </Button>
+                                            <OptionsButton>
+                                                <ContextMenuItem name="Preview" icon={faEye} action={() => alert("TODO File preview")} />
+                                                <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={() => alert("TODO File download")} />
+                                                <ContextMenuItem name="Share" icon={faShareAlt} action={() => alert("TODO File sharing")} />
+                                                <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => alert("TODO Permission modal")} />
+                                                <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
+                                                    setModalFileTarget(new File(0, "Creditor bank details.pdf"));
+                                                    setShowOverwriteModal(true);
+                                                }} />
+                                                <ContextMenuItem name="Delete" icon={faTimesCircle} action={() => {
+                                                    setModalFileTarget(new File(0, "Creditor bank details.pdf"));
+                                                    setShowDeleteModal(true);
+                                                }} />
+                                            </OptionsButton>
                                         </div>
                                     </td>
                                 </tr>
@@ -575,6 +204,18 @@ function HomePage(): JSX.Element {
                 </div>
 
             </div>
+            {showDeleteModal && modalFileTarget !== null &&
+                <DeleteFileModal file={modalFileTarget} closeCallback={() => {
+                    setShowDeleteModal(false);
+                    setModalFileTarget(null);
+                }} />
+            }
+            {showOverwriteModal && modalFileTarget !== null &&
+                <OverwriteFileModal file={modalFileTarget} closeCallback={() => {
+                    setShowOverwriteModal(false);
+                    setModalFileTarget(null);
+                }} />
+            }
         </div>
     );
 }
