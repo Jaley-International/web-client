@@ -22,14 +22,14 @@ function UserPage(): JSX.Element {
 
     const user = Users.filter((user) => user.userId.toString() === id)[0];
 
-    if (user) {
+    const firstnameRef = useRef<HTMLInputElement>(null);
+    const lastnameRef = useRef<HTMLInputElement>(null);
+    const emailRef = useRef<HTMLInputElement>(null);
+    const groupRef = useRef<HTMLSelectElement>(null);
+    const jobRef = useRef<HTMLSelectElement>(null);
+    const accessLevelRef = useRef<HTMLSelectElement>(null);
 
-        const firstnameRef = useRef<HTMLInputElement>(null);
-        const lastnameRef = useRef<HTMLInputElement>(null);
-        const emailRef = useRef<HTMLInputElement>(null);
-        const groupRef = useRef<HTMLSelectElement>(null);
-        const jobRef = useRef<HTMLSelectElement>(null);
-        const accessLevelRef = useRef<HTMLSelectElement>(null);
+    if (user) {
 
         return (
             <div className="flex bg-bg-light">
