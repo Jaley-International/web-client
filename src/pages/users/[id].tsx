@@ -249,7 +249,7 @@ function UserPage(): JSX.Element {
                                 <div className="flex text-txt-body px-6 pb-6 pt-2">
                                     <div className="w-full">
                                         <span>
-                                            By deleting this account, all the user's data will be lost.<br />
+                                            By deleting this account, all the user&apos;s data will be lost.<br />
                                             Their files and folders will be transferred to you.<br />
                                             This process is definitive and cannot be reversed.
                                         </span>
