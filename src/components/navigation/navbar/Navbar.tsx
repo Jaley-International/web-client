@@ -32,19 +32,19 @@ function Navbar(): JSX.Element {
                     </div>
                 </Link>
 
-                <NavbarItem name="Files" icon={faFile} active={true} href="/" />
-                <NavbarItem name="Tracked&nbsp;folders" icon={faFolderOpen} />
-                <NavbarItem name="Admin&nbsp;panel" icon={faUserShield} href="/users" />
+                <NavbarItem name="Files" icon={faFile} activeRoutes={[/^\/$/]} href="/" />
+                <NavbarItem name="Tracked&nbsp;folders" activeRoutes={[]} icon={faFolderOpen} />
+                <NavbarItem name="Admin&nbsp;panel" activeRoutes={[/^\/users.*$/]} icon={faUserShield} href="/users" />
 
                 <div className="w-full py-6">
                     <hr className="mx-auto w-2/3 text-grey-200" />
                 </div>
 
-                <NavbarItem name="Notifications" icon={faBell} badge="12" />
-                <NavbarItem name="Settings" icon={faSlidersH} />
-                <NavbarItem name="My&nbsp;account" icon={faUserCircle} />
+                <NavbarItem name="Notifications" activeRoutes={[]} icon={faBell} badge="12" />
+                <NavbarItem name="Settings" activeRoutes={[]} icon={faSlidersH} />
+                <NavbarItem name="My&nbsp;account" activeRoutes={[]} icon={faUserCircle} />
 
-                <NavbarItem name="File&nbsp;transfers" icon={faExchangeAlt} className="absolute inset-x-0 bottom-2" badge="3" action={() => toggleFileTransfers()} />
+                <NavbarItem name="File&nbsp;transfers" active={showFileTransfers} activeRoutes={[]} icon={faExchangeAlt} className="absolute inset-x-0 bottom-2" badge="3" action={() => toggleFileTransfers()} />
 
             </nav>
         </>

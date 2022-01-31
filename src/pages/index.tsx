@@ -67,7 +67,7 @@ function HomePage(): JSX.Element {
                                                 <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
                                             </div>
                                             <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
+                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span>
                                                 <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
                                             </div>
                                         </div>
@@ -113,7 +113,7 @@ function HomePage(): JSX.Element {
                                                 <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
                                             </div>
                                             <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
+                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span>
                                                 <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
                                             </div>
                                         </div>
@@ -159,7 +159,7 @@ function HomePage(): JSX.Element {
                                                 <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord} />
                                             </div>
                                             <div className="grid content-center leading-4">
-                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span><br />
+                                                <span className="text-txt-heading font-semibold text-2xs">Creditor bank details.pdf</span>
                                                 <span className="text-txt-body-muted font-light text-4xs">PDF Document</span>
                                             </div>
                                         </div>

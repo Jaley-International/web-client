@@ -34,9 +34,13 @@ function UserPage(): JSX.Element {
 
                         <div className="mb-10">
                             <div className="flex space-x-4">
-                                <div className="grid rounded-full w-24 lg:w-32 h-24 lg:h-32 bg-silver my-auto">
-                                    <FontAwesomeIcon className="m-auto text-silver-dark text-4xl lg:text-6xl" icon={faUser} />
-                                </div>
+                                {user.profilePicture ?
+                                    <div className="bg-cover bg-center w-9 h-9 rounded-full w-24 lg:w-32 h-24 lg:h-32 my-auto" style={{backgroundImage: `url(${user.profilePicture})`}}/>
+                                :
+                                    <div className="grid rounded-full w-24 lg:w-32 h-24 lg:h-32 bg-silver my-auto">
+                                        <FontAwesomeIcon className="m-auto text-silver-dark text-4xl lg:text-6xl" icon={faUser} />
+                                    </div>
+                                }
                                 <div>
                                     <p className="text-xl font-semibold text-txt-heading">{user.firstName} {user.lastName}</p>
                                     <p>{user.job}, {user.group}</p>

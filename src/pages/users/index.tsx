@@ -55,7 +55,7 @@ function UserList(): JSX.Element {
                             <tbody className="overflow-y-scroll h-4/6">
                             {Users.map(user => {
                                 return (
-                                    <tr className="border-b border-grey-200">
+                                    <tr className="border-b border-grey-200" key={user.userId}>
                                         <td className="py-2 px-4">
                                             <Link href={`/users/${user.userId}`}>
                                                 <div className="flex space-x-6 cursor-pointer">
@@ -67,7 +67,7 @@ function UserList(): JSX.Element {
                                                         </div>
                                                     }
                                                     <div className="grid content-center leading-4">
-                                                        <span className="text-txt-heading font-semibold text-2xs">{user.firstName} {user.lastName}</span><br />
+                                                        <span className="text-txt-heading font-semibold text-2xs">{user.firstName} {user.lastName}</span>
                                                         <span className="text-txt-body-muted font-light text-4xs">{user.job}</span>
                                                     </div>
                                                 </div>
