@@ -7,16 +7,17 @@ import {
     faUserFriends,
     faCloudDownloadAlt,
     faShareAlt,
-    faUsersCog, faFileImport
+    faUsersCog, faFileImport, faFileUpload
 } from "@fortawesome/free-solid-svg-icons";
 import {faFile, faFileWord, faCalendar, faEye, faTimesCircle} from "@fortawesome/free-regular-svg-icons";
 import Card from "../components/containers/Card";
 import ContextMenuItem from "../components/containers/contextmenu/ContextMenuItem";
 import OptionsButton from "../components/buttons/OptionsButton";
-import {useState} from "react";
+import {useRef, useState} from "react";
 import File from "../model/File";
 import DeleteFileModal from "../components/containers/modals/DeleteFileModals";
 import OverwriteFileModal from "../components/containers/modals/OverwriteFileModal";
+import Button from "../components/buttons/Button";
 
 function HomePage(): JSX.Element {
 
@@ -24,20 +25,53 @@ function HomePage(): JSX.Element {
     const [showOverwriteModal, setShowOverwriteModal] = useState<boolean>(false);
     const [modalFileTarget, setModalFileTarget] = useState<File | null>(null);
 
+    const [isDragging, setIsDragging] = useState<boolean>(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const processUpload = () => {
+        alert("TODO File upload");
+    };
+
     return (
         <div className="flex bg-bg-light">
             <Navbar />
             <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
                 <Header title="Files">
-                    <Breadcrumb items={[
-                        {icon: faServer, href: "/"},
-                        {title: "Cases", href: "/"},
-                        {title: "Case #42 Mr. Dupont", href: "/"},
-                        {title: "Bills and invoices"},
-                    ]} />
+                    <div className="flex">
+                        <div className="w-full">
+                            <Breadcrumb items={[
+                                {icon: faServer, href: "/"},
+                                {title: "Cases", href: "/"},
+                                {title: "Case #42 Mr. Dupont", href: "/"},
+                                {title: "Bills and invoices"},
+                            ]} />
+                        </div>
+                        <div className="w-48 text-right">
+                            <Button size="small" type="regular" colour="blue" onClick={() => {
+                                if (fileInputRef.current)
+                                    fileInputRef.current.click();
+                            }}>
+                                <span><FontAwesomeIcon icon={faFileUpload} />&nbsp;&nbsp;Upload file</span>
+                            </Button>
+                            <input ref={fileInputRef} type="file" className="hidden" onChange={(e) => {
+                                processUpload();
+                            }} />
+                        </div>
+                    </div>
                 </Header>
 
-                <div className="w-full p-8">
+                <div className={`w-full ${isDragging ? " p-8 border-4 border-blue border-dashed" : "p-9"}`}
+                    onDragOver={(e) => {
+                        e.preventDefault();
+                        setIsDragging(true);
+                    }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(e) => {
+                        e.preventDefault();
+                        setIsDragging(false);
+                        processUpload();
+                    }}
+                >
                     <Card title="Files" className="pb-2">
                         <table className="w-full">
                             <thead>
