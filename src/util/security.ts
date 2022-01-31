@@ -105,7 +105,7 @@ function encrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: st
  * Decrypts a string using AES
  * @param {string}      operation       Cipher and block mode of operation
  * @param {Hex}         key             Encryption key
- * @param {Hex}         iv              Initialization vector
+ * @param {Hex}         iv              Initialization vector (128 bits)
  * @param {Hex}         str             String to decrypt
  * @return {string}                     Decrypted string
  */
@@ -126,6 +126,48 @@ function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: Hex, str: Hex):
 export function rsaPrivateDecrypt(key: string, value: Hex): Hex {
     const privateKey = forge.pki.privateKeyFromPem(key);
     return forge.util.bytesToHex(privateKey.decrypt(forge.util.hexToBytes(value)));
+}
+
+
+/**
+ * Encrypts a buffer using RSA-GCM
+ * @param {Buffer}      buffer          Buffer to encrypt
+ * @param {Hex}         key             Encryption key
+ * @param {Hex}         iv              Initialization vector (128 bits)
+ * @return {Buffer}                     Encrypted buffer
+ */
+export function encryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
+
+    const cipher = forge.cipher.createCipher("AES-GCM", key);
+    cipher.start({iv: iv});
+    cipher.update(forge.util.createBuffer(buffer.toString("binary")));
+    cipher.finish();
+
+    const encryptedBuffer = forge.util.createBuffer();
+    encryptedBuffer.putBuffer(cipher.output);
+
+    return Buffer.from(encryptedBuffer.getBytes(), "binary");
+}
+
+
+/**
+ * Decrypts a buffer using RSA-GCM
+ * @param {Buffer}      buffer          Buffer to decrypt
+ * @param {Hex}         key             Encryption key
+ * @param {Hex}         iv              Initialization vector (128 bits)
+ * @return {Buffer}                     Decrypted buffer
+ */
+export function decryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
+
+    const decipher = forge.cipher.createDecipher("AES-GCM", key);
+    decipher.start({iv: iv});
+    decipher.update(forge.util.createBuffer(buffer.toString("binary")));
+    decipher.finish();
+
+    const decryptedBuffer = forge.util.createBuffer();
+    decryptedBuffer.putBuffer(decipher.output);
+
+    return Buffer.from(decryptedBuffer.getBytes(), "binary");
 }
 
 
