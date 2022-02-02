@@ -7,7 +7,7 @@ import {
     faUserFriends,
     faCloudDownloadAlt,
     faShareAlt,
-    faUsersCog, faFileImport, faFileUpload
+    faUsersCog, faFileImport, faFileUpload, faFolderPlus, faLock
 } from "@fortawesome/free-solid-svg-icons";
 import {faFile, faFileWord, faCalendar, faEye, faTimesCircle} from "@fortawesome/free-regular-svg-icons";
 import Card from "../components/containers/Card";
@@ -15,14 +15,16 @@ import ContextMenuItem from "../components/containers/contextmenu/ContextMenuIte
 import OptionsButton from "../components/buttons/OptionsButton";
 import {useRef, useState} from "react";
 import File from "../model/File";
-import DeleteFileModal from "../components/containers/modals/DeleteFileModals";
+import DeleteFileModal from "../components/containers/modals/DeleteFileModal";
 import OverwriteFileModal from "../components/containers/modals/OverwriteFileModal";
 import Button from "../components/buttons/Button";
+import CreateFolderModal from "../components/containers/modals/CreateFolderModal";
 
 function HomePage(): JSX.Element {
 
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
     const [showOverwriteModal, setShowOverwriteModal] = useState<boolean>(false);
+    const [showCreateFolderModal, setShowCreateFolderModal] = useState<boolean>(false);
     const [modalFileTarget, setModalFileTarget] = useState<File | null>(null);
 
     const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -46,7 +48,7 @@ function HomePage(): JSX.Element {
                                 {title: "Bills and invoices"},
                             ]} />
                         </div>
-                        <div className="w-48 text-right">
+                        <div className="w-96 text-right space-x-4">
                             <Button size="small" type="regular" colour="blue" onClick={() => {
                                 if (fileInputRef.current)
                                     fileInputRef.current.click();
@@ -56,6 +58,10 @@ function HomePage(): JSX.Element {
                             <input ref={fileInputRef} type="file" className="hidden" onChange={(e) => {
                                 processUpload();
                             }} />
+
+                            <Button size="small" type="regular" colour="cyan" onClick={() => setShowCreateFolderModal(true)}>
+                                <span><FontAwesomeIcon icon={faFolderPlus} />&nbsp;&nbsp;Create folder</span>
+                            </Button>
                         </div>
                     </div>
                 </Header>
@@ -128,6 +134,7 @@ function HomePage(): JSX.Element {
                                                 <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={() => alert("TODO File download")} />
                                                 <ContextMenuItem name="Share" icon={faShareAlt} action={() => alert("TODO File sharing")} />
                                                 <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => alert("TODO Permission modal")} />
+                                                <ContextMenuItem name="Lock file" icon={faLock} action={() => alert("TODO File locking")} />
                                                 <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
                                                     setModalFileTarget(new File(0, "Creditor bank details.pdf"));
                                                     setShowOverwriteModal(true);
@@ -174,6 +181,7 @@ function HomePage(): JSX.Element {
                                                 <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={() => alert("TODO File download")} />
                                                 <ContextMenuItem name="Share" icon={faShareAlt} action={() => alert("TODO File sharing")} />
                                                 <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => alert("TODO Permission modal")} />
+                                                <ContextMenuItem name="Lock file" icon={faLock} action={() => alert("TODO File locking")} />
                                                 <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
                                                     setModalFileTarget(new File(0, "Creditor bank details.pdf"));
                                                     setShowOverwriteModal(true);
@@ -220,6 +228,7 @@ function HomePage(): JSX.Element {
                                                 <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={() => alert("TODO File download")} />
                                                 <ContextMenuItem name="Share" icon={faShareAlt} action={() => alert("TODO File sharing")} />
                                                 <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => alert("TODO Permission modal")} />
+                                                <ContextMenuItem name="Lock file" icon={faLock} action={() => alert("TODO File locking")} />
                                                 <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
                                                     setModalFileTarget(new File(0, "Creditor bank details.pdf"));
                                                     setShowOverwriteModal(true);
@@ -249,6 +258,9 @@ function HomePage(): JSX.Element {
                     setShowOverwriteModal(false);
                     setModalFileTarget(null);
                 }} />
+            }
+            {showCreateFolderModal &&
+                <CreateFolderModal closeCallback={() => setShowCreateFolderModal(false)} />
             }
         </div>
     );
