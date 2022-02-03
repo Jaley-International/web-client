@@ -1,6 +1,6 @@
-import Navbar from "../components/navigation/navbar/Navbar";
-import Header from "../components/sections/Header";
-import Breadcrumb from "../components/navigation/breadcrumb/Breadcrumb";
+import Navbar from "../../components/navigation/navbar/Navbar";
+import Header from "../../components/sections/Header";
+import Breadcrumb from "../../components/navigation/breadcrumb/Breadcrumb";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
     faServer,
@@ -10,17 +10,17 @@ import {
     faUsersCog, faFileImport, faFileUpload, faFolderPlus, faLock
 } from "@fortawesome/free-solid-svg-icons";
 import {faFile, faFileWord, faCalendar, faEye, faTimesCircle} from "@fortawesome/free-regular-svg-icons";
-import Card from "../components/containers/Card";
-import ContextMenuItem from "../components/containers/contextmenu/ContextMenuItem";
-import OptionsButton from "../components/buttons/OptionsButton";
+import Card from "../../components/containers/Card";
+import ContextMenuItem from "../../components/containers/contextmenu/ContextMenuItem";
+import OptionsButton from "../../components/buttons/OptionsButton";
 import {useRef, useState} from "react";
-import File from "../model/File";
-import DeleteFileModal from "../components/containers/modals/DeleteFileModal";
-import OverwriteFileModal from "../components/containers/modals/OverwriteFileModal";
-import Button from "../components/buttons/Button";
-import CreateFolderModal from "../components/containers/modals/CreateFolderModal";
+import File from "../../model/File";
+import DeleteFileModal from "../../components/containers/modals/DeleteFileModal";
+import OverwriteFileModal from "../../components/containers/modals/OverwriteFileModal";
+import Button from "../../components/buttons/Button";
+import CreateFolderModal from "../../components/containers/modals/CreateFolderModal";
 
-function HomePage(): JSX.Element {
+function FilesPage(): JSX.Element {
 
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
     const [showOverwriteModal, setShowOverwriteModal] = useState<boolean>(false);
@@ -266,4 +266,4 @@ function HomePage(): JSX.Element {
     );
 }
 
-export default HomePage;
+export default FilesPage;

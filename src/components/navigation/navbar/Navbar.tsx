@@ -32,7 +32,7 @@ function Navbar(): JSX.Element {
                     </div>
                 </Link>
 
-                <NavbarItem name="Files" icon={faFile} activeRoutes={[/^\/$/]} href="/" />
+                <NavbarItem name="Files" icon={faFile} activeRoutes={[/^\/files$/]} href="/files" />
                 <NavbarItem name="Tracked&nbsp;folders" activeRoutes={[]} icon={faFolderOpen} />
                 <NavbarItem name="Admin&nbsp;panel" activeRoutes={[/^\/users.*$/]} icon={faUserShield} href="/users" />
 

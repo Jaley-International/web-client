@@ -1,6 +1,8 @@
 import forge, {Hex} from "node-forge";
 import assert from "assert";
 import {request} from "./communication";
+import {setCookies} from "cookies-next";
+import {NextResponse} from "next/server";
 
 
 // TODO : Change instance ID to be unique for each instance
@@ -14,6 +16,11 @@ export interface RegisterReqData {
     hashedAuthenticationKey: string;
     encryptedRsaPrivateSharingKey: string;
     rsaPublicSharingKey: string;
+}
+
+export interface Session {
+    id?: string;
+    exp?: number;
 }
 
 
@@ -178,6 +185,7 @@ export function decryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
  * @param {string}      username        New account's username.
  * @param {string}      email           New account's email address.
  * @param {string}      password        New account's password.
+ * @return {RegisterReqData}            Data to be sent to the API.
  */
 export async function register(username: string, email: string, password: string): Promise<RegisterReqData> {
     // Generate AES MasterKey (256 bits)
@@ -224,7 +232,7 @@ export async function register(username: string, email: string, password: string
  * @param {string}      password        Account's password.
  * @param {string}      salt            Account's salt.
  * @param {string}      api_url         API URL.
- *
+ * @return {boolean}                    True if authentication is successful, false otherwise
  */
 export async function authenticate(username: string, password: string, salt: string, api_url: string): Promise<boolean> {
 
@@ -251,7 +259,38 @@ export async function authenticate(username: string, password: string, salt: str
     sessionStorage.setItem("masterKey", masterKey);
     sessionStorage.setItem("publicSharingKey", response.data.rsaPublicSharingKey);
     sessionStorage.setItem("privateSharingKey", privateSharingKey);
-    sessionStorage.setItem("sessionIdentifier", sessionIdentifier);
+
+    // Storing session in cookies
+    setCookies("session", {
+        id: sessionIdentifier,
+        exp: 1000000000000000
+    }, {
+        sameSite: true,
+        secure: true
+    });
+
+    return true;
+}
+
+
+/**
+ * Validates user's session
+ *
+ * @param {Session}     session         Session to validate.
+ * @param {string}      api_url         API URL.
+ * @return {boolean}                    True if validation is successful, false otherwise
+ */
+export function validateSession(session: Session, api_url: string): boolean {
+
+    // Session not set
+    if (!session.id || !session.exp)
+        return false;
+
+    // Session expired
+    if (Date.now() > session.exp)
+        return false;
+
+    // TODO Session API verification
 
     return true;
 }
