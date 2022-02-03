@@ -233,7 +233,7 @@ export async function authenticate(username: string, password: string, salt: str
     const derivedAuthenticationKey = derivedKey.substr(64);
 
     // Authenticating (session identifier request with encrypted keys)
-    const response = await request("POST", "http://localhost:3001/api/users/login", {
+    const response = await request("POST", `${process.env.PEC_CLIENT_API_URL}/users/login`, {
         username: username,
         derivedAuthenticationKey: derivedAuthenticationKey
     });
