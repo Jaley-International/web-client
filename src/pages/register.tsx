@@ -12,8 +12,9 @@ import {ToastProps} from "../components/toast/Toast";
 import NewPasswordInput from "../components/inputs/NewPasswordInput";
 import Link from "next/link";
 import {request} from "../util/communication";
+import {GetStaticProps, InferGetServerSidePropsType} from "next";
 
-function RegisterPage(): JSX.Element {
+function RegisterPage({api_url}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
 
     const toastRef = useRef<ToastRef>(null);
     const addToast = (toast: ToastProps) => {
@@ -99,7 +100,7 @@ function RegisterPage(): JSX.Element {
                             if (!submitting) {
                                 setSubmitting(true);
                                 const registerData = await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string);
-                                const response = await request("POST", `${process.env.PEC_CLIENT_API_URL}/users`, registerData);
+                                const response = await request("POST", `${api_url}/users/create`, registerData);
                                 setSubmitting(false);
                                 if (response.status === 201)
                                     addToast({type: "success", title: "Account created", message: "Please check your emails to finalize your registration."});
@@ -133,5 +134,13 @@ function RegisterPage(): JSX.Element {
         </>
     );
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+    return {
+        props: {
+            api_url: process.env.PEC_CLIENT_API_URL
+        }
+    };
+};
 
 export default RegisterPage;

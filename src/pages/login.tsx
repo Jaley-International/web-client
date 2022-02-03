@@ -10,8 +10,12 @@ import {request} from "../util/communication";
 import {authenticate} from "../util/security";
 import ToastPortal, {ToastRef} from "../components/toast/ToastPortal";
 import {ToastProps} from "../components/toast/Toast";
+import {GetStaticProps, InferGetServerSidePropsType} from "next";
+import {useRouter} from "next/router";
 
-function LoginPage(): JSX.Element {
+function LoginPage({api_url}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
+
+    const router = useRouter();
 
     const toastRef = useRef<ToastRef>(null);
     const addToast = (toast: ToastProps) => {
@@ -91,16 +95,19 @@ function LoginPage(): JSX.Element {
                                 const password = passwordRef.current?.value as string;
 
                                 // Salt request
-                                const response = await request("POST", `${process.env.PEC_CLIENT_API_URL}/users/getSalt`, {username: username});
-                                if (response.status === 200) {
+                                const response = await request("POST", `${api_url}/users/getSalt`, {username: username});
+                                if (response.status === 200 || response.status === 201) {
                                     const salt = response.data;
 
                                     // Authentication request
-                                    const result = await authenticate(username, password, salt);
-                                    if (result)
+                                    const result = await authenticate(username, password, salt, api_url);
+                                    if (result) {
                                         addToast({type: "success", title: "Welcome!", message: "Successfully authenticated."});
-                                    else
+                                        setTimeout(() => router.push("/"), 2000);
+                                    } else {
                                         addToast({type: "warning", title: "Invalid credentials", message: "Please check your username and password then try again."});
+                                    }
+
                                 } else {
                                     addToast({type: "error", title: "Could not authenticate", message: "An unexpected error occurred. Please try again later."});
                                 }
@@ -125,5 +132,13 @@ function LoginPage(): JSX.Element {
         </>
     );
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+    return {
+        props: {
+            api_url: process.env.PEC_CLIENT_API_URL
+        }
+    };
+};
 
 export default LoginPage;

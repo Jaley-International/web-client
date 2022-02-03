@@ -196,8 +196,8 @@ export async function register(username: string, email: string, password: string
 
     // PPF
     const derivedKey = await pbkdf2(password, salt);
-    const derivedEncryptionKey = derivedKey.substr(0, 64);
-    const derivedAuthenticationKey = derivedKey.substr(64);
+    const derivedEncryptionKey = derivedKey.substring(0, 64);
+    const derivedAuthenticationKey = derivedKey.substring(64);
 
     // Encrypting data before sending to the API
     const encryptedPrivateSharingKey = encrypt("AES-CTR", masterKey, salt, privateSharingKey);
@@ -223,22 +223,23 @@ export async function register(username: string, email: string, password: string
  * @param {string}      username        Account's username.
  * @param {string}      password        Account's password.
  * @param {string}      salt            Account's salt.
+ * @param {string}      api_url         API URL.
  *
  */
-export async function authenticate(username: string, password: string, salt: string): Promise<boolean> {
+export async function authenticate(username: string, password: string, salt: string, api_url: string): Promise<boolean> {
 
     // PPF
     const derivedKey = await pbkdf2(password, salt);
-    const derivedEncryptionKey = derivedKey.substr(0, 64);
-    const derivedAuthenticationKey = derivedKey.substr(64);
+    const derivedEncryptionKey = derivedKey.substring(0, 64);
+    const derivedAuthenticationKey = derivedKey.substring(64);
 
     // Authenticating (session identifier request with encrypted keys)
-    const response = await request("POST", `${process.env.PEC_CLIENT_API_URL}/users/login`, {
+    const response = await request("POST", `${api_url}/users/login`, {
         username: username,
         derivedAuthenticationKey: derivedAuthenticationKey
     });
 
-    if (response.status !== 200)
+    if (response.status !== 200 && response.status !== 201)
         return false;
 
     // Decrypting keys
