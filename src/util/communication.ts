@@ -18,7 +18,10 @@ export async function request(method: Method, url: string, data: object): Promis
         await axios.request({
             method: method,
             url: url,
-            data: data
+            data: data,
+            headers: {
+                "Access-Control-Allow-Origin": url
+            }
         }).then(response => {
             resolve(response.data);
         }).catch(reason => {
