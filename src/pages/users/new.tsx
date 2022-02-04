@@ -2,11 +2,12 @@ import Navbar from "../../components/navigation/navbar/Navbar";
 import Header from "../../components/sections/Header";
 import Link from "next/link";
 import Button from "../../components/buttons/Button";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faArrowLeft, faUser} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft, faUser } from "@fortawesome/free-solid-svg-icons";
 import TextInput from "../../components/inputs/TextInput";
-import React, {useRef} from "react";
+import React, { useRef } from "react";
 import Select from "../../components/inputs/Select";
+import { request } from "../../util/communication";
 
 function NewUser(): JSX.Element {
 
@@ -72,7 +73,7 @@ function NewUser(): JSX.Element {
 
                     <form className="space-y-2" onSubmit={async (e) => {
                         e.preventDefault();
-                        // TODO Form submission
+
                         const firstname = (firstnameRef.current as HTMLInputElement).value;
                         const lastname = (lastnameRef.current as HTMLInputElement).value;
                         const username = (usernameRef.current as HTMLInputElement).value;
@@ -80,12 +81,22 @@ function NewUser(): JSX.Element {
                         const group = (groupRef.current as HTMLSelectElement).value;
                         const job = (jobRef.current as HTMLSelectElement).value;
                         const accessLevel = (accessLevelRef.current as HTMLSelectElement).value;
-                        alert(`TODO Submit form\n\n${firstname}\n${lastname}\n${username}\n${email}\n${group}\n${job}\n${accessLevel}`)
+
+                        const createUserData = { firstname: firstname, lastname: lastname, username: username, email: email, group: group, job: job, accessLevel: accessLevel };
+                        const response = await request("POST", "http://localhost:3001/api/users/create", createUserData); {/* TODO change URL to config URL */ }
+
+                        if (response.status === 201) {
+                            console.log("user created");
+                        } else if (response.status === 409) {
+                            console.log("fail to create user (email or username already in use)");
+                        } else {
+                            console.log("fail to create user (unknown error)");
+                        }
                     }}>
 
                         <div className="lg:flex">
-                            <TextInput ref={firstnameRef} className="lg:w-1/2 lg:pr-4" type="text" autoComplete="given-name" label="First name" name="firstname" required={true} minLength={1} maxLength={32} validator={(str: string) => /^[0-9a-zA-Z-]{1,32}$/.test(str)} onChange={() => {updatePreview();updateDefaultUsername();}} />
-                            <TextInput ref={lastnameRef} className="lg:w-1/2 lg:pl-4" type="text" autoComplete="family-name" label="Last name" name="lastname" required={true} minLength={1} maxLength={32} validator={(str: string) => /^[0-9a-zA-Z-]{1,32}$/.test(str)} onChange={() => {updatePreview();updateDefaultUsername();}} />
+                            <TextInput ref={firstnameRef} className="lg:w-1/2 lg:pr-4" type="text" autoComplete="given-name" label="First name" name="firstname" required={true} minLength={1} maxLength={32} validator={(str: string) => /^[0-9a-zA-Z-]{1,32}$/.test(str)} onChange={() => { updatePreview(); updateDefaultUsername(); }} />
+                            <TextInput ref={lastnameRef} className="lg:w-1/2 lg:pl-4" type="text" autoComplete="family-name" label="Last name" name="lastname" required={true} minLength={1} maxLength={32} validator={(str: string) => /^[0-9a-zA-Z-]{1,32}$/.test(str)} onChange={() => { updatePreview(); updateDefaultUsername(); }} />
                         </div>
                         <div className="lg:flex">
                             <TextInput ref={usernameRef} className="lg:w-1/2 lg:pr-4" type="text" autoComplete="username" label="Username" name="username" required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} onChange={updatePreview} />
