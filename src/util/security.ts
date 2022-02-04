@@ -256,7 +256,7 @@ export async function authenticate(username: string, password: string, salt: str
         derivedAuthenticationKey: derivedAuthenticationKey
     });
 
-    if (response.status !== 200 && response.status !== 201)
+    if (response.status !== "SUCCESS")
         return false;
 
     // Decrypting keys
@@ -273,7 +273,7 @@ export async function authenticate(username: string, password: string, salt: str
     // Storing session in cookies
     setCookies("session", {
         id: sessionIdentifier,
-        exp: 1000000000000000
+        exp: response.data.sessionExpire
     }, {
         sameSite: true,
         secure: true

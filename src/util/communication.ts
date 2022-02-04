@@ -1,7 +1,8 @@
 import axios, {Method} from "axios";
 
 export interface APIResponse {
-    status: number;
+    status: string;
+    verbose: string;
     data?: any;
 }
 
@@ -19,15 +20,22 @@ export async function request(method: Method, url: string, data: object): Promis
             url: url,
             data: data
         }).then(response => {
-            resolve({
-                status: response.status,
-                data: response.data
-            });
+            resolve(response.data);
         }).catch(reason => {
-            resolve({
-                status: reason.request.status,
-                data: {message: reason.request.response}
-            });
+            try {
+                const response = JSON.parse(reason.request.response);
+                resolve({
+                    status: response.status,
+                    verbose: response.verbose,
+                    data: {}
+                });
+            } catch (_) {
+                resolve({
+                    status: "ERROR_UNKNOWN",
+                    verbose: reason.request.response,
+                    data: {}
+                });
+            }
         });
     });
 }

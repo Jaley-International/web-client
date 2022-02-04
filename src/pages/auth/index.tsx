@@ -13,6 +13,7 @@ import {ToastProps} from "../../components/toast/Toast";
 import {GetStaticProps, InferGetServerSidePropsType} from "next";
 import {useRouter} from "next/router";
 import {removeCookies} from "cookies-next";
+import user from "../../model/User";
 
 function LoginPage({api_url}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
 
@@ -110,9 +111,9 @@ function LoginPage({api_url}: InferGetServerSidePropsType<typeof getStaticProps>
 
                                 // Salt request
                                 updateStatus("Requesting salt...");
-                                const response = await request("POST", `${api_url}/users/getSalt`, {username: username});
-                                if (response.status === 200 || response.status === 201) {
-                                    const salt = response.data;
+                                const response = await request("GET", `${api_url}/users/salt/${username}`, {});
+                                if (response.status === "SUCCESS") {
+                                    const salt = response.data.salt;
 
                                     // Authentication request
                                     const result = await authenticate(username, password, salt, api_url, updateStatus);

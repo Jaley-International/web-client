@@ -107,10 +107,10 @@ function RegisterPage({api_url}: InferGetServerSidePropsType<typeof getStaticPro
 
                                 const registerData = await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string, updateStatus);
                                 updateStatus("Submitting...");
-                                const response = await request("POST", `${api_url}/users/create`, registerData);
-                                if (response.status === 201)
+                                const response = await request("POST", `${api_url}/users`, registerData);
+                                if (response.status === "SUCCESS")
                                     addToast({type: "success", title: "Account created", message: "Please check your emails to finalize your registration."});
-                                else if (response.status === 409)
+                                else if (response.status === "ERROR_USERNAME_ALREADY_USED" || response.status === "ERROR_EMAIL_ALREADY_USED")
                                     addToast({type: "error", title: "Failed to create an account", message: "Email or username already in use."});
                                 else
                                     addToast({type: "error", title: "Failed to create an account", message: "An unknown error occurred while creating your account."});
