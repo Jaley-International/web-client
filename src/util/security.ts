@@ -1,6 +1,6 @@
-import forge, {Hex} from "node-forge";
+import forge, { Hex } from "node-forge";
 import assert from "assert";
-import {request} from "./communication";
+import { request } from "./communication";
 
 
 // TODO : Change instance ID to be unique for each instance
@@ -16,6 +16,14 @@ export interface RegisterReqData {
     rsaPublicSharingKey: string;
 }
 
+export interface FileUploadReqData {
+    // TODO: containingFolderId: string;
+    ref: string;
+    encryptedMetadata: string;
+    encryptedNodeKey: string;
+    // TODO: parentEncryptedKey: string;
+}
+
 
 /**
  * Generate a 2048-bits RSA key pair
@@ -23,7 +31,7 @@ export interface RegisterReqData {
  */
 async function generateRSAKeyPair(): Promise<forge.pki.KeyPair> {
     return new Promise((resolve, reject) => {
-        forge.pki.rsa.generateKeyPair({bits: 2048, workers: 2}, (err, keypair) => {
+        forge.pki.rsa.generateKeyPair({ bits: 2048, workers: 2 }, (err, keypair) => {
             if (err)
                 reject(err);
             resolve(keypair);
@@ -94,7 +102,7 @@ function sha512(str: string): Hex {
  */
 function encrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: string): Hex {
     const cipher = forge.cipher.createCipher(operation, forge.util.hexToBytes(key));
-    cipher.start({iv: iv});
+    cipher.start({ iv: iv });
     cipher.update(forge.util.createBuffer(str));
     cipher.finish();
     return cipher.output.toHex();
@@ -111,7 +119,7 @@ function encrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: st
  */
 function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: Hex, str: Hex): string {
     const decipher = forge.cipher.createDecipher(operation, forge.util.hexToBytes(key));
-    decipher.start({iv: iv});
+    decipher.start({ iv: iv });
     decipher.update(forge.util.createBuffer(forge.util.hexToBytes(str)));
     return forge.util.hexToBytes(decipher.output.toHex());
 }
@@ -139,7 +147,7 @@ export function rsaPrivateDecrypt(key: string, value: Hex): Hex {
 export function encryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
 
     const cipher = forge.cipher.createCipher("AES-GCM", key);
-    cipher.start({iv: iv});
+    cipher.start({ iv: iv });
     cipher.update(forge.util.createBuffer(buffer.toString("binary")));
     cipher.finish();
 
@@ -160,7 +168,7 @@ export function encryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
 export function decryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
 
     const decipher = forge.cipher.createDecipher("AES-GCM", key);
-    decipher.start({iv: iv});
+    decipher.start({ iv: iv });
     decipher.update(forge.util.createBuffer(buffer.toString("binary")));
     decipher.finish();
 
@@ -253,4 +261,53 @@ export async function authenticate(username: string, password: string, salt: str
     sessionStorage.setItem("sessionIdentifier", sessionIdentifier);
 
     return true;
+}
+
+
+/**
+ * File upload client-side process
+ * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
+ *
+ * @param {object}      file            The file uploaded by user.
+ */
+export async function fileUpload(file: object): Promise<FileUploadReqData> {
+
+    // Generate Node Key (256 bits)
+    const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
+
+    // Generate initialization vector (128 bits)
+    const iv = forge.random.getBytesSync(16);
+
+    // Generate Encrypted Node Key
+    const encryptedNodeKey = encrypt("AES-CTR", sessionStorage.masterKey, iv, nodeKey);
+
+    // TODO: Generate Parent Encrypted Key
+
+    // Generate Encrypted Meta-data
+    const encryptedMetadata = encrypt("AES-GCM", nodeKey, iv, JSON.stringify(file));
+
+    // Encrypt file
+    const fileString = JSON.stringify(file);
+    const fileBuffer = Buffer.from(fileString);
+    const encryptedFile = encryptBuffer(fileBuffer, nodeKey, iv).toString();
+
+    // Send file to the API
+    const response = await request("POST", "http://localhost:3001/api/fileSystem/uploadFile", {
+        file: encryptedFile
+    });
+
+    if (response.status !== 200)
+        return new Promise<FileUploadReqData>((resolve, reject) => null);
+
+    const ref = response.data;
+    console.log("encrypted file uploaded");
+    console.log("ref: ", ref);
+
+    return {
+        // TODO: containingFolderId: containingFolderId,
+        ref: ref,
+        encryptedMetadata: encryptedMetadata,
+        encryptedNodeKey: encryptedNodeKey,
+        // TODO: parentEncryptedKey: parentEncryptedKey
+    };
 }

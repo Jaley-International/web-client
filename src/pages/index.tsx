@@ -1,7 +1,7 @@
 import Navbar from "../components/navigation/navbar/Navbar";
 import Header from "../components/sections/Header";
 import Breadcrumb from "../components/navigation/breadcrumb/Breadcrumb";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faServer,
     faUserFriends,
@@ -9,16 +9,18 @@ import {
     faShareAlt,
     faUsersCog, faFileImport, faFileUpload, faFolderPlus, faLock
 } from "@fortawesome/free-solid-svg-icons";
-import {faFile, faFileWord, faCalendar, faEye, faTimesCircle} from "@fortawesome/free-regular-svg-icons";
+import { faFile, faFileWord, faCalendar, faEye, faTimesCircle } from "@fortawesome/free-regular-svg-icons";
 import Card from "../components/containers/Card";
 import ContextMenuItem from "../components/containers/contextmenu/ContextMenuItem";
 import OptionsButton from "../components/buttons/OptionsButton";
-import {useRef, useState} from "react";
+import { useRef, useState } from "react";
 import File from "../model/File";
 import DeleteFileModal from "../components/containers/modals/DeleteFileModal";
 import OverwriteFileModal from "../components/containers/modals/OverwriteFileModal";
 import Button from "../components/buttons/Button";
 import CreateFolderModal from "../components/containers/modals/CreateFolderModal";
+import { fileUpload } from "util/security";
+import { request } from "util/communication";
 
 function HomePage(): JSX.Element {
 
@@ -30,8 +32,28 @@ function HomePage(): JSX.Element {
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const processUpload = () => {
-        alert("TODO File upload");
+    const processUpload = async () => {
+        const files = fileInputRef.current?.files;
+        console.log("Files: ", files);
+
+        if (files && files.length > 0) {
+            const file = files[0];
+            console.log("File: ", file);
+            const fileUploadData = await fileUpload(file as object);
+            console.log("File Upload Data: ", fileUploadData);
+            if (fileUploadData != null) {
+                const response = await request("POST", "http://localhost:3001/api/fileSystem/createFile", fileUploadData); {/* TODO change URL to config URL */ }
+                if (response.status === 201) {
+                    console.log("file created");
+                    const fileSystem = response.data;
+                    console.log("Updated file system architecture: ", fileSystem);
+                } else {
+                    console.log("file not created");
+                }
+            } else {
+                console.log("file not created (null upload data)");
+            }
+        } else { console.log("No file has been uploaded"); }
     };
 
     return (
@@ -42,10 +64,10 @@ function HomePage(): JSX.Element {
                     <div className="flex">
                         <div className="w-full">
                             <Breadcrumb items={[
-                                {icon: faServer, href: "/"},
-                                {title: "Cases", href: "/"},
-                                {title: "Case #42 Mr. Dupont", href: "/"},
-                                {title: "Bills and invoices"},
+                                { icon: faServer, href: "/" },
+                                { title: "Cases", href: "/" },
+                                { title: "Case #42 Mr. Dupont", href: "/" },
+                                { title: "Bills and invoices" },
                             ]} />
                         </div>
                         <div className="w-96 text-right space-x-4">
@@ -119,11 +141,11 @@ function HomePage(): JSX.Element {
                                     </td>
                                     <td className="py-2 px-4">
                                         <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)" }} />
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)" }} />
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)" }} />
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)" }} />
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)" }} />
                                             <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
                                         </div>
                                     </td>
@@ -166,11 +188,11 @@ function HomePage(): JSX.Element {
                                     </td>
                                     <td className="py-2 px-4">
                                         <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)" }} />
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)" }} />
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)" }} />
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)" }} />
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)" }} />
                                             <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
                                         </div>
                                     </td>
@@ -213,11 +235,11 @@ function HomePage(): JSX.Element {
                                     </td>
                                     <td className="py-2 px-4">
                                         <div className="flex">
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)" }} />
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)" }} />
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)" }} />
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)" }} />
+                                            <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)" }} />
                                             <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
                                         </div>
                                     </td>
