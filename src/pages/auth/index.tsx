@@ -100,28 +100,37 @@ function LoginPage({api_url}: InferGetServerSidePropsType<typeof getStaticProps>
                             if (!submitting) {
                                 setSubmitting(true);
 
+                                const updateStatus = (message: string) => {
+                                    if (submitRef.current)
+                                        submitRef.current.innerText = message;
+                                }
+
                                 const username = usernameRef.current?.value as string;
                                 const password = passwordRef.current?.value as string;
 
                                 // Salt request
+                                updateStatus("Requesting salt...");
                                 const response = await request("POST", `${api_url}/users/getSalt`, {username: username});
                                 if (response.status === 200 || response.status === 201) {
                                     const salt = response.data;
 
                                     // Authentication request
-                                    const result = await authenticate(username, password, salt, api_url);
+                                    const result = await authenticate(username, password, salt, api_url, updateStatus);
                                     if (result) {
+                                        updateStatus("Redirecting...");
                                         addToast({type: "success", title: "Welcome!", message: "Successfully authenticated."});
                                         setTimeout(() => router.push("/"), 2000);
                                     } else {
+                                        updateStatus("Login");
+                                        setSubmitting(false);
                                         addToast({type: "warning", title: "Invalid credentials", message: "Please check your username and password then try again."});
                                     }
 
                                 } else {
+                                    updateStatus("Login");
+                                    setSubmitting(false);
                                     addToast({type: "error", title: "Could not authenticate", message: "An unexpected error occurred. Please try again later."});
                                 }
-
-                                setSubmitting(false);
                             }
                         }}>
                             <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />

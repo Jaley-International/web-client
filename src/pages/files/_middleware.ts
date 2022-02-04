@@ -6,6 +6,6 @@ export function middleware(req: NextRequest) {
     const session = JSON.parse(req.cookies.session || "{}");
 
     if (!validateSession(session, process.env.PEC_CLIENT_API_URL || ""))
-        return NextResponse.redirect(new URL("/auth/login", req.url));
+        return NextResponse.redirect(new URL("/auth", req.url));
     return NextResponse.next();
 }

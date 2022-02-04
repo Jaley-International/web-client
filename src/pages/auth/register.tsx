@@ -99,15 +99,23 @@ function RegisterPage({api_url}: InferGetServerSidePropsType<typeof getStaticPro
                             e.preventDefault();
                             if (!submitting) {
                                 setSubmitting(true);
-                                const registerData = await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string);
+
+                                const updateStatus = (message: string) => {
+                                    if (submitRef.current)
+                                        submitRef.current.innerText = message;
+                                }
+
+                                const registerData = await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string, updateStatus);
+                                updateStatus("Submitting...");
                                 const response = await request("POST", `${api_url}/users/create`, registerData);
-                                setSubmitting(false);
                                 if (response.status === 201)
                                     addToast({type: "success", title: "Account created", message: "Please check your emails to finalize your registration."});
                                 else if (response.status === 409)
                                     addToast({type: "error", title: "Failed to create an account", message: "Email or username already in use."});
                                 else
                                     addToast({type: "error", title: "Failed to create an account", message: "An unknown error occurred while creating your account."});
+                                updateStatus("Register");
+                                setSubmitting(false);
                             }
                         }}>
                             <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" hint="Must be between 3 and 16 characters long." required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
@@ -124,7 +132,7 @@ function RegisterPage({api_url}: InferGetServerSidePropsType<typeof getStaticPro
                             </Button>
                             <br />
                             <p className="text-center text-txt-body-muted text-2xs">
-                                Already have an account? <Link href="/auth/login"><a className="text-blue">Sign in</a></Link>
+                                Already have an account? <Link href="/auth"><a className="text-blue">Sign in</a></Link>
                             </p>
                         </form>
                     </div>

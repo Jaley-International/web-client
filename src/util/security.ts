@@ -2,7 +2,6 @@ import forge, {Hex} from "node-forge";
 import assert from "assert";
 import {request} from "./communication";
 import {setCookies} from "cookies-next";
-import {NextResponse} from "next/server";
 
 
 // TODO : Change instance ID to be unique for each instance
@@ -185,29 +184,36 @@ export function decryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
  * @param {string}      username        New account's username.
  * @param {string}      email           New account's email address.
  * @param {string}      password        New account's password.
+ * @param {function}    updateStatus    Function to update the registration status.
  * @return {RegisterReqData}            Data to be sent to the API.
  */
-export async function register(username: string, email: string, password: string): Promise<RegisterReqData> {
+export async function register(username: string, email: string, password: string, updateStatus: (message: string) => void): Promise<RegisterReqData> {
     // Generate AES MasterKey (256 bits)
+    updateStatus("Generating Master Key...");
     const masterKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
 
     // Generate Client Random Value (128 bits)
+    updateStatus("Generating Client Random Value...");
     const clientRandomValue = forge.util.bytesToHex(forge.random.getBytesSync(16));
 
     // Generate RSA key pair
+    updateStatus("Generating RSA key pair...");
     const sharingKeys = await generateRSAKeyPair();
     const privateSharingKey = forge.pki.privateKeyToPem(sharingKeys.privateKey);
     const publicSharingKey = forge.pki.publicKeyToPem(sharingKeys.publicKey);
 
     // Generate Salt
+    updateStatus("Computing Salt...");
     const salt = sha256(addPadding(username + INSTANCE_ID + clientRandomValue, 128));
 
     // PPF
+    updateStatus("Processing password...");
     const derivedKey = await pbkdf2(password, salt);
     const derivedEncryptionKey = derivedKey.substring(0, 64);
     const derivedAuthenticationKey = derivedKey.substring(64);
 
     // Encrypting data before sending to the API
+    updateStatus("Encrypting keys...");
     const encryptedPrivateSharingKey = encrypt("AES-CTR", masterKey, salt, privateSharingKey);
     const encryptedMasterKey = encrypt("AES-CTR", derivedEncryptionKey, salt, masterKey);
     const hashedAuthenticationKey = sha512(derivedAuthenticationKey);
@@ -232,16 +238,19 @@ export async function register(username: string, email: string, password: string
  * @param {string}      password        Account's password.
  * @param {string}      salt            Account's salt.
  * @param {string}      api_url         API URL.
+ * @param {function}    updateStatus    Function to update the authentication status.
  * @return {boolean}                    True if authentication is successful, false otherwise
  */
-export async function authenticate(username: string, password: string, salt: string, api_url: string): Promise<boolean> {
+export async function authenticate(username: string, password: string, salt: string, api_url: string, updateStatus: (message: string) => void): Promise<boolean> {
 
     // PPF
+    updateStatus("Processing password...");
     const derivedKey = await pbkdf2(password, salt);
     const derivedEncryptionKey = derivedKey.substring(0, 64);
     const derivedAuthenticationKey = derivedKey.substring(64);
 
     // Authenticating (session identifier request with encrypted keys)
+    updateStatus("Requesting keys...");
     const response = await request("POST", `${api_url}/users/login`, {
         username: username,
         derivedAuthenticationKey: derivedAuthenticationKey
@@ -251,6 +260,7 @@ export async function authenticate(username: string, password: string, salt: str
         return false;
 
     // Decrypting keys
+    updateStatus("Decrypting keys...");
     const masterKey = decrypt("AES-CTR", derivedEncryptionKey, salt, response.data.encryptedMasterKey);
     const privateSharingKey = decrypt("AES-CTR", masterKey, salt, response.data.encryptedRsaPrivateSharingKey);
     const sessionIdentifier = rsaPrivateDecrypt(privateSharingKey, response.data.encryptedSessionIdentifier);
