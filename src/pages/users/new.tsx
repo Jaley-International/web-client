@@ -92,7 +92,7 @@ function NewUser({api_url}: InferGetServerSidePropsType<typeof getStaticProps>):
                             const accessLevel = (accessLevelRef.current as HTMLSelectElement).value;
 
                             const createUserData = { firstname: firstname, lastname: lastname, username: username, email: email, group: group, job: job, accessLevel: accessLevel };
-                            const response = await request("POST", `${api_url}/users`, createUserData); {/* TODO : Use route for user creation from admin panel */}
+                            const response = await request("POST", `${api_url}/users`, createUserData);
 
                             if (response.status === "SUCCESS") {
                                 addToast({type: "success", title: "Account created", message: "User account created successfully."});
