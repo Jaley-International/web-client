@@ -11,7 +11,7 @@ interface Props {
 
 function ContextMenuItem(props: Props): JSX.Element {
     return (
-        <Link href={props.href ? props.href : "#"}>
+        <Link href={props.href ? props.href : "#"} passHref>
             <div className="context flex text-xs hover:bg-grey-100 py-1.5 px-6 cursor-pointer transition duration-100" onClick={props.action ? props.action : () => {}}>
                 {props.icon &&
                     <span className="w-6 text-center mr-2.5">

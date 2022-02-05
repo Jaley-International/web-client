@@ -21,7 +21,7 @@ function NavbarItem(props: Props): JSX.Element {
     let active = props.active || !!props.activeRoutes.find(route => router.route.match(route));
 
     return (
-        <Link href={props.href ? props.href : "#"}>
+        <Link href={props.href ? props.href : "#"} passHref>
             <div className={`flex space-x-2 lg:space-x-4 py-3 my-1 cursor-pointer ${props.className}`} onClick={props.action}>
                 <div className={`w-0.5 h-6 my-auto min-h-max mr-0 lg:mr-1 ${active ? "bg-blue" : ""}`} />
                 <div className="w-full text-center pr-2 lg:w-4 lg:text-left lg:pr-0">

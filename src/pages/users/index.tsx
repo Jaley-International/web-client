@@ -23,7 +23,7 @@ function UserList(): JSX.Element {
             <Navbar />
             <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
                 <Header title="User management">
-                    <Link href="/users/new">
+                    <Link href="/users/new" passHref>
                         <Button size="small" type="regular" colour="green">
                                 <span><FontAwesomeIcon icon={faPlus} />&nbsp;&nbsp;New user</span>
                         </Button>
@@ -57,7 +57,7 @@ function UserList(): JSX.Element {
                                 return (
                                     <tr className="border-b border-grey-200" key={user.userId}>
                                         <td className="py-2 px-4">
-                                            <Link href={`/users/${user.userId}`}>
+                                            <Link href={`/users/${user.userId}`} passHref>
                                                 <div className="flex space-x-6 cursor-pointer">
                                                     {user.profilePicture ?
                                                         <div className="bg-cover bg-center w-9 h-9 rounded-full -mr-3" style={{backgroundImage: `url(${user.profilePicture})`}}/>
