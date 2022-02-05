@@ -14,7 +14,7 @@ import Link from "next/link";
 import {request} from "../../util/communication";
 import {GetStaticProps, InferGetServerSidePropsType} from "next";
 
-function RegisterPage({api_url}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
+function RegisterPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
 
     const toastRef = useRef<ToastRef>(null);
     const addToast = (toast: ToastProps) => {
@@ -107,7 +107,7 @@ function RegisterPage({api_url}: InferGetServerSidePropsType<typeof getStaticPro
 
                                 const registerData = await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string, updateStatus);
                                 updateStatus("Submitting...");
-                                const response = await request("POST", `${api_url}/users`, registerData);
+                                const response = await request("POST", `${apiUrl}/users`, registerData);
                                 if (response.status === "SUCCESS")
                                     addToast({type: "success", title: "Account created", message: "Please check your emails to finalize your registration."});
                                 else if (response.status === "ERROR_USERNAME_ALREADY_USED" || response.status === "ERROR_EMAIL_ALREADY_USED")
@@ -146,7 +146,7 @@ function RegisterPage({api_url}: InferGetServerSidePropsType<typeof getStaticPro
 export const getStaticProps: GetStaticProps = async () => {
     return {
         props: {
-            api_url: process.env.PEC_CLIENT_API_URL
+            apiUrl: process.env.PEC_CLIENT_API_URL
         }
     };
 };

@@ -20,11 +20,12 @@ import DeleteFileModal from "../../components/containers/modals/DeleteFileModal"
 import CreateFolderModal from "../../components/containers/modals/CreateFolderModal";
 import OverwriteFileModal from "../../components/containers/modals/OverwriteFileModal";
 import {uploadFile} from "../../util/security";
-import {GetStaticProps, InferGetServerSidePropsType} from "next";
+import {GetServerSideProps, GetStaticProps, InferGetServerSidePropsType} from "next";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
+import {request} from "../../util/communication";
 
-function FilesPage({api_url}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
+function FilesPage({apiUrl}: InferGetServerSidePropsType<typeof getServerSideProps>): JSX.Element {
 
     const toastRef = useRef<ToastRef>(null);
     const addToast = (toast: ToastProps) => {
@@ -46,7 +47,7 @@ function FilesPage({api_url}: InferGetServerSidePropsType<typeof getStaticProps>
             const file = files.item(i);
 
             if (file)
-                uploadFile(file, 0, "", api_url).then(success => {
+                uploadFile(file, 1, "abc", apiUrl).then(success => {
                     if (success)
                         addToast({type: "success", title: "File uploaded", message: `Your file ${file.name} has been uploaded successfully.`});
                     else
@@ -339,7 +340,7 @@ function FilesPage({api_url}: InferGetServerSidePropsType<typeof getStaticProps>
                     }}/>
                 }
                 {showCreateFolderModal &&
-                    <CreateFolderModal closeCallback={() => setShowCreateFolderModal(false)}/>
+                    <CreateFolderModal closeCallback={() => setShowCreateFolderModal(false)} apiUrl={apiUrl} addToast={addToast} />
                 }
             </div>
             <ToastPortal ref={toastRef}/>
@@ -347,10 +348,18 @@ function FilesPage({api_url}: InferGetServerSidePropsType<typeof getStaticProps>
     );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
+
+    // Requesting file system
+    let filesystem = [];
+    const response = await request("GET", `${process.env.PEC_CLIENT_API_URL}/filesystems`, {});
+    if (response.status === "SUCCESS")
+        filesystem = response.data;
+
     return {
         props: {
-            api_url: process.env.PEC_CLIENT_API_URL
+            apiUrl: process.env.PEC_CLIENT_API_URL,
+            filesystem: filesystem
         }
     };
 };

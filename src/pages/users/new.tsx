@@ -12,7 +12,7 @@ import {GetStaticProps, InferGetServerSidePropsType} from "next";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
 
-function NewUser({api_url}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
+function NewUser({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
 
     const toastRef = useRef<ToastRef>(null);
     const addToast = (toast: ToastProps) => {
@@ -92,7 +92,7 @@ function NewUser({api_url}: InferGetServerSidePropsType<typeof getStaticProps>):
                             const accessLevel = (accessLevelRef.current as HTMLSelectElement).value;
 
                             const createUserData = { firstname: firstname, lastname: lastname, username: username, email: email, group: group, job: job, accessLevel: accessLevel };
-                            const response = await request("POST", `${api_url}/users`, createUserData);
+                            const response = await request("POST", `${apiUrl}/users`, createUserData);
 
                             if (response.status === "SUCCESS") {
                                 addToast({type: "success", title: "Account created", message: "User account created successfully."});
@@ -151,7 +151,7 @@ function NewUser({api_url}: InferGetServerSidePropsType<typeof getStaticProps>):
 export const getStaticProps: GetStaticProps = async () => {
     return {
         props: {
-            api_url: process.env.PEC_CLIENT_API_URL
+            apiUrl: process.env.PEC_CLIENT_API_URL
         }
     };
 };

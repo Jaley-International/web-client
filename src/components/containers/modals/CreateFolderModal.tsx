@@ -1,12 +1,20 @@
 import ModalHeader from "./subcomponents/ModalHeader";
 import Button from "../../buttons/Button";
 import TextInput from "../../inputs/TextInput";
+import {createFolder} from "../../../util/security";
+import {useRef} from "react";
+import {ToastProps} from "../../toast/Toast";
 
 interface Props {
     closeCallback: () => void;
+    apiUrl: string;
+    addToast: (toast: ToastProps) => void;
 }
 
 function CreateFolderModal(props: Props): JSX.Element {
+
+    const nameRef = useRef<HTMLInputElement>(null);
+
     return (
         <>
             <div className="z-10 absolute w-full h-full bg-white bg-opacity-40 firefox:bg-opacity-40 backdrop-filter backdrop-blur-sm" onClick={props.closeCallback} />
@@ -15,12 +23,19 @@ function CreateFolderModal(props: Props): JSX.Element {
                     <ModalHeader title="Create folder" className="text-center" />
                     <div className="py-8 px-20">
 
-                        <form onSubmit={() => {
-                            // TODO Folder creation
-                            alert("TODO : Folder creation");
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            if (nameRef.current) {
+                                const name = nameRef.current.value;
+                                const success = await createFolder(name, props.apiUrl);
+                                if (success)
+                                    props.addToast({type: "success", title: "Folder created", message: `Folder ${name} created successfully.`});
+                                else
+                                    props.addToast({type: "error", title: "Error when creating folder", message: `Could not create folder ${name}.`});
+                            }
                             props.closeCallback();
                         }}>
-                            <TextInput type="text" label="Folder name" name="folder-name" required={true} validator={(str: string) => /^[0-9a-zA-Z-_àéèêëîïÀÉÈÊËÎÏçÇ]{1,32}$/.test(str)} />
+                            <TextInput ref={nameRef} type="text" label="Folder name" name="folder-name" required={true} validator={(str: string) => /^[0-9a-zA-Z-_àéèêëîïÀÉÈÊËÎÏçÇ]{1,32}$/.test(str)} />
 
                             <div className="pt-8 text-center space-x-4">
                                 <Button size="medium" type="regular" colour="green" action="submit">Create folder</Button>

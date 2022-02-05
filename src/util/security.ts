@@ -2,6 +2,7 @@ import forge, { Hex } from "node-forge";
 import assert from "assert";
 import { request } from "./communication";
 import { setCookies } from "cookies-next";
+import axios from "axios";
 
 
 // TODO : Change instance ID to be unique for each instance
@@ -236,11 +237,11 @@ export async function register(username: string, email: string, password: string
  * @param {string}      username        Account's username.
  * @param {string}      password        Account's password.
  * @param {string}      salt            Account's salt.
- * @param {string}      api_url         API URL.
+ * @param {string}      apiUrl         API URL.
  * @param {function}    updateStatus    Function to update the authentication status.
  * @return {boolean}                    True if authentication is successful, false otherwise
  */
-export async function authenticate(username: string, password: string, salt: string, api_url: string, updateStatus: (message: string) => void): Promise<boolean> {
+export async function authenticate(username: string, password: string, salt: string, apiUrl: string, updateStatus: (message: string) => void): Promise<boolean> {
 
     // PPF
     updateStatus("Processing password...");
@@ -250,7 +251,7 @@ export async function authenticate(username: string, password: string, salt: str
 
     // Authenticating (session identifier request with encrypted keys)
     updateStatus("Requesting keys...");
-    const response = await request("POST", `${api_url}/users/login`, {
+    const response = await request("POST", `${apiUrl}/users/login`, {
         username: username,
         derivedAuthenticationKey: derivedAuthenticationKey
     });
@@ -288,11 +289,11 @@ export async function authenticate(username: string, password: string, salt: str
  *
  * @param {File}        file                File to upload.
  * @param {number}      containingFolderID  ID of the containing folder.
- * @param {number}      parentFolderKey     Parent folder's key.
- * @param {string}      api_url             API URL.
+ * @param {Hex}         parentFolderKey     Parent folder's key.
+ * @param {string}      apiUrl             API URL.
  * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
  */
-export async function uploadFile(file: File, containingFolderID: number, parentFolderKey: Hex, api_url: string): Promise<boolean> {
+export async function uploadFile(file: File, containingFolderID: number, parentFolderKey: Hex, apiUrl: string): Promise<boolean> {
 
     // Generate Node Key (256 bits)
     const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
@@ -309,9 +310,15 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
     const encryptedFile = await encryptBuffer(buffer, nodeKey, iv);
 
     // Sending file to the server
-    const fileSubmitResponse = await request("POST", `${api_url}/filesystems/document`, {
-        file: encryptedFile
-    }, {"Content-Type": "multipart/form-data"});
+    const ffile = new File([encryptedFile], "file.enc");
+    const formData = new FormData();
+    formData.append("file", ffile);
+
+    const fileSubmitResponse = await request(
+        "POST",
+        `${apiUrl}/filesystems/content`,
+        formData,
+        {"Content-Type": "multipart/form-data; "});
     if (fileSubmitResponse.status !== "SUCCESS")
         return false;
     const ref = fileSubmitResponse.data.ref;
@@ -326,18 +333,19 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
     const encryptedMetadata = encrypt("AES-GCM", nodeKey, iv, JSON.stringify(metaData));
 
     // Compute Encrypted Node Key
-    const encryptedNodeKey = encrypt("AES-CTR", sessionStorage.masterKey, iv, nodeKey);
+    const encryptedNodeKey = encrypt("AES-CTR", sessionStorage.masterKey, nodeKey, iv);
 
     // Compute Parent Encrypted Key
-    const parentEncryptedKey = encrypt("AES-CTR", parentFolderKey, iv, nodeKey);
+    //const parentEncryptedKey = encrypt("AES-CTR", parentFolderKey, nodeKey, iv);
+    const parentEncryptedKey = "abc";
 
     // Submitting file data to the API
-    const metadataSubmitResponse = await request("POST", `${api_url}/filesystem/file`, {
+    const metadataSubmitResponse = await request("POST", `${apiUrl}/filesystems/file`, {
         ref: ref,
-        containingFolderID: containingFolderID,
+        parentId: containingFolderID,
         encryptedMetadata: encryptedMetadata,
-        encryptedNodeKey: encryptedNodeKey,
-        parentEncryptedKey: parentEncryptedKey
+        encryptedKey: encryptedNodeKey,
+        encryptedParentKey: parentEncryptedKey
     });
 
     return metadataSubmitResponse.status === "SUCCESS";
@@ -345,13 +353,48 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
 
 
 /**
+ * Folder creation
+ * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
+ *
+ * @param {string}      name                Name of the folder.
+ * @param {string}      apiUrl             API URL.
+ * @param {number}      containingFolderID  ID of the containing folder.
+ * @param {Hex}         parentFolderKey     Parent folder's key.
+ * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
+ */
+export async function createFolder(name: string, apiUrl: string, containingFolderID?: number, parentFolderKey?: Hex) {
+
+    // Generate Node Key (256 bits)
+    const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
+
+    // Generate initialization vector (128 bits)
+    const iv = forge.random.getBytesSync(16);
+
+    // Computing encrypted metadata
+    const encryptedMetadata = encrypt("AES-GCM", nodeKey, iv, JSON.stringify({
+        name: name
+    }));
+
+    // Compute Encrypted Node Key
+    const encryptedNodeKey = encrypt("AES-CTR", sessionStorage.masterKey, nodeKey, iv);
+
+    const response = await request("POST", `${apiUrl}/filesystems/root`, {
+        encryptedMetadata: encryptedMetadata,
+        encryptedKey: encryptedNodeKey
+    });
+
+    return response.status === "SUCCESS";
+}
+
+
+/**
  * Validates user's session
  *
  * @param {Session}     session         Session to validate.
- * @param {string}      api_url         API URL.
+ * @param {string}      apiUrl         API URL.
  * @return {boolean}                    True if validation is successful, false otherwise
  */
-export function validateSession(session: Session, api_url: string): boolean {
+export function validateSession(session: Session, apiUrl: string): boolean {
 
     // Session not set
     if (!session.id || !session.exp)
