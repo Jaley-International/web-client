@@ -22,7 +22,7 @@ function Navbar(): JSX.Element {
             <TransferList show={showFileTransfers}/>
             <nav className="w-14 lg:w-2/12 max-w-xs min-h-screen bg-white border-r-2 border-border relative">
 
-                <Link href="/">
+                <Link href="/" passHref>
                     <div className="inline-flex space-x-3 px-1 lg:px-4 py-8 w-full cursor-pointer">
                         <div className="w-9 h-9 mx-auto lg:mx-0 rounded-2lg bg-gradient-to-bl from-blue-gradient-from to-blue-gradient-to text-center text-md text-white py-1">
                             <FontAwesomeIcon icon={faCloud} /> {/* TODO Change icon */}

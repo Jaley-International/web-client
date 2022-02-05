@@ -58,7 +58,7 @@ function NewUser({api_url}: InferGetServerSidePropsType<typeof getStaticProps>):
                 <Navbar />
                 <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
                     <Header title="User pre-registration">
-                        <Link href="/users">
+                        <Link href="/users" passHref>
                             <Button size="small" type="regular" colour="orange">
                                 <span><FontAwesomeIcon icon={faArrowLeft} />&nbsp;&nbsp;Discard and go back</span>
                             </Button>
