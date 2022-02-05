@@ -1,7 +1,7 @@
-import forge, {Hex} from "node-forge";
+import forge, { Hex } from "node-forge";
 import assert from "assert";
-import {request} from "./communication";
-import {setCookies} from "cookies-next";
+import { request } from "./communication";
+import { setCookies } from "cookies-next";
 
 
 // TODO : Change instance ID to be unique for each instance
@@ -29,7 +29,7 @@ export interface Session {
  */
 async function generateRSAKeyPair(): Promise<forge.pki.KeyPair> {
     return new Promise((resolve, reject) => {
-        forge.pki.rsa.generateKeyPair({bits: 2048, workers: 2}, (err, keypair) => {
+        forge.pki.rsa.generateKeyPair({ bits: 2048, workers: 2 }, (err, keypair) => {
             if (err)
                 reject(err);
             resolve(keypair);
@@ -100,7 +100,7 @@ function sha512(str: string): Hex {
  */
 function encrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: string): Hex {
     const cipher = forge.cipher.createCipher(operation, forge.util.hexToBytes(key));
-    cipher.start({iv: iv});
+    cipher.start({ iv: iv });
     cipher.update(forge.util.createBuffer(str));
     cipher.finish();
     return cipher.output.toHex();
@@ -117,7 +117,7 @@ function encrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: st
  */
 function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: Hex, str: Hex): string {
     const decipher = forge.cipher.createDecipher(operation, forge.util.hexToBytes(key));
-    decipher.start({iv: iv});
+    decipher.start({ iv: iv });
     decipher.update(forge.util.createBuffer(forge.util.hexToBytes(str)));
     return forge.util.hexToBytes(decipher.output.toHex());
 }
@@ -143,9 +143,8 @@ export function rsaPrivateDecrypt(key: string, value: Hex): Hex {
  * @return {Buffer}                     Encrypted buffer
  */
 export function encryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
-
-    const cipher = forge.cipher.createCipher("AES-GCM", key);
-    cipher.start({iv: iv});
+    const cipher = forge.cipher.createCipher("AES-GCM", forge.util.hexToBytes(key));
+    cipher.start({ iv: iv });
     cipher.update(forge.util.createBuffer(buffer.toString("binary")));
     cipher.finish();
 
@@ -165,8 +164,8 @@ export function encryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
  */
 export function decryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
 
-    const decipher = forge.cipher.createDecipher("AES-GCM", key);
-    decipher.start({iv: iv});
+    const decipher = forge.cipher.createDecipher("AES-GCM", forge.util.hexToBytes(key));
+    decipher.start({ iv: iv });
     decipher.update(forge.util.createBuffer(buffer.toString("binary")));
     decipher.finish();
 
@@ -280,6 +279,68 @@ export async function authenticate(username: string, password: string, salt: str
     });
 
     return true;
+}
+
+
+/**
+ * File upload client-side process
+ * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
+ *
+ * @param {File}        file                File to upload.
+ * @param {number}      containingFolderID  ID of the containing folder.
+ * @param {number}      parentFolderKey     Parent folder's key.
+ * @param {string}      api_url             API URL.
+ * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
+ */
+export async function uploadFile(file: File, containingFolderID: number, parentFolderKey: Hex, api_url: string): Promise<boolean> {
+
+    // Generate Node Key (256 bits)
+    const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
+
+    // Generate initialization vector (128 bits)
+    const iv = forge.random.getBytesSync(16);
+
+    // Reading file
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Encrypt file
+    // TODO compress file before encryption
+    // TODO make encryption process asynchronous
+    const encryptedFile = await encryptBuffer(buffer, nodeKey, iv);
+
+    // Sending file to the server
+    const fileSubmitResponse = await request("POST", `${api_url}/filesystems/document`, {
+        file: encryptedFile
+    }, {"Content-Type": "multipart/form-data"});
+    if (fileSubmitResponse.status !== "SUCCESS")
+        return false;
+    const ref = fileSubmitResponse.data.ref;
+
+    // Getting and encrypting file meta data
+    const metaData = {
+        name: file.name,
+        type: file.type,
+        lastModified: file.lastModified,
+        size: file.size
+    }
+    const encryptedMetadata = encrypt("AES-GCM", nodeKey, iv, JSON.stringify(metaData));
+
+    // Compute Encrypted Node Key
+    const encryptedNodeKey = encrypt("AES-CTR", sessionStorage.masterKey, iv, nodeKey);
+
+    // Compute Parent Encrypted Key
+    const parentEncryptedKey = encrypt("AES-CTR", parentFolderKey, iv, nodeKey);
+
+    // Submitting file data to the API
+    const metadataSubmitResponse = await request("POST", `${api_url}/filesystem/file`, {
+        ref: ref,
+        containingFolderID: containingFolderID,
+        encryptedMetadata: encryptedMetadata,
+        encryptedNodeKey: encryptedNodeKey,
+        parentEncryptedKey: parentEncryptedKey
+    });
+
+    return metadataSubmitResponse.status === "SUCCESS";
 }
 
 

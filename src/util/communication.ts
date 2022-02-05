@@ -1,4 +1,5 @@
-import axios, {Method} from "axios";
+import axios, {AxiosRequestHeaders, Method} from "axios";
+import {getCookie, getCookies} from "cookies-next";
 
 export interface APIResponse {
     status: string;
@@ -8,19 +9,27 @@ export interface APIResponse {
 
 /**
  * Makes an HTTP request to the API
- * @param {Method}      method          HTTP request method.
- * @param {string}      url             API URL.
- * @param {object}      data            Request body as an object.
+ * @param {Method}              method              HTTP request method.
+ * @param {string}              url                 API URL.
+ * @param {object}              data                Request body as an object.
+ * @param {AxiosRequestHeaders} additionalHeaders   Additional headers to send.
  * @return {Promise<APIResponse>}
  */
-export async function request(method: Method, url: string, data: object): Promise<APIResponse> {
+export async function request(method: Method, url: string, data: object, additionalHeaders?: AxiosRequestHeaders): Promise<APIResponse> {
+    const sessionJSON = getCookie("session");
+    let sessionId: string;
+    if (typeof sessionJSON === "string")
+        sessionId = JSON.parse(sessionJSON).id;
+
     return new Promise<APIResponse>(async (resolve) => {
         await axios.request({
             method: method,
             url: url,
             data: data,
             headers: {
-                "Access-Control-Allow-Origin": url
+                "Access-Control-Allow-Origin": url,
+                "Authorization": "Bearer " + sessionId || "",
+                ...additionalHeaders
             }
         }).then(response => {
             resolve(response.data);
