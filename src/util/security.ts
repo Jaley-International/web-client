@@ -427,7 +427,7 @@ export async function downloadFile(node: Node, apiUrl: string, addToast: (toast:
     let test = document.createElement("a");
     // @ts-ignore
     test.href = window.URL.createObjectURL(blob);
-    test.download = "test.txt";
+    test.download = node.metaData.name;
     test.click();
 }
 
