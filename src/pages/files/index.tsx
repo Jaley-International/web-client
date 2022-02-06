@@ -14,12 +14,11 @@ import Button from "../../components/buttons/Button";
 import Card from "../../components/containers/Card";
 import OptionsButton from "../../components/buttons/OptionsButton";
 import ContextMenuItem from "../../components/containers/contextmenu/ContextMenuItem";
-import File from "../../model/File";
 import Header from "components/sections/Header";
 import DeleteFileModal from "../../components/containers/modals/DeleteFileModal";
 import CreateFolderModal from "../../components/containers/modals/CreateFolderModal";
 import OverwriteFileModal from "../../components/containers/modals/OverwriteFileModal";
-import {decryptFileSystem, downloadFile, EncryptedNode, Node, uploadFile} from "../../util/security";
+import {createFolder, decryptFileSystem, downloadFile, EncryptedNode, Node, uploadFile} from "../../util/security";
 import {GetStaticProps, InferGetStaticPropsType} from "next";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
@@ -35,7 +34,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
     const [showOverwriteModal, setShowOverwriteModal] = useState<boolean>(false);
     const [showCreateFolderModal, setShowCreateFolderModal] = useState<boolean>(false);
-    const [modalFileTarget, setModalFileTarget] = useState<File | null>(null);
+    const [modalNodeTarget, setModalNodeTarget] = useState<Node | null>(null);
 
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -209,11 +208,11 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                                         <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => alert("TODO Permission modal")}/>
                                                         <ContextMenuItem name="Lock file" icon={faLock} action={() => alert("TODO File locking")}/>
                                                         <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
-                                                            setModalFileTarget(new File(0, "Creditor bank details.pdf"));
+                                                            setModalNodeTarget(node);
                                                             setShowOverwriteModal(true);
                                                         }}/>
                                                         <ContextMenuItem name="Delete" icon={faTimesCircle} action={() => {
-                                                            setModalFileTarget(new File(0, "Creditor bank details.pdf"));
+                                                            setModalNodeTarget(node);
                                                             setShowDeleteModal(true);
                                                         }}/>
                                                     </OptionsButton>
@@ -229,20 +228,36 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                     </div>
 
                 </div>
-                {showDeleteModal && modalFileTarget !== null &&
-                    <DeleteFileModal file={modalFileTarget} closeCallback={() => {
+                {showDeleteModal && modalNodeTarget !== null &&
+                    <DeleteFileModal node={modalNodeTarget} closeCallback={() => {
                         setShowDeleteModal(false);
-                        setModalFileTarget(null);
+                        setModalNodeTarget(null);
+                    }} submitCallback={async () => {
+                        const response = await request("DELETE", `${apiUrl}/filesystems/`, {
+                            nodeId: modalNodeTarget.id
+                        });
+                        if (response.status === "SUCCESS")
+                            addToast({type: "success", title: "File deleted", message: "File deleted successfully."});
+                        else
+                            addToast({type: "error", title: "Could not delete file", message: "An unknown error occurred while deleting the file."});
+                        await fetchFilesystem();
                     }}/>
                 }
-                {showOverwriteModal && modalFileTarget !== null &&
-                    <OverwriteFileModal file={modalFileTarget} closeCallback={() => {
+                {showOverwriteModal && modalNodeTarget !== null &&
+                    <OverwriteFileModal node={modalNodeTarget} closeCallback={() => {
                         setShowOverwriteModal(false);
-                        setModalFileTarget(null);
+                        setModalNodeTarget(null);
                     }}/>
                 }
                 {showCreateFolderModal &&
-                    <CreateFolderModal closeCallback={() => setShowCreateFolderModal(false)} apiUrl={apiUrl} addToast={addToast} parentId={filesystem?.id || 0} />
+                    <CreateFolderModal closeCallback={() => setShowCreateFolderModal(false)} submitCallback={async (name: string) => {
+                        const success = filesystem && await createFolder(name, filesystem.id, "abc", apiUrl);
+                        if (success)
+                            addToast({type: "success", title: "Folder created", message: `Folder ${name} created successfully.`});
+                        else
+                            addToast({type: "error", title: "Error when creating folder", message: `Could not create folder ${name}.`});
+                        await fetchFilesystem();
+                    }} />
                 }
             </div>
             <ToastPortal ref={toastRef}/>
