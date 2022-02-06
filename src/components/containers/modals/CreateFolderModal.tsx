@@ -9,6 +9,7 @@ interface Props {
     closeCallback: () => void;
     apiUrl: string;
     addToast: (toast: ToastProps) => void;
+    parentId: number;
 }
 
 function CreateFolderModal(props: Props): JSX.Element {
@@ -27,7 +28,7 @@ function CreateFolderModal(props: Props): JSX.Element {
                             e.preventDefault();
                             if (nameRef.current) {
                                 const name = nameRef.current.value;
-                                const success = await createFolder(name, props.apiUrl);
+                                const success = await createFolder(name, props.parentId, "abc", props.apiUrl);
                                 if (success)
                                     props.addToast({type: "success", title: "Folder created", message: `Folder ${name} created successfully.`});
                                 else
