@@ -1,4 +1,4 @@
-import axios, {AxiosRequestHeaders, Method} from "axios";
+import axios, {AxiosRequestConfig, AxiosRequestHeaders, Method} from "axios";
 import {getCookie, getCookies} from "cookies-next";
 
 export interface APIResponse {
@@ -15,7 +15,7 @@ export interface APIResponse {
  * @param {AxiosRequestHeaders} additionalHeaders   Additional headers to send.
  * @return {Promise<APIResponse>}
  */
-export async function request(method: Method, url: string, data: object, additionalHeaders?: AxiosRequestHeaders): Promise<APIResponse> {
+export async function request(method: Method, url: string, data: object, additionalHeaders?: AxiosRequestHeaders, additionalOptions?: AxiosRequestConfig): Promise<APIResponse> {
     const sessionJSON = getCookie("session");
     let sessionId: string;
     if (typeof sessionJSON === "string")
@@ -30,9 +30,17 @@ export async function request(method: Method, url: string, data: object, additio
                 "Access-Control-Allow-Origin": url,
                 "Authorization": "Bearer " + sessionId || "",
                 ...additionalHeaders
-            }
+            },
+            ...additionalOptions
         }).then(response => {
-            resolve(response.data);
+            if (response.data)
+                resolve(response.data);
+            else
+                resolve({
+                    status: "SUCCESS",
+                    verbose: "",
+                    data: response
+                })
         }).catch(reason => {
             try {
                 const response = JSON.parse(reason.request.response);

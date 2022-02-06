@@ -19,7 +19,7 @@ import Header from "components/sections/Header";
 import DeleteFileModal from "../../components/containers/modals/DeleteFileModal";
 import CreateFolderModal from "../../components/containers/modals/CreateFolderModal";
 import OverwriteFileModal from "../../components/containers/modals/OverwriteFileModal";
-import {decryptFileSystem, EncryptedNode, Node, uploadFile} from "../../util/security";
+import {decryptFileSystem, downloadFile, EncryptedNode, Node, uploadFile} from "../../util/security";
 import {GetStaticProps, InferGetStaticPropsType} from "next";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
@@ -201,16 +201,13 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                             <td className="py-2 px-4">
                                                 <div className="w-full">
                                                     <OptionsButton>
-                                                        <ContextMenuItem name="Preview" icon={faEye}
-                                                                         action={() => alert("TODO File preview")}/>
-                                                        <ContextMenuItem name="Download" icon={faCloudDownloadAlt}
-                                                                         action={() => alert("TODO File download")}/>
-                                                        <ContextMenuItem name="Share" icon={faShareAlt}
-                                                                         action={() => alert("TODO File sharing")}/>
-                                                        <ContextMenuItem name="Manage permissions" icon={faUsersCog}
-                                                                         action={() => alert("TODO Permission modal")}/>
-                                                        <ContextMenuItem name="Lock file" icon={faLock}
-                                                                         action={() => alert("TODO File locking")}/>
+                                                        <ContextMenuItem name="Preview" icon={faEye} action={() => alert("TODO File preview")}/>
+                                                        <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={async () => {
+                                                            await downloadFile(node, apiUrl, addToast);
+                                                        }}/>
+                                                        <ContextMenuItem name="Share" icon={faShareAlt} action={() => alert("TODO File sharing")}/>
+                                                        <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => alert("TODO Permission modal")}/>
+                                                        <ContextMenuItem name="Lock file" icon={faLock} action={() => alert("TODO File locking")}/>
                                                         <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
                                                             setModalFileTarget(new File(0, "Creditor bank details.pdf"));
                                                             setShowOverwriteModal(true);

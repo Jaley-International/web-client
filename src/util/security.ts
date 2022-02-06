@@ -1,8 +1,12 @@
-import forge, {Hex} from "node-forge";
+import forge, {Hex, util} from "node-forge";
 import assert from "assert";
 import {request} from "./communication";
 import {setCookies} from "cookies-next";
 import file from "../model/File";
+import {Simulate} from "react-dom/test-utils";
+import encrypted = Simulate.encrypted;
+import {ToastProps} from "../components/toast/Toast";
+import {node} from "prop-types";
 
 
 // TODO : Change instance ID to be unique for each instance
@@ -190,20 +194,22 @@ export function encryptBuffer(buffer: Buffer, key: Hex, iv: string): [Buffer, He
  * @param {Buffer}      buffer          Buffer to decrypt
  * @param {Hex}         key             Encryption key
  * @param {string}      iv              Initialization vector (128 bits)
- * @param {Hex}         tag             Cipher tag
+ * @param {string}      tag             Cipher tag
  * @return {Buffer}                     Decrypted buffer
  */
-export function decryptBuffer(buffer: Buffer, key: Hex, iv: string, tag: Hex): Buffer {
+export function decryptBuffer(buffer: Buffer, key: Hex, iv: string, tag: string): Buffer | null {
 
     const decipher = forge.cipher.createDecipher("AES-GCM", forge.util.hexToBytes(key));
-    decipher.start({ iv: iv, tag: forge.util.createBuffer(forge.util.hexToBytes(tag)) });
+    decipher.start({iv: iv, tag: new forge.util.ByteStringBuffer(tag)});
     decipher.update(forge.util.createBuffer(buffer.toString("binary")));
-    decipher.finish();
+    const finish = decipher.finish();
 
     const decryptedBuffer = forge.util.createBuffer();
     decryptedBuffer.putBuffer(decipher.output);
 
-    return Buffer.from(decryptedBuffer.getBytes(), "binary");
+    if (finish)
+        return Buffer.from(decryptedBuffer.getBytes(), "binary");
+    return null;
 }
 
 
@@ -385,6 +391,48 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
 
 
 /**
+ * File download client-side process
+ * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
+ *
+ * @param {Node}        node                File to download
+ * @param {string}      apiUrl              API URL.
+ * @param {function}    addToast            (Temporary) add toast to UI.
+ */
+export async function downloadFile(node: Node, apiUrl: string, addToast: (toast: ToastProps) => void): Promise<void> {
+
+    const response = await request("GET", `${apiUrl}/filesystems/content/${node.id}`, {}, {
+        "Content-Encoding": "identity"
+    }, {
+        responseType: "arraybuffer"
+    });
+
+    if (!response) {
+        addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
+        return;
+    }
+
+    const decrypted = decryptBuffer(
+        Buffer.from(response as unknown as string, "binary"),
+        node.nodeKey,
+        forge.util.hexToBytes(node.iv),
+        forge.util.hexToBytes(node.tag));
+
+    if (!decrypted) {
+        addToast({type: "error", title: "Failed to decrypt", message: "An error occurred while decrypting the file."});
+        return;
+    }
+
+    // FIXME Refactor client download
+    const blob = new File([decrypted], node.metaData.name);
+    let test = document.createElement("a");
+    // @ts-ignore
+    test.href = window.URL.createObjectURL(blob);
+    test.download = "test.txt";
+    test.click();
+}
+
+
+/**
  * Folder creation client-side process
  * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
  *
@@ -394,7 +442,7 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
  * @param {string}      apiUrl              API URL.
  * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
  */
-export async function createFolder(name: string, containingFolderID: number, parentFolderKey: Hex, apiUrl: string) {
+export async function createFolder(name: string, containingFolderID: number, parentFolderKey: Hex, apiUrl: string): Promise<boolean> {
 
     // Generate Node Key (256 bits)
     const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
