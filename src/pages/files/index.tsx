@@ -40,7 +40,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const fetchFilesystem = async () => {
-        const response = await request("GET", `${apiUrl}/filesystems`, {});
+        const response = await request("GET", `${apiUrl}/filesystem`, {});
         if (response.status === "SUCCESS")
             setRawFilesystem(response.data);
         else
@@ -75,7 +75,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
 
     useEffect(() => {
         if (rawFilesystem) {
-            const decrypted = decryptFileSystem(rawFilesystem as unknown as EncryptedNode[]);
+            const decrypted = decryptFileSystem(rawFilesystem as unknown as EncryptedNode);
             if (decrypted)
                 setFilesystem(decrypted);
             else
@@ -233,7 +233,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                         setShowDeleteModal(false);
                         setModalNodeTarget(null);
                     }} submitCallback={async () => {
-                        const response = await request("DELETE", `${apiUrl}/filesystems/`, {
+                        const response = await request("DELETE", `${apiUrl}/filesystem/`, {
                             nodeId: modalNodeTarget.id
                         });
                         if (response.status === "SUCCESS")
@@ -269,7 +269,7 @@ export const getStaticProps: GetStaticProps = async () => {
 
     // Requesting file system
     let filesystem = [];
-    const response = await request("GET", `${process.env.PEC_CLIENT_API_URL}/filesystems`, {});
+    const response = await request("GET", `${process.env.PEC_CLIENT_API_URL}/filesystem`, {});
     if (response.status === "SUCCESS")
         filesystem = response.data;
 
