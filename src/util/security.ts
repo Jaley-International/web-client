@@ -1,7 +1,12 @@
-import forge, { Hex } from "node-forge";
+import forge, {Hex, util} from "node-forge";
 import assert from "assert";
-import { request } from "./communication";
-import { setCookies } from "cookies-next";
+import {request} from "./communication";
+import {setCookies} from "cookies-next";
+import file from "../model/File";
+import {Simulate} from "react-dom/test-utils";
+import encrypted = Simulate.encrypted;
+import {ToastProps} from "../components/toast/Toast";
+import {node} from "prop-types";
 
 
 // TODO : Change instance ID to be unique for each instance
@@ -15,6 +20,35 @@ export interface RegisterReqData {
     hashedAuthenticationKey: string;
     encryptedRsaPrivateSharingKey: string;
     rsaPublicSharingKey: string;
+}
+
+export interface EncryptedNode {
+    id: number;
+    iv: Hex;
+    tag: Hex;
+    encryptedKey: Hex;
+    encryptedMetadata: Hex;
+    type: "FOLDER" | "FILE";
+    ref: string;
+    encryptedParentKey: Hex;
+    children: EncryptedNode[];
+}
+
+export interface MetaData {
+    name: string;
+    [key: string]: any;
+}
+
+export interface Node {
+    id: number;
+    iv: Hex;
+    tag: Hex;
+    nodeKey: Hex;
+    metaData: MetaData;
+    type: "FOLDER" | "FILE";
+    ref: string;
+    parentKey: Hex;
+    children: Node[];
 }
 
 export interface Session {
@@ -111,11 +145,11 @@ function encrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: st
  * Decrypts a string using AES
  * @param {string}      operation       Cipher and block mode of operation
  * @param {Hex}         key             Encryption key
- * @param {Hex}         iv              Initialization vector (128 bits)
+ * @param {string}      iv              Initialization vector (128 bits)
  * @param {Hex}         str             String to decrypt
  * @return {string}                     Decrypted string
  */
-function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: Hex, str: Hex): string {
+function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: Hex): string {
     const decipher = forge.cipher.createDecipher(operation, forge.util.hexToBytes(key));
     decipher.start({ iv: iv });
     decipher.update(forge.util.createBuffer(forge.util.hexToBytes(str)));
@@ -139,10 +173,10 @@ export function rsaPrivateDecrypt(key: string, value: Hex): Hex {
  * Encrypts a buffer using RSA-GCM
  * @param {Buffer}      buffer          Buffer to encrypt
  * @param {Hex}         key             Encryption key
- * @param {Hex}         iv              Initialization vector (128 bits)
- * @return {Buffer}                     Encrypted buffer
+ * @param {string}      iv              Initialization vector (128 bits)
+ * @return {[Buffer, Hex]}              Encrypted file as buffer and cipher tag
  */
-export function encryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
+export function encryptBuffer(buffer: Buffer, key: Hex, iv: string): [Buffer, Hex] {
     const cipher = forge.cipher.createCipher("AES-GCM", forge.util.hexToBytes(key));
     cipher.start({ iv: iv });
     cipher.update(forge.util.createBuffer(buffer.toString("binary")));
@@ -151,7 +185,7 @@ export function encryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
     const encryptedBuffer = forge.util.createBuffer();
     encryptedBuffer.putBuffer(cipher.output);
 
-    return Buffer.from(encryptedBuffer.getBytes(), "binary");
+    return [Buffer.from(encryptedBuffer.getBytes(), "binary"), cipher.mode.tag.toHex()];
 }
 
 
@@ -159,20 +193,23 @@ export function encryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
  * Decrypts a buffer using RSA-GCM
  * @param {Buffer}      buffer          Buffer to decrypt
  * @param {Hex}         key             Encryption key
- * @param {Hex}         iv              Initialization vector (128 bits)
+ * @param {string}      iv              Initialization vector (128 bits)
+ * @param {string}      tag             Cipher tag
  * @return {Buffer}                     Decrypted buffer
  */
-export function decryptBuffer(buffer: Buffer, key: Hex, iv: Hex): Buffer {
+export function decryptBuffer(buffer: Buffer, key: Hex, iv: string, tag: string): Buffer | null {
 
     const decipher = forge.cipher.createDecipher("AES-GCM", forge.util.hexToBytes(key));
-    decipher.start({ iv: iv });
+    decipher.start({iv: iv, tag: new forge.util.ByteStringBuffer(tag)});
     decipher.update(forge.util.createBuffer(buffer.toString("binary")));
-    decipher.finish();
+    const finish = decipher.finish();
 
     const decryptedBuffer = forge.util.createBuffer();
     decryptedBuffer.putBuffer(decipher.output);
 
-    return Buffer.from(decryptedBuffer.getBytes(), "binary");
+    if (finish)
+        return Buffer.from(decryptedBuffer.getBytes(), "binary");
+    return null;
 }
 
 
@@ -236,11 +273,11 @@ export async function register(username: string, email: string, password: string
  * @param {string}      username        Account's username.
  * @param {string}      password        Account's password.
  * @param {string}      salt            Account's salt.
- * @param {string}      api_url         API URL.
+ * @param {string}      apiUrl          API URL.
  * @param {function}    updateStatus    Function to update the authentication status.
  * @return {boolean}                    True if authentication is successful, false otherwise
  */
-export async function authenticate(username: string, password: string, salt: string, api_url: string, updateStatus: (message: string) => void): Promise<boolean> {
+export async function authenticate(username: string, password: string, salt: string, apiUrl: string, updateStatus: (message: string) => void): Promise<boolean> {
 
     // PPF
     updateStatus("Processing password...");
@@ -250,7 +287,7 @@ export async function authenticate(username: string, password: string, salt: str
 
     // Authenticating (session identifier request with encrypted keys)
     updateStatus("Requesting keys...");
-    const response = await request("POST", `${api_url}/users/login`, {
+    const response = await request("POST", `${apiUrl}/users/login`, {
         username: username,
         derivedAuthenticationKey: derivedAuthenticationKey
     });
@@ -288,11 +325,11 @@ export async function authenticate(username: string, password: string, salt: str
  *
  * @param {File}        file                File to upload.
  * @param {number}      containingFolderID  ID of the containing folder.
- * @param {number}      parentFolderKey     Parent folder's key.
- * @param {string}      api_url             API URL.
+ * @param {Hex}         parentFolderKey     Parent folder's key.
+ * @param {string}      apiUrl              API URL.
  * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
  */
-export async function uploadFile(file: File, containingFolderID: number, parentFolderKey: Hex, api_url: string): Promise<boolean> {
+export async function uploadFile(file: File, containingFolderID: number, parentFolderKey: Hex, apiUrl: string): Promise<boolean> {
 
     // Generate Node Key (256 bits)
     const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
@@ -306,12 +343,18 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
     // Encrypt file
     // TODO compress file before encryption
     // TODO make encryption process asynchronous
-    const encryptedFile = await encryptBuffer(buffer, nodeKey, iv);
+    const [encryptedFile, tag] = encryptBuffer(buffer, nodeKey, iv);
 
     // Sending file to the server
-    const fileSubmitResponse = await request("POST", `${api_url}/filesystems/document`, {
-        file: encryptedFile
-    }, {"Content-Type": "multipart/form-data"});
+    const ffile = new File([encryptedFile], "file.enc");
+    const formData = new FormData();
+    formData.append("file", ffile);
+
+    const fileSubmitResponse = await request(
+        "POST",
+        `${apiUrl}/filesystems/content`,
+        formData,
+        {"Content-Type": "multipart/form-data; "});
     if (fileSubmitResponse.status !== "SUCCESS")
         return false;
     const ref = fileSubmitResponse.data.ref;
@@ -323,21 +366,24 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
         lastModified: file.lastModified,
         size: file.size
     }
-    const encryptedMetadata = encrypt("AES-GCM", nodeKey, iv, JSON.stringify(metaData));
+    const encryptedMetadata = encrypt("AES-CTR", nodeKey, iv, JSON.stringify(metaData));
 
     // Compute Encrypted Node Key
     const encryptedNodeKey = encrypt("AES-CTR", sessionStorage.masterKey, iv, nodeKey);
 
     // Compute Parent Encrypted Key
-    const parentEncryptedKey = encrypt("AES-CTR", parentFolderKey, iv, nodeKey);
+    //const parentEncryptedKey = encrypt("AES-CTR", parentFolderKey, nodeKey, iv);
+    const parentEncryptedKey = "abc";
 
     // Submitting file data to the API
-    const metadataSubmitResponse = await request("POST", `${api_url}/filesystem/file`, {
+    const metadataSubmitResponse = await request("POST", `${apiUrl}/filesystems/file`, {
         ref: ref,
-        containingFolderID: containingFolderID,
+        iv: forge.util.bytesToHex(iv),
+        tag: tag,
+        encryptedKey: encryptedNodeKey,
+        parentId: containingFolderID,
         encryptedMetadata: encryptedMetadata,
-        encryptedNodeKey: encryptedNodeKey,
-        parentEncryptedKey: parentEncryptedKey
+        encryptedParentKey: parentEncryptedKey
     });
 
     return metadataSubmitResponse.status === "SUCCESS";
@@ -345,13 +391,139 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
 
 
 /**
+ * File download client-side process
+ * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
+ *
+ * @param {Node}        node                File to download
+ * @param {string}      apiUrl              API URL.
+ * @param {function}    addToast            (Temporary) add toast to UI.
+ */
+export async function downloadFile(node: Node, apiUrl: string, addToast: (toast: ToastProps) => void): Promise<void> {
+
+    const response = await request("GET", `${apiUrl}/filesystems/content/${node.id}`, {}, {
+        "Content-Encoding": "identity"
+    }, {
+        responseType: "arraybuffer"
+    });
+
+    if (!response) {
+        addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
+        return;
+    }
+
+    const decrypted = decryptBuffer(
+        Buffer.from(response as unknown as string, "binary"),
+        node.nodeKey,
+        forge.util.hexToBytes(node.iv),
+        forge.util.hexToBytes(node.tag));
+
+    if (!decrypted) {
+        addToast({type: "error", title: "Failed to decrypt", message: "An error occurred while decrypting the file."});
+        return;
+    }
+
+    // FIXME Refactor client download
+    const blob = new File([decrypted], node.metaData.name);
+    let test = document.createElement("a");
+    // @ts-ignore
+    test.href = window.URL.createObjectURL(blob);
+    test.download = node.metaData.name;
+    test.click();
+}
+
+
+/**
+ * Folder creation client-side process
+ * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
+ *
+ * @param {string}      name                Name of the folder.
+ * @param {number}      containingFolderID  ID of the containing folder.
+ * @param {Hex}         parentFolderKey     Parent folder's key.
+ * @param {string}      apiUrl              API URL.
+ * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
+ */
+export async function createFolder(name: string, containingFolderID: number, parentFolderKey: Hex, apiUrl: string): Promise<boolean> {
+
+    // Generate Node Key (256 bits)
+    const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
+
+    // Generate initialization vector (128 bits)
+    const iv = forge.random.getBytesSync(16);
+
+    // Computing encrypted metadata
+    const encryptedMetadata = encrypt("AES-CTR", nodeKey, iv, JSON.stringify({
+        name: name
+    }));
+
+    // Compute Encrypted Node Key
+    const encryptedNodeKey = encrypt("AES-CTR", sessionStorage.masterKey, iv, nodeKey);
+
+    const response = await request("POST", `${apiUrl}/filesystems/root`, {
+        iv: forge.util.bytesToHex(iv),
+        tag: "",
+        encryptedKey: encryptedNodeKey,
+        encryptedMetadata: encryptedMetadata
+    });
+
+    return response.status === "SUCCESS";
+}
+
+
+/**
+ * Decrypts the file system
+ *
+ * @param {EncryptedNode[]} rawFilesystem   File system to decrypted
+ * @return {Node | null}                    Decrypted file system
+ */
+export function decryptFileSystem(rawFilesystem: EncryptedNode[]): Node | null {
+    if (rawFilesystem.length !== 1)
+        return null;
+
+    const filesystem = rawFilesystem[0];
+
+    const decryptNode = (encryptedNode: EncryptedNode, masterKey: Hex): Node => {
+        const iv = forge.util.hexToBytes(encryptedNode.iv);
+        const nodeKey = decrypt("AES-CTR", masterKey, iv, encryptedNode.encryptedKey);
+        return {
+            id: encryptedNode.id,
+            children: [],
+            iv: encryptedNode.iv,
+            tag: encryptedNode.tag,
+            nodeKey: nodeKey,
+            parentKey: "", //decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedParentKey),
+            metaData: JSON.parse(decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedMetadata)),
+            ref: encryptedNode.ref,
+            type: encryptedNode.type
+        }
+    }
+
+    try {
+        // TODO decrypt multiple depth
+
+        let decryptedFilesystem = decryptNode(filesystem, sessionStorage.getItem("masterKey") || "");
+
+        for (const encryptedChild of filesystem.children) {
+            decryptedFilesystem.children.push(decryptNode(
+                encryptedChild,  sessionStorage.getItem("masterKey") || ""
+            ));
+        }
+        return decryptedFilesystem;
+
+    } catch (e) {
+        console.error(e);
+        return null
+    }
+}
+
+
+/**
  * Validates user's session
  *
  * @param {Session}     session         Session to validate.
- * @param {string}      api_url         API URL.
+ * @param {string}      apiUrl          API URL.
  * @return {boolean}                    True if validation is successful, false otherwise
  */
-export function validateSession(session: Session, api_url: string): boolean {
+export function validateSession(session: Session, apiUrl: string): boolean {
 
     // Session not set
     if (!session.id || !session.exp)

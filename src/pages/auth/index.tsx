@@ -15,7 +15,7 @@ import {useRouter} from "next/router";
 import {removeCookies} from "cookies-next";
 import user from "../../model/User";
 
-function LoginPage({api_url}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
+function LoginPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
 
     const router = useRouter();
     const [loaded, setLoaded] = useState<boolean>(false);
@@ -111,12 +111,12 @@ function LoginPage({api_url}: InferGetServerSidePropsType<typeof getStaticProps>
 
                                 // Salt request
                                 updateStatus("Requesting salt...");
-                                const response = await request("GET", `${api_url}/users/salt/${username}`, {});
+                                const response = await request("GET", `${apiUrl}/users/salt/${username}`, {});
                                 if (response.status === "SUCCESS") {
                                     const salt = response.data.salt;
 
                                     // Authentication request
-                                    const result = await authenticate(username, password, salt, api_url, updateStatus);
+                                    const result = await authenticate(username, password, salt, apiUrl, updateStatus);
                                     if (result) {
                                         updateStatus("Redirecting...");
                                         addToast({type: "success", title: "Welcome!", message: "Successfully authenticated."});
@@ -155,7 +155,7 @@ function LoginPage({api_url}: InferGetServerSidePropsType<typeof getStaticProps>
 export const getStaticProps: GetStaticProps = async () => {
     return {
         props: {
-            api_url: process.env.PEC_CLIENT_API_URL
+            apiUrl: process.env.PEC_CLIENT_API_URL
         }
     };
 };
