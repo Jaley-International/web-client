@@ -244,8 +244,8 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                         setModalFileTarget(null);
                     }}/>
                 }
-                {showCreateFolderModal && filesystem &&
-                    <CreateFolderModal closeCallback={() => setShowCreateFolderModal(false)} apiUrl={apiUrl} addToast={addToast} parentId={filesystem.id} />
+                {showCreateFolderModal &&
+                    <CreateFolderModal closeCallback={() => setShowCreateFolderModal(false)} apiUrl={apiUrl} addToast={addToast} parentId={filesystem?.id || 0} />
                 }
             </div>
             <ToastPortal ref={toastRef}/>
