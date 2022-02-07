@@ -539,32 +539,31 @@ export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
         }
     }
 
-    try {
-        // TODO decrypt multiple depth
+    // TODO decrypt multiple depth
 
-        let decryptedFilesystem: Node = {
-            id: filesystem.id,
-            iv: "",
-            tag: "",
-            nodeKey: "",
-            metaData: {name: "root"},
-            type: "FOLDER",
-            ref: "",
-            parentKey: "",
-            children: []
-        };
+    let decryptedFilesystem: Node = {
+        id: filesystem.id,
+        iv: "",
+        tag: "",
+        nodeKey: "",
+        metaData: {name: "root"},
+        type: "FOLDER",
+        ref: "",
+        parentKey: "",
+        children: []
+    };
 
-        for (const encryptedChild of filesystem.children) {
+    for (const encryptedChild of filesystem.children) {
+        try {
+            // TODO Check node ownership
             decryptedFilesystem.children.push(decryptNode(
                 encryptedChild,  sessionStorage.getItem("masterKey") || ""
             ));
+        } catch (_) {
+            console.warn(`Could not decrypt node ${encryptedChild.id}. Not owner ?`);
         }
-        return decryptedFilesystem;
-
-    } catch (e) {
-        console.error(e);
-        return null
     }
+    return decryptedFilesystem;
 }
 
 

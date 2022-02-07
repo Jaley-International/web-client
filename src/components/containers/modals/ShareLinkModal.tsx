@@ -4,6 +4,7 @@ import TextInput from "../../inputs/TextInput";
 import {useRef} from "react";
 import {decrypt, ShareLink} from "../../../util/security";
 import forge from "node-forge";
+import {hexToBase64Url} from "../../../util/util";
 
 interface Props {
     sharelink: ShareLink;
@@ -20,13 +21,7 @@ function ShareLinkModal(props: Props): JSX.Element {
         forge.util.hexToBytes(props.sharelink.iv),
         props.sharelink.encryptedShareKey);
 
-    const nodeKey = decrypt(
-        "AES-CTR",
-        shareKey,
-        forge.util.hexToBytes(props.sharelink.iv),
-        props.sharelink.encryptedNodeKey);
-
-    const link = "https://" + window.location.hostname + "/share/" + props.sharelink.shareId + "#" + forge.util.bytesToHex(nodeKey);
+    const link = "https://" + window.location.hostname + "/share#" + hexToBase64Url(props.sharelink.shareId) + "#" + hexToBase64Url(shareKey);
 
     return (
         <>

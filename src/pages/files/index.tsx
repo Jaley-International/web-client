@@ -32,7 +32,6 @@ import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
 import {request} from "../../util/communication";
 import ShareLinkModal from "../../components/containers/modals/ShareLinkModal";
-import {Hex} from "node-forge";
 
 function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
 
