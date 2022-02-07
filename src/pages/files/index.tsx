@@ -69,7 +69,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                         addToast({type: "success", title: "File uploaded", message: `Your file ${file.name} has been uploaded successfully.`});
                         await fetchFilesystem();
                     } else {
-                        addToast({type: "error", title: "File upload error", message: `Your file ${file.name} could not be uploaded.`});
+                        addToast({type: "error", title: "File upload error", message: `Your file ${file.name} could not be uploaded. (File too big.)`});
                     }
                 });
             }
