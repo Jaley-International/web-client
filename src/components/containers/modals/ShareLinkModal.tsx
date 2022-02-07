@@ -21,7 +21,7 @@ function ShareLinkModal(props: Props): JSX.Element {
         forge.util.hexToBytes(props.sharelink.iv),
         props.sharelink.encryptedShareKey);
 
-    const link = "https://" + window.location.hostname + "/share#" + hexToBase64Url(props.sharelink.shareId) + "#" + hexToBase64Url(forge.util.bytesToHex(shareKey));
+    const link = "https://" + window.location.hostname + "/share#" + hexToBase64Url(props.sharelink.shareId) + "#" + hexToBase64Url(shareKey);
 
     return (
         <>

@@ -13,6 +13,7 @@ export interface APIResponse {
  * @param {string}              url                 API URL.
  * @param {object}              data                Request body as an object.
  * @param {AxiosRequestHeaders} additionalHeaders   Additional headers to send.
+ * @param {AxiosRequestConfig}  additionalOptions   Additional axios config.
  * @return {Promise<APIResponse>}
  */
 export async function request(method: Method, url: string, data: object, additionalHeaders?: AxiosRequestHeaders, additionalOptions?: AxiosRequestConfig): Promise<APIResponse> {
@@ -27,7 +28,6 @@ export async function request(method: Method, url: string, data: object, additio
             url: url,
             data: data,
             headers: {
-                "Access-Control-Allow-Origin": "*",
                 "Authorization": "Bearer " + sessionId || "",
                 ...additionalHeaders
             },
