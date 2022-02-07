@@ -31,6 +31,13 @@ export interface EncryptedNode {
     children: EncryptedNode[];
 }
 
+export interface ShareLink {
+    shareId: string;
+    iv: Hex;
+    encryptedNodeKey: Hex;
+    encryptedShareKey: Hex;
+}
+
 export interface MetaData {
     name: string;
     [key: string]: any;
@@ -46,6 +53,7 @@ export interface Node {
     ref: string;
     parentKey: Hex;
     children: Node[];
+    shareLink?: ShareLink;
 }
 
 export interface Session {
@@ -146,7 +154,7 @@ function encrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: st
  * @param {Hex}         str             String to decrypt
  * @return {string}                     Decrypted string
  */
-function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: Hex): string {
+export function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: Hex): string {
     const decipher = forge.cipher.createDecipher(operation, forge.util.hexToBytes(key));
     decipher.start({ iv: iv });
     decipher.update(forge.util.createBuffer(forge.util.hexToBytes(str)));
@@ -465,6 +473,45 @@ export async function createFolder(name: string, containingFolderID: number, par
     });
 
     return response.status === "SUCCESS";
+}
+
+
+/**
+ * Node sharing by link process
+ * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
+ *
+ * @param {Node}            node            Node to share.
+ * @param {string}          apiUrl          API URL.
+ * @return {string | null}                  Share Link path, or null if request failed
+ */
+export async function createNodeShareLink(node: Node, apiUrl: string): Promise<ShareLink | null> {
+
+    // Generate Share Key (256 bits)
+    const shareKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
+
+    // Generate initialization vector (128 bits)
+    const iv = forge.random.getBytesSync(16);
+
+    // Generate Encrypted Keys
+    const encryptedNodeKey = encrypt("AES-CTR", shareKey, iv, node.nodeKey);
+    const encryptedShareKey = encrypt("AES-CTR", sessionStorage.getItem("masterKey") || "", iv, node.nodeKey);
+
+    const response = await request("POST", `${apiUrl}/link`, {
+        nodeId: node.id,
+        iv: forge.util.bytesToHex(iv),
+        encryptedNodeKey: encryptedNodeKey,
+        encryptedShareKey: encryptedShareKey
+    });
+
+    if (response.status !== "SUCCESS")
+        return null;
+
+    return {
+        shareId: response.data.shareId,
+        iv: forge.util.bytesToHex(iv),
+        encryptedNodeKey: encryptedNodeKey,
+        encryptedShareKey: encryptedShareKey
+    }
 }
 
 

@@ -28,7 +28,7 @@ function CreateFolderModal(props: Props): JSX.Element {
                             }
                             props.closeCallback();
                         }}>
-                            <TextInput ref={nameRef} type="text" label="Folder name" name="folder-name" required={true} validator={(str: string) => /^[0-9a-zA-Z-_àéèêëîïÀÉÈÊËÎÏçÇ]{1,32}$/.test(str)} />
+                            <TextInput ref={nameRef} type="text" label="Folder name" name="folder-name" required={true} validator={(str: string) => /^[0-9a-zA-Z-_àéèêëîïÀÉÈÊËÎÏçÇ ]{1,32}$/.test(str)} />
 
                             <div className="pt-8 text-center space-x-4">
                                 <Button size="medium" type="regular" colour="green" action="submit">Create folder</Button>

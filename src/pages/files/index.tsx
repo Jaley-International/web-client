@@ -18,11 +18,21 @@ import Header from "components/sections/Header";
 import DeleteFileModal from "../../components/containers/modals/DeleteFileModal";
 import CreateFolderModal from "../../components/containers/modals/CreateFolderModal";
 import OverwriteFileModal from "../../components/containers/modals/OverwriteFileModal";
-import {createFolder, decryptFileSystem, downloadFile, EncryptedNode, Node, uploadFile} from "../../util/security";
+import {
+    createFolder,
+    createNodeShareLink,
+    decryptFileSystem,
+    downloadFile,
+    EncryptedNode,
+    Node,
+    uploadFile
+} from "../../util/security";
 import {GetStaticProps, InferGetStaticPropsType} from "next";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
 import {request} from "../../util/communication";
+import ShareLinkModal from "../../components/containers/modals/ShareLinkModal";
+import {Hex} from "node-forge";
 
 function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
 
@@ -34,6 +44,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
     const [showOverwriteModal, setShowOverwriteModal] = useState<boolean>(false);
     const [showCreateFolderModal, setShowCreateFolderModal] = useState<boolean>(false);
+    const [showShareLinkModal, setShowShareLinkModal] = useState<boolean>(false);
     const [modalNodeTarget, setModalNodeTarget] = useState<Node | null>(null);
 
     const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -167,7 +178,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                                     <div className="grid content-center leading-4">
                                                         <span className="text-txt-heading font-semibold text-2xs">{node.metaData.name}</span>
                                                         <span
-                                                            className="text-txt-body-muted font-light text-4xs">PDF Document</span>
+                                                            className="text-txt-body-muted font-light text-4xs">{node.type === "FILE" ? "File" : "Folder"}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -204,7 +215,24 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                                         <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={async () => {
                                                             await downloadFile(node, apiUrl, addToast);
                                                         }}/>
-                                                        <ContextMenuItem name="Share" icon={faShareAlt} action={() => alert("TODO File sharing")}/>
+                                                        <ContextMenuItem name="Share" icon={faShareAlt} action={async () => {
+
+                                                            const response = await request("GET", `${apiUrl}/link/${node.id}`, {});
+                                                            if (response.status !== "SUCCESS")
+                                                                return;
+
+                                                            if (response.data.links.length === 0) {
+                                                                const shareLink = await createNodeShareLink(node, apiUrl);
+                                                                if (shareLink)
+                                                                    node.shareLink = shareLink;
+                                                            } else {
+                                                                node.shareLink = response.data.links[0];
+                                                            }
+
+
+                                                            setModalNodeTarget(node);
+                                                            setShowShareLinkModal(true);
+                                                        }}/>
                                                         <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => alert("TODO Permission modal")}/>
                                                         <ContextMenuItem name="Lock file" icon={faLock} action={() => alert("TODO File locking")}/>
                                                         <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
@@ -228,7 +256,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                     </div>
 
                 </div>
-                {showDeleteModal && modalNodeTarget !== null &&
+                {showDeleteModal && modalNodeTarget &&
                     <DeleteFileModal node={modalNodeTarget} closeCallback={() => {
                         setShowDeleteModal(false);
                         setModalNodeTarget(null);
@@ -243,7 +271,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                         await fetchFilesystem();
                     }}/>
                 }
-                {showOverwriteModal && modalNodeTarget !== null &&
+                {showOverwriteModal && modalNodeTarget &&
                     <OverwriteFileModal node={modalNodeTarget} closeCallback={() => {
                         setShowOverwriteModal(false);
                         setModalNodeTarget(null);
@@ -258,6 +286,9 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                             addToast({type: "error", title: "Error when creating folder", message: `Could not create folder ${name}.`});
                         await fetchFilesystem();
                     }} />
+                }
+                {showShareLinkModal && modalNodeTarget && modalNodeTarget.shareLink &&
+                    <ShareLinkModal closeCallback={() => setShowShareLinkModal(false)} sharelink={modalNodeTarget.shareLink} />
                 }
             </div>
             <ToastPortal ref={toastRef}/>
