@@ -1,9 +1,10 @@
-import File from "../../../model/File";
+import {Node} from "../../../util/security";
 import ModalHeader from "./subcomponents/ModalHeader";
 import Button from "../../buttons/Button";
 
 interface Props {
-    file: File;
+    node: Node;
+    submitCallback: () => void;
     closeCallback: () => void;
 }
 
@@ -16,13 +17,12 @@ function DeleteFileModal(props: Props): JSX.Element {
                     <ModalHeader title={`File deletion confirmation`} className="text-center" />
                     <div className="py-8 px-20">
                         <p className="text-txt text-center">
-                            Are you sure you want to delete &quot;<span className="font-semibold">{props.file.filename}</span>&quot; ?<br />
+                            Are you sure you want to delete &quot;<span className="font-semibold">{props.node.metaData.name}</span>&quot; ?<br />
                             This process cannot be reversed.
                         </p>
                         <div className="pt-8 text-center space-x-4">
                             <Button size="medium" type="regular" colour="red" onClick={() => {
-                                // TODO File deletion
-                                alert("TODO : File deletion");
+                                props.submitCallback();
                                 props.closeCallback();
                             }}>Confirm deletion</Button>
                             <Button size="medium" type="regular" colour="dark" onClick={props.closeCallback}>Cancel</Button>

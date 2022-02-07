@@ -14,16 +14,25 @@ import Button from "../../components/buttons/Button";
 import Card from "../../components/containers/Card";
 import OptionsButton from "../../components/buttons/OptionsButton";
 import ContextMenuItem from "../../components/containers/contextmenu/ContextMenuItem";
-import File from "../../model/File";
 import Header from "components/sections/Header";
 import DeleteFileModal from "../../components/containers/modals/DeleteFileModal";
 import CreateFolderModal from "../../components/containers/modals/CreateFolderModal";
 import OverwriteFileModal from "../../components/containers/modals/OverwriteFileModal";
-import {decryptFileSystem, downloadFile, EncryptedNode, Node, uploadFile} from "../../util/security";
+import {
+    createFolder,
+    createNodeShareLink,
+    decryptFileSystem,
+    downloadFile,
+    EncryptedNode,
+    Node,
+    uploadFile
+} from "../../util/security";
 import {GetStaticProps, InferGetStaticPropsType} from "next";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
 import {request} from "../../util/communication";
+import ShareLinkModal from "../../components/containers/modals/ShareLinkModal";
+import {Hex} from "node-forge";
 
 function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
 
@@ -35,13 +44,14 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
     const [showOverwriteModal, setShowOverwriteModal] = useState<boolean>(false);
     const [showCreateFolderModal, setShowCreateFolderModal] = useState<boolean>(false);
-    const [modalFileTarget, setModalFileTarget] = useState<File | null>(null);
+    const [showShareLinkModal, setShowShareLinkModal] = useState<boolean>(false);
+    const [modalNodeTarget, setModalNodeTarget] = useState<Node | null>(null);
 
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const fetchFilesystem = async () => {
-        const response = await request("GET", `${apiUrl}/filesystems`, {});
+        const response = await request("GET", `${apiUrl}/filesystem`, {});
         if (response.status === "SUCCESS")
             setRawFilesystem(response.data);
         else
@@ -76,7 +86,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
 
     useEffect(() => {
         if (rawFilesystem) {
-            const decrypted = decryptFileSystem(rawFilesystem as unknown as EncryptedNode[]);
+            const decrypted = decryptFileSystem(rawFilesystem as unknown as EncryptedNode);
             if (decrypted)
                 setFilesystem(decrypted);
             else
@@ -168,7 +178,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                                     <div className="grid content-center leading-4">
                                                         <span className="text-txt-heading font-semibold text-2xs">{node.metaData.name}</span>
                                                         <span
-                                                            className="text-txt-body-muted font-light text-4xs">PDF Document</span>
+                                                            className="text-txt-body-muted font-light text-4xs">{node.type === "FILE" ? "File" : "Folder"}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -205,15 +215,32 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                                         <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={async () => {
                                                             await downloadFile(node, apiUrl, addToast);
                                                         }}/>
-                                                        <ContextMenuItem name="Share" icon={faShareAlt} action={() => alert("TODO File sharing")}/>
+                                                        <ContextMenuItem name="Share" icon={faShareAlt} action={async () => {
+
+                                                            const response = await request("GET", `${apiUrl}/link/${node.id}`, {});
+                                                            if (response.status !== "SUCCESS")
+                                                                return;
+
+                                                            if (response.data.links.length === 0) {
+                                                                const shareLink = await createNodeShareLink(node, apiUrl);
+                                                                if (shareLink)
+                                                                    node.shareLink = shareLink;
+                                                            } else {
+                                                                node.shareLink = response.data.links[0];
+                                                            }
+
+
+                                                            setModalNodeTarget(node);
+                                                            setShowShareLinkModal(true);
+                                                        }}/>
                                                         <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => alert("TODO Permission modal")}/>
                                                         <ContextMenuItem name="Lock file" icon={faLock} action={() => alert("TODO File locking")}/>
                                                         <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
-                                                            setModalFileTarget(new File(0, "Creditor bank details.pdf"));
+                                                            setModalNodeTarget(node);
                                                             setShowOverwriteModal(true);
                                                         }}/>
                                                         <ContextMenuItem name="Delete" icon={faTimesCircle} action={() => {
-                                                            setModalFileTarget(new File(0, "Creditor bank details.pdf"));
+                                                            setModalNodeTarget(node);
                                                             setShowDeleteModal(true);
                                                         }}/>
                                                     </OptionsButton>
@@ -229,20 +256,39 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                     </div>
 
                 </div>
-                {showDeleteModal && modalFileTarget !== null &&
-                    <DeleteFileModal file={modalFileTarget} closeCallback={() => {
+                {showDeleteModal && modalNodeTarget &&
+                    <DeleteFileModal node={modalNodeTarget} closeCallback={() => {
                         setShowDeleteModal(false);
-                        setModalFileTarget(null);
+                        setModalNodeTarget(null);
+                    }} submitCallback={async () => {
+                        const response = await request("DELETE", `${apiUrl}/filesystem/`, {
+                            nodeId: modalNodeTarget.id
+                        });
+                        if (response.status === "SUCCESS")
+                            addToast({type: "success", title: "File deleted", message: "File deleted successfully."});
+                        else
+                            addToast({type: "error", title: "Could not delete file", message: "An unknown error occurred while deleting the file."});
+                        await fetchFilesystem();
                     }}/>
                 }
-                {showOverwriteModal && modalFileTarget !== null &&
-                    <OverwriteFileModal file={modalFileTarget} closeCallback={() => {
+                {showOverwriteModal && modalNodeTarget &&
+                    <OverwriteFileModal node={modalNodeTarget} closeCallback={() => {
                         setShowOverwriteModal(false);
-                        setModalFileTarget(null);
+                        setModalNodeTarget(null);
                     }}/>
                 }
                 {showCreateFolderModal &&
-                    <CreateFolderModal closeCallback={() => setShowCreateFolderModal(false)} apiUrl={apiUrl} addToast={addToast} parentId={filesystem?.id || 0} />
+                    <CreateFolderModal closeCallback={() => setShowCreateFolderModal(false)} submitCallback={async (name: string) => {
+                        const success = filesystem && await createFolder(name, filesystem.id, "abc", apiUrl);
+                        if (success)
+                            addToast({type: "success", title: "Folder created", message: `Folder ${name} created successfully.`});
+                        else
+                            addToast({type: "error", title: "Error when creating folder", message: `Could not create folder ${name}.`});
+                        await fetchFilesystem();
+                    }} />
+                }
+                {showShareLinkModal && modalNodeTarget && modalNodeTarget.shareLink &&
+                    <ShareLinkModal closeCallback={() => setShowShareLinkModal(false)} sharelink={modalNodeTarget.shareLink} />
                 }
             </div>
             <ToastPortal ref={toastRef}/>
@@ -254,7 +300,7 @@ export const getStaticProps: GetStaticProps = async () => {
 
     // Requesting file system
     let filesystem = [];
-    const response = await request("GET", `${process.env.PEC_CLIENT_API_URL}/filesystems`, {});
+    const response = await request("GET", `${process.env.PEC_CLIENT_API_URL}/filesystem`, {});
     if (response.status === "SUCCESS")
         filesystem = response.data;
 

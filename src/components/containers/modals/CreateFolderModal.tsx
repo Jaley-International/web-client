@@ -1,15 +1,11 @@
 import ModalHeader from "./subcomponents/ModalHeader";
 import Button from "../../buttons/Button";
 import TextInput from "../../inputs/TextInput";
-import {createFolder} from "../../../util/security";
 import {useRef} from "react";
-import {ToastProps} from "../../toast/Toast";
 
 interface Props {
     closeCallback: () => void;
-    apiUrl: string;
-    addToast: (toast: ToastProps) => void;
-    parentId: number;
+    submitCallback: (name:string) => void;
 }
 
 function CreateFolderModal(props: Props): JSX.Element {
@@ -28,15 +24,11 @@ function CreateFolderModal(props: Props): JSX.Element {
                             e.preventDefault();
                             if (nameRef.current) {
                                 const name = nameRef.current.value;
-                                const success = await createFolder(name, props.parentId, "abc", props.apiUrl);
-                                if (success)
-                                    props.addToast({type: "success", title: "Folder created", message: `Folder ${name} created successfully.`});
-                                else
-                                    props.addToast({type: "error", title: "Error when creating folder", message: `Could not create folder ${name}.`});
+                                props.submitCallback(name);
                             }
                             props.closeCallback();
                         }}>
-                            <TextInput ref={nameRef} type="text" label="Folder name" name="folder-name" required={true} validator={(str: string) => /^[0-9a-zA-Z-_àéèêëîïÀÉÈÊËÎÏçÇ]{1,32}$/.test(str)} />
+                            <TextInput ref={nameRef} type="text" label="Folder name" name="folder-name" required={true} validator={(str: string) => /^[0-9a-zA-Z-_àéèêëîïÀÉÈÊËÎÏçÇ ]{1,32}$/.test(str)} />
 
                             <div className="pt-8 text-center space-x-4">
                                 <Button size="medium" type="regular" colour="green" action="submit">Create folder</Button>

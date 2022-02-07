@@ -3,10 +3,7 @@ import assert from "assert";
 import {request} from "./communication";
 import {setCookies} from "cookies-next";
 import file from "../model/File";
-import {Simulate} from "react-dom/test-utils";
-import encrypted = Simulate.encrypted;
 import {ToastProps} from "../components/toast/Toast";
-import {node} from "prop-types";
 
 
 // TODO : Change instance ID to be unique for each instance
@@ -34,6 +31,13 @@ export interface EncryptedNode {
     children: EncryptedNode[];
 }
 
+export interface ShareLink {
+    shareId: string;
+    iv: Hex;
+    encryptedNodeKey: Hex;
+    encryptedShareKey: Hex;
+}
+
 export interface MetaData {
     name: string;
     [key: string]: any;
@@ -49,6 +53,7 @@ export interface Node {
     ref: string;
     parentKey: Hex;
     children: Node[];
+    shareLink?: ShareLink;
 }
 
 export interface Session {
@@ -149,7 +154,7 @@ function encrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: st
  * @param {Hex}         str             String to decrypt
  * @return {string}                     Decrypted string
  */
-function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: Hex): string {
+export function decrypt(operation: "AES-CTR" | "AES-GCM", key: Hex, iv: string, str: Hex): string {
     const decipher = forge.cipher.createDecipher(operation, forge.util.hexToBytes(key));
     decipher.start({ iv: iv });
     decipher.update(forge.util.createBuffer(forge.util.hexToBytes(str)));
@@ -352,7 +357,7 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
 
     const fileSubmitResponse = await request(
         "POST",
-        `${apiUrl}/filesystems/content`,
+        `${apiUrl}/filesystem/content`,
         formData,
         {"Content-Type": "multipart/form-data; "});
     if (fileSubmitResponse.status !== "SUCCESS")
@@ -376,7 +381,7 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
     const parentEncryptedKey = "abc";
 
     // Submitting file data to the API
-    const metadataSubmitResponse = await request("POST", `${apiUrl}/filesystems/file`, {
+    const metadataSubmitResponse = await request("POST", `${apiUrl}/filesystem/file`, {
         ref: ref,
         iv: forge.util.bytesToHex(iv),
         tag: tag,
@@ -400,7 +405,7 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
  */
 export async function downloadFile(node: Node, apiUrl: string, addToast: (toast: ToastProps) => void): Promise<void> {
 
-    const response = await request("GET", `${apiUrl}/filesystems/content/${node.id}`, {}, {
+    const response = await request("GET", `${apiUrl}/filesystem/content/${node.id}`, {}, {
         "Content-Encoding": "identity"
     }, {
         responseType: "arraybuffer"
@@ -458,11 +463,13 @@ export async function createFolder(name: string, containingFolderID: number, par
     // Compute Encrypted Node Key
     const encryptedNodeKey = encrypt("AES-CTR", sessionStorage.masterKey, iv, nodeKey);
 
-    const response = await request("POST", `${apiUrl}/filesystems/root`, {
+    const response = await request("POST", `${apiUrl}/filesystem/folder`, {
         iv: forge.util.bytesToHex(iv),
         tag: "",
         encryptedKey: encryptedNodeKey,
-        encryptedMetadata: encryptedMetadata
+        encryptedMetadata: encryptedMetadata,
+        encryptedParentKey: "abc",
+        parentId: containingFolderID
     });
 
     return response.status === "SUCCESS";
@@ -470,16 +477,51 @@ export async function createFolder(name: string, containingFolderID: number, par
 
 
 /**
- * Decrypts the file system
+ * Node sharing by link process
+ * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
  *
- * @param {EncryptedNode[]} rawFilesystem   File system to decrypted
- * @return {Node | null}                    Decrypted file system
+ * @param {Node}            node            Node to share.
+ * @param {string}          apiUrl          API URL.
+ * @return {string | null}                  Share Link path, or null if request failed
  */
-export function decryptFileSystem(rawFilesystem: EncryptedNode[]): Node | null {
-    if (rawFilesystem.length !== 1)
+export async function createNodeShareLink(node: Node, apiUrl: string): Promise<ShareLink | null> {
+
+    // Generate Share Key (256 bits)
+    const shareKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
+
+    // Generate initialization vector (128 bits)
+    const iv = forge.random.getBytesSync(16);
+
+    // Generate Encrypted Keys
+    const encryptedNodeKey = encrypt("AES-CTR", shareKey, iv, node.nodeKey);
+    const encryptedShareKey = encrypt("AES-CTR", sessionStorage.getItem("masterKey") || "", iv, node.nodeKey);
+
+    const response = await request("POST", `${apiUrl}/link`, {
+        nodeId: node.id,
+        iv: forge.util.bytesToHex(iv),
+        encryptedNodeKey: encryptedNodeKey,
+        encryptedShareKey: encryptedShareKey
+    });
+
+    if (response.status !== "SUCCESS")
         return null;
 
-    const filesystem = rawFilesystem[0];
+    return {
+        shareId: response.data.shareId,
+        iv: forge.util.bytesToHex(iv),
+        encryptedNodeKey: encryptedNodeKey,
+        encryptedShareKey: encryptedShareKey
+    }
+}
+
+
+/**
+ * Decrypts the file system
+ *
+ * @param {EncryptedNode}   filesystem      File system to decrypted
+ * @return {Node | null}                    Decrypted file system
+ */
+export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
 
     const decryptNode = (encryptedNode: EncryptedNode, masterKey: Hex): Node => {
         const iv = forge.util.hexToBytes(encryptedNode.iv);
@@ -500,7 +542,17 @@ export function decryptFileSystem(rawFilesystem: EncryptedNode[]): Node | null {
     try {
         // TODO decrypt multiple depth
 
-        let decryptedFilesystem = decryptNode(filesystem, sessionStorage.getItem("masterKey") || "");
+        let decryptedFilesystem: Node = {
+            id: filesystem.id,
+            iv: "",
+            tag: "",
+            nodeKey: "",
+            metaData: {name: "root"},
+            type: "FOLDER",
+            ref: "",
+            parentKey: "",
+            children: []
+        };
 
         for (const encryptedChild of filesystem.children) {
             decryptedFilesystem.children.push(decryptNode(
