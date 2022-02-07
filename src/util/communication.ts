@@ -27,7 +27,7 @@ export async function request(method: Method, url: string, data: object, additio
             url: url,
             data: data,
             headers: {
-                "Access-Control-Allow-Origin": url,
+                "Access-Control-Allow-Origin": "*",
                 "Authorization": "Bearer " + sessionId || "",
                 ...additionalHeaders
             },

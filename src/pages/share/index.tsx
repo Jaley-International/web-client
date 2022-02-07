@@ -3,19 +3,40 @@ import Card from "../../components/containers/Card";
 import {Heading2, Heading3} from "../../components/text/Headings";
 import Link from "next/link";
 import Button from "../../components/buttons/Button";
-import React from "react";
+import React, {useEffect, useState} from "react";
 import Badge from "../../components/Badge";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {faCloud, faDownload, faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
+import {base64UrlToHex} from "../../util/util";
+import {request} from "../../util/communication";
+import {GetStaticProps, InferGetStaticPropsType} from "next";
+import {ShareLink} from "../../util/security";
 
-function SharePage(): JSX.Element {
+function SharePage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
+
+    const [sharelink, setSharelink] = useState<ShareLink | null>(null);
+    const [shareKey, setSharekey] = useState<string | null>(null);
 
     const router = useRouter();
-    const {id} = router.query;
+    const params = router.asPath.split("#");
 
-    const key = router.asPath.split("#").length == 2 ? router.asPath.split("#").pop() : null;
+    useEffect(() => {
 
-    if (key !== null) {
+        let id = null;
+        if (params && params.length == 3) {
+            id = base64UrlToHex(params[1]);
+            setSharekey(base64UrlToHex(params[2]));
+
+            request("GET", `${apiUrl}/link/${id}`, {}).then((response) => {
+                if (response.status === "SUCCESS")
+                    setSharelink(response.data);
+            });
+        }
+    }, []);
+
+
+
+    if (shareKey && sharelink) {
         return (
             <div className="h-screen bg-bg-light">
                 <Link href="/" passHref>
@@ -82,5 +103,13 @@ function SharePage(): JSX.Element {
     }
 
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+    return {
+        props: {
+            apiUrl: process.env.PEC_CLIENT_API_URL
+        }
+    };
+};
 
 export default SharePage;
