@@ -10,10 +10,11 @@ import {faCloud, faDownload, faExclamationTriangle} from "@fortawesome/free-soli
 import {base64UrlToHex} from "../../util/util";
 import {request} from "../../util/communication";
 import {GetStaticProps, InferGetStaticPropsType} from "next";
-import {ShareLink, Node, EncryptedNode, decrypt, downloadFile} from "../../util/security";
+import {ShareLink, Node, EncryptedNode, downloadFile} from "../../util/processes";
 import forge from "node-forge";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
+import {decrypt} from "../../util/security";
 
 function SharePage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
 
@@ -34,7 +35,7 @@ function SharePage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JS
             id = base64UrlToHex(params[1]);
             const shareKey = base64UrlToHex(params[2]);
 
-            request("GET", `${apiUrl}/link/node/${id}`, {}).then((response) => {
+            request("GET", `${apiUrl}/links/${id}/node`, {}).then((response) => {
 
                 if (response.status === "SUCCESS") {
 
@@ -92,8 +93,13 @@ function SharePage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JS
                             <div className="p-12 bg-blue-soft rounded-xl">
                                 <div className="w-full h-full flex justify-center">
                                     <Button className="mx-auto my-auto w-32" size="medium" type="regular" colour="blue" onClick={async () => {
-                                        console.log(node)
-                                        await downloadFile(node, apiUrl, addToast);
+                                        const status = await downloadFile(node, apiUrl);
+                                        if (status === "ERROR_FETCH")
+                                            addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
+                                        else if (status === "ERROR_DECRYPT")
+                                            addToast({type: "error", title: "Failed to decrypt", message: "An error occurred while decrypting the file."});
+                                        else if (status !== "SUCCESS")
+                                            addToast({type: "error", title: "Failed to download", message: "An unexpected error occurred while downloading the file."});
                                     }}>
                                         <span><FontAwesomeIcon icon={faDownload} />&nbsp;&nbsp;Download</span>
                                     </Button>

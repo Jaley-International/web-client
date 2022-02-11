@@ -26,7 +26,7 @@ import {
     EncryptedNode,
     Node,
     uploadFile
-} from "../../util/security";
+} from "../../util/processes";
 import {GetStaticProps, InferGetStaticPropsType} from "next";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
@@ -50,9 +50,9 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const fetchFilesystem = async () => {
-        const response = await request("GET", `${apiUrl}/filesystem`, {});
+        const response = await request("GET", `${apiUrl}/file-system`, {});
         if (response.status === "SUCCESS")
-            setRawFilesystem(response.data);
+            setRawFilesystem(response.data.filesystem);
         else
             addToast({type: "error", title: "File system load error", message: "Could not fetch your file system."});
     }
@@ -212,11 +212,17 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                                     <OptionsButton>
                                                         <ContextMenuItem name="Preview" icon={faEye} action={() => alert("TODO File preview")}/>
                                                         <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={async () => {
-                                                            await downloadFile(node, apiUrl, addToast);
+                                                            const status = await downloadFile(node, apiUrl);
+                                                            if (status === "ERROR_FETCH")
+                                                                addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
+                                                            else if (status === "ERROR_DECRYPT")
+                                                                addToast({type: "error", title: "Failed to decrypt", message: "An error occurred while decrypting the file."});
+                                                            else if (status !== "SUCCESS")
+                                                                addToast({type: "error", title: "Failed to download", message: "An unexpected error occurred while downloading the file."});
                                                         }}/>
                                                         <ContextMenuItem name="Share" icon={faShareAlt} action={async () => {
 
-                                                            const response = await request("GET", `${apiUrl}/link/${node.id}`, {});
+                                                            const response = await request("GET", `${apiUrl}/file-system/${node.id}/links`, {});
                                                             if (response.status !== "SUCCESS")
                                                                 return;
 
@@ -260,9 +266,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                         setShowDeleteModal(false);
                         setModalNodeTarget(null);
                     }} submitCallback={async () => {
-                        const response = await request("DELETE", `${apiUrl}/filesystem/`, {
-                            nodeId: modalNodeTarget.id
-                        });
+                        const response = await request("DELETE", `${apiUrl}/file-system/${modalNodeTarget.id}`, {});
                         if (response.status === "SUCCESS")
                             addToast({type: "success", title: "File deleted", message: "File deleted successfully."});
                         else
@@ -299,9 +303,9 @@ export const getStaticProps: GetStaticProps = async () => {
 
     // Requesting file system
     let filesystem = [];
-    const response = await request("GET", `${process.env.PEC_CLIENT_API_URL}/filesystem`, {});
+    const response = await request("GET", `${process.env.PEC_CLIENT_API_URL}/file-system`, {});
     if (response.status === "SUCCESS")
-        filesystem = response.data;
+        filesystem = response.data.filesystem;
 
     return {
         props: {
