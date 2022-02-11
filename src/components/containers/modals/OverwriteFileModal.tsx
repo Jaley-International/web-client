@@ -1,4 +1,4 @@
-import {Node} from "../../../util/security";
+import {Node} from "../../../util/processes";
 import ModalHeader from "./subcomponents/ModalHeader";
 import Button from "../../buttons/Button";
 import FileDropArea from "../../inputs/FileDropArea";

@@ -2,9 +2,10 @@ import ModalHeader from "./subcomponents/ModalHeader";
 import Button from "../../buttons/Button";
 import TextInput from "../../inputs/TextInput";
 import {useRef} from "react";
-import {decrypt, ShareLink} from "../../../util/security";
+import {ShareLink} from "../../../util/processes";
 import forge from "node-forge";
 import {hexToBase64Url} from "../../../util/util";
+import {decrypt} from "../../../util/security";
 
 interface Props {
     sharelink: ShareLink;
