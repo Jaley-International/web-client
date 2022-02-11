@@ -1,5 +1,5 @@
 import {NextRequest, NextResponse} from "next/server";
-import {validateSession} from "../../util/security";
+import {validateSession} from "../../util/processes";
 
 export function middleware(req: NextRequest) {
 

@@ -7,13 +7,12 @@ import TextInput from "../../components/inputs/TextInput";
 import Button from "../../components/buttons/Button";
 import Link from 'next/link';
 import {request} from "../../util/communication";
-import {authenticate} from "../../util/security";
+import {authenticate} from "../../util/processes";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
 import {GetStaticProps, InferGetServerSidePropsType} from "next";
 import {useRouter} from "next/router";
 import {removeCookies} from "cookies-next";
-import user from "../../model/User";
 
 function LoginPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
 
@@ -109,28 +108,16 @@ function LoginPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>)
                                 const username = usernameRef.current?.value as string;
                                 const password = passwordRef.current?.value as string;
 
-                                // Salt request
-                                updateStatus("Requesting salt...");
-                                const response = await request("GET", `${apiUrl}/users/salt/${username}`, {});
-                                if (response.status === "SUCCESS") {
-                                    const salt = response.data.salt;
-
-                                    // Authentication request
-                                    const result = await authenticate(username, password, salt, apiUrl, updateStatus);
-                                    if (result) {
-                                        updateStatus("Redirecting...");
-                                        addToast({type: "success", title: "Welcome!", message: "Successfully authenticated."});
-                                        setTimeout(() => router.push("/"), 2000);
-                                    } else {
-                                        updateStatus("Login");
-                                        setSubmitting(false);
-                                        addToast({type: "warning", title: "Invalid credentials", message: "Please check your username and password then try again."});
-                                    }
-
+                                // Authentication request
+                                const success = await authenticate(username, password, apiUrl, updateStatus);
+                                if (success) {
+                                    updateStatus("Redirecting...");
+                                    addToast({type: "success", title: "Welcome!", message: "Successfully authenticated."});
+                                    setTimeout(() => router.push("/"), 2000);
                                 } else {
                                     updateStatus("Login");
                                     setSubmitting(false);
-                                    addToast({type: "error", title: "Could not authenticate", message: "An unexpected error occurred. Please try again later."});
+                                    addToast({type: "warning", title: "Invalid credentials", message: "Please check your username and password then try again."});
                                 }
                             }
                         }}>

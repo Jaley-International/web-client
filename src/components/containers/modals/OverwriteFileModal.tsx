@@ -1,10 +1,10 @@
-import File from "../../../model/File";
+import {Node} from "../../../util/processes";
 import ModalHeader from "./subcomponents/ModalHeader";
 import Button from "../../buttons/Button";
 import FileDropArea from "../../inputs/FileDropArea";
 
 interface Props {
-    file: File;
+    node: Node;
     closeCallback: () => void;
 }
 
@@ -17,7 +17,7 @@ function OverwriteFileModal(props: Props): JSX.Element {
                     <ModalHeader title={`File overwriting`} className="text-center" />
                     <div className="py-8 px-20">
                         <p className="text-txt text-center">
-                            You are about to overwrite &quot;<span className="font-semibold">{props.file.filename}</span>&quot;.<br />
+                            You are about to overwrite &quot;<span className="font-semibold">{props.node.metaData.name}</span>&quot;.<br />
                         </p>
                         <form className="pt-10">
                             <FileDropArea />
