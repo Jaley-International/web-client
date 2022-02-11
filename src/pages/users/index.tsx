@@ -11,9 +11,10 @@ import DeleteUserModal from "../../components/containers/modals/DeleteUserModal"
 import User from "../../model/User";
 import OptionsButton from "../../components/buttons/OptionsButton";
 import ContextMenuItem from "../../components/containers/contextmenu/ContextMenuItem";
-import Users from "../../fixtures/Users";
+import {GetStaticProps, InferGetStaticPropsType} from "next";
+import {request} from "../../util/communication";
 
-function UserList(): JSX.Element {
+function UserList({users}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
 
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
     const [modalUserTarget, setModalUserTarget] = useState<User | null>(null);
@@ -53,11 +54,12 @@ function UserList(): JSX.Element {
                             </tr>
                             </thead>
                             <tbody className="overflow-y-scroll h-4/6">
-                            {Users.map(user => {
+
+                            {users.map((user: User) => {
                                 return (
-                                    <tr className="border-b border-grey-200" key={user.userId}>
+                                    <tr className="border-b border-grey-200" key={user.username}>
                                         <td className="py-2 px-4">
-                                            <Link href={`/users/${user.userId}`} passHref>
+                                            <Link href={`/users/${user.username}`} passHref>
                                                 <div className="flex space-x-6 cursor-pointer">
                                                     {user.profilePicture ?
                                                         <div className="bg-cover bg-center w-9 h-9 rounded-full -mr-3" style={{backgroundImage: `url(${user.profilePicture})`}}/>
@@ -67,7 +69,8 @@ function UserList(): JSX.Element {
                                                         </div>
                                                     }
                                                     <div className="grid content-center leading-4">
-                                                        <span className="text-txt-heading font-semibold text-2xs">{user.firstName} {user.lastName}</span>
+                                                        {/* TODO replace username by first name and last name */}
+                                                        <span className="text-txt-heading font-semibold text-2xs">{user.username}</span>
                                                         <span className="text-txt-body-muted font-light text-4xs">{user.job}</span>
                                                     </div>
                                                 </div>
@@ -82,7 +85,7 @@ function UserList(): JSX.Element {
                                         <td className="py-2 px-4">
                                             <div className="w-full">
                                                 <OptionsButton>
-                                                    <ContextMenuItem name="View/Edit" icon={faEye} href={`/users/${user.userId}`} />
+                                                    <ContextMenuItem name="View/Edit" icon={faEye} href={`/users/${user.username}`} />
                                                     <ContextMenuItem name="Delete" icon={faTimesCircle} action={() => {
                                                         setModalUserTarget(user);
                                                         setShowDeleteModal(true);
@@ -108,5 +111,15 @@ function UserList(): JSX.Element {
         </div>
     );
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+    const usersListResponse = await request("GET", `${process.env.PEC_CLIENT_API_URL}/users`, {});
+    const users = usersListResponse.data.users;
+    return {
+        props: {
+            users: users
+        }
+    };
+};
 
 export default UserList;
