@@ -20,7 +20,7 @@ function ExpandSessionModal(props: Props): JSX.Element {
             const timer = setInterval(() => setRemaining(expire - Date.now()), 1000);
             return () => clearInterval(timer);
         } else {
-            logoutSession(props.session);
+            logoutSession();
             router.push("/").then(_ => {});
         }
     }, [remaining, setRemaining]);
@@ -44,7 +44,7 @@ function ExpandSessionModal(props: Props): JSX.Element {
                         <div className="pt-8 text-center space-x-4">
                             <Button size="medium" type="regular" colour="orange" onClick={() => alert("TODO Extend session")}>Extend session</Button>
                             <Button size="medium" type="regular" colour="dark" onClick={async () => {
-                                logoutSession(props.session);
+                                logoutSession();
                                 await router.push("/");
                             }}>Logout immediately</Button>
                         </div>

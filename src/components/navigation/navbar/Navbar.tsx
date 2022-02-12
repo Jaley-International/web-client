@@ -1,12 +1,14 @@
 import NavbarItem from "./NavbarItem";
 import {faFile, faFolderOpen, faBell, faUserCircle} from "@fortawesome/free-regular-svg-icons";
-import {faUserShield, faSlidersH, faExchangeAlt} from "@fortawesome/free-solid-svg-icons";
+import {faUserShield, faSlidersH, faSignOutAlt} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCloud} from "@fortawesome/free-solid-svg-icons";
 import {Heading3} from "../../text/Headings";
 import Link from "next/link";
 import {useState} from "react";
 import TransferList from "../../transfers/TransferList";
+import {logoutSession} from "../../../util/processes";
+import {useRouter} from "next/router";
 
 function Navbar(): JSX.Element {
 
@@ -16,6 +18,7 @@ function Navbar(): JSX.Element {
         setShowFileTransfers(prev => !prev);
     }
 
+    const router = useRouter();
 
     return (
         <>
@@ -44,7 +47,14 @@ function Navbar(): JSX.Element {
                 <NavbarItem name="Settings" activeRoutes={[]} icon={faSlidersH} />
                 <NavbarItem name="My&nbsp;account" activeRoutes={[]} icon={faUserCircle} />
 
-                <NavbarItem name="File&nbsp;transfers" active={showFileTransfers} activeRoutes={[]} icon={faExchangeAlt} className="absolute inset-x-0 bottom-2" badge="3" action={() => toggleFileTransfers()} />
+                <NavbarItem name="Logout" active={false} activeRoutes={[]} icon={faSignOutAlt} className="absolute inset-x-0 bottom-2" action={async () => {
+                    logoutSession();
+                    await router.push("/");
+                }} />
+                {
+                    // FIXME File transfer view
+                    /* <NavbarItem name="File&nbsp;transfers" active={showFileTransfers} activeRoutes={[]} icon={faExchangeAlt} className="absolute inset-x-0 bottom-2" badge="3" action={() => toggleFileTransfers()} />*/
+                }
 
             </nav>
         </>

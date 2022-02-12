@@ -431,10 +431,8 @@ export function validateSession(session: Session, apiUrl: string): boolean {
 
 /**
  * Terminates user's session.
- *
- * @param {Session}     session         Session to terminate.
  */
-export function logoutSession(session: Session): void {
+export function logoutSession(): void {
 
     // Clearing cookies and session storage
     removeCookies("session");
