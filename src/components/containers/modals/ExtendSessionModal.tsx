@@ -8,7 +8,7 @@ interface Props {
     session: Session;
 }
 
-function ExpandSessionModal(props: Props): JSX.Element {
+function ExtendSessionModal(props: Props): JSX.Element {
 
     const expire = props.session.exp as number;
     const router = useRouter();
@@ -58,4 +58,4 @@ function ExpandSessionModal(props: Props): JSX.Element {
     );
 }
 
-export default ExpandSessionModal;
+export default ExtendSessionModal;

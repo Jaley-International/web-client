@@ -1,7 +1,7 @@
 import "../styles/tailwind.css";
 import Head from "next/head";
 import App from "next/app";
-import ExpandSessionModal from "../components/containers/modals/ExpandSessionModal";
+import ExtendSessionModal from "../components/containers/modals/ExtendSessionModal";
 import {getCookie} from "cookies-next";
 import {Session} from "../util/processes";
 
@@ -39,7 +39,7 @@ class MyApp extends App {
                     <>
                         <Component {...pageProps} />
                         {session.exp &&
-                            <ExpandSessionModal session={session} />
+                            <ExtendSessionModal session={session} />
                         }
                     </>
                 </main>
