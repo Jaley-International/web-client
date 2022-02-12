@@ -74,9 +74,8 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                 });
             }
         }
-
-        // @ts-ignore
-        fileInputRef.current?.files = null;
+        if (fileInputRef.current)
+            fileInputRef.current.files = null;
     };
 
 

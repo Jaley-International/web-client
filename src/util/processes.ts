@@ -1,7 +1,6 @@
 import forge, {Hex} from "node-forge";
 import {request} from "./communication";
 import {setCookies} from "cookies-next";
-import {ToastProps} from "../components/toast/Toast";
 import {addPadding, decrypt, decryptBuffer, encrypt, encryptBuffer, generateRSAKeyPair, INSTANCE_ID, pbkdf2, rsaPrivateDecrypt, sha256, sha512,} from "./security";
 
 export interface EncryptedNode {
@@ -57,7 +56,13 @@ export interface Session {
  * @param {string}      apiUrl          API URL.
  * @return {string}                     Status code returned by API.
  */
-export async function register(username: string, email: string, password: string, updateStatus: (message: string) => void, apiUrl: string): Promise<string> {
+export async function register(
+    username: string,
+    email: string,
+    password: string,
+    updateStatus: (message: string) => void, apiUrl: string
+): Promise<string> {
+
     // Generate AES MasterKey (256 bits)
     updateStatus("Generating Master Key...");
     const masterKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
@@ -114,7 +119,12 @@ export async function register(username: string, email: string, password: string
  * @param {function}    updateStatus    Function to update the authentication status.
  * @return {boolean}                    True if authentication is successful, false otherwise
  */
-export async function authenticate(username: string, password: string, apiUrl: string, updateStatus: (message: string) => void): Promise<boolean> {
+export async function authenticate(
+    username: string,
+    password: string,
+    apiUrl: string,
+    updateStatus: (message: string) => void
+): Promise<boolean> {
 
     // Salt request
     updateStatus("Requesting salt...");
@@ -175,7 +185,11 @@ export async function authenticate(username: string, password: string, apiUrl: s
  * @param {string}      apiUrl              API URL.
  * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
  */
-export async function uploadFile(file: File, containingFolderID: number, parentFolderKey: Hex, apiUrl: string): Promise<boolean> {
+export async function uploadFile(
+    file: File, containingFolderID: number,
+    parentFolderKey: Hex,
+    apiUrl: string
+): Promise<boolean> {
 
     // Generate Node Key (256 bits)
     const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
@@ -286,7 +300,12 @@ export async function downloadFile(node: Node, apiUrl: string): Promise<string> 
  * @param {string}      apiUrl              API URL.
  * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
  */
-export async function createFolder(name: string, containingFolderID: number, parentFolderKey: Hex, apiUrl: string): Promise<boolean> {
+export async function createFolder(
+    name: string,
+    containingFolderID: number,
+    parentFolderKey: Hex,
+    apiUrl: string
+): Promise<boolean> {
 
     // Generate Node Key (256 bits)
     const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
@@ -333,7 +352,8 @@ export async function createNodeShareLink(node: Node, apiUrl: string): Promise<S
 
     // Generate Encrypted Keys
     const encryptedNodeKey = encrypt("AES-CTR", shareKey, iv, node.nodeKey);
-    const encryptedShareKey = encrypt("AES-CTR", sessionStorage.getItem("masterKey") || "", iv, node.nodeKey);
+    const encryptedShareKey = encrypt("AES-CTR",
+        sessionStorage.getItem("masterKey") || "", iv, node.nodeKey);
 
     const response = await request("POST", `${apiUrl}/links`, {
         nodeId: node.id,
@@ -426,4 +446,16 @@ export function validateSession(session: Session, apiUrl: string): boolean {
     // TODO Session API verification
 
     return true;
+}
+
+/**
+ * Deletes a user account.
+ *
+ * @param {string}      username        Account's username.
+ * @param {string}      apiUrl          API URL.
+ * @return {string}                     Deletion status.
+ */
+export async function deleteAccount(username: string, apiUrl: string) {
+    const response = await request("DELETE", `${apiUrl}/users/${username}`, {});
+    return response.status;
 }
