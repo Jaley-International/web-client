@@ -1,6 +1,6 @@
 import forge, {Hex} from "node-forge";
 import {request} from "./communication";
-import {setCookies} from "cookies-next";
+import {removeCookies, setCookies} from "cookies-next";
 import {ToastProps} from "../components/toast/Toast";
 import {addPadding, decrypt, decryptBuffer, encrypt, encryptBuffer, generateRSAKeyPair, INSTANCE_ID, pbkdf2, rsaPrivateDecrypt, sha256, sha512,} from "./security";
 
@@ -426,4 +426,19 @@ export function validateSession(session: Session, apiUrl: string): boolean {
     // TODO Session API verification
 
     return true;
+}
+
+
+/**
+ * Terminates user's session.
+ *
+ * @param {Session}     session         Session to terminate.
+ */
+export function logoutSession(session: Session): void {
+
+    // Clearing cookies and session storage
+    removeCookies("session");
+    sessionStorage.clear();
+
+    // TODO API Call for session termination
 }

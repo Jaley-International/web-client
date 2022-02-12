@@ -209,6 +209,9 @@ module.exports = {
           "50%": {opacity: 0.7},
           "100%": {opacity: 1}
         }
+      },
+      transitionProperty: {
+        "width": "width"
       }
     },
   },

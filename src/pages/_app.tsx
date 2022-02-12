@@ -1,10 +1,20 @@
 import "../styles/tailwind.css";
 import Head from "next/head";
 import App from "next/app";
+import ExpandSessionModal from "../components/containers/modals/ExpandSessionModal";
+import {getCookie} from "cookies-next";
+import {Session} from "../util/processes";
 
 class MyApp extends App {
     render() {
+
         const {Component, pageProps} = this.props;
+
+        let session: Session = {};
+        const sessionCookie = getCookie("session");
+        if (sessionCookie && typeof sessionCookie === "string")
+            session = JSON.parse(sessionCookie);
+
         return (
             <>
                 <Head>
@@ -26,7 +36,12 @@ class MyApp extends App {
                     <meta property="twitter:image" content="/banner.png" />
                 </Head>
                 <main>
-                    <Component {...pageProps} />
+                    <>
+                        <Component {...pageProps} />
+                        {session.exp &&
+                            <ExpandSessionModal session={session} />
+                        }
+                    </>
                 </main>
             </>
         );
