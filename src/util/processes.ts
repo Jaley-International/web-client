@@ -50,14 +50,13 @@ export interface Session {
  * User registration client-side process
  * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
  *
- * @param {string}      username        New account's username.
- * @param {string}      email           New account's email address.
+ * @param {string}      registerKey     New account's username.
  * @param {string}      password        New account's password.
  * @param {function}    updateStatus    Function to update the registration status.
  * @param {string}      apiUrl          API URL.
  * @return {string}                     Status code returned by API.
  */
-export async function register(username: string, email: string, password: string, updateStatus: (message: string) => void, apiUrl: string): Promise<string> {
+export async function register(registerKey: string, password: string, updateStatus: (message: string) => void, apiUrl: string): Promise<string> {
     // Generate AES MasterKey (256 bits)
     updateStatus("Generating Master Key...");
     const masterKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
@@ -74,7 +73,7 @@ export async function register(username: string, email: string, password: string
 
     // Generate Salt
     updateStatus("Computing Salt...");
-    const salt = sha256(addPadding(username + INSTANCE_ID + clientRandomValue, 128));
+    const salt = sha256(addPadding(registerKey + INSTANCE_ID + clientRandomValue, 128));
 
     // PPF
     updateStatus("Processing password...");
@@ -89,8 +88,7 @@ export async function register(username: string, email: string, password: string
     const hashedAuthenticationKey = sha512(derivedAuthenticationKey);
 
     const registerData = {
-        username: username,
-        email: email,
+        registerKey: registerKey,
         clientRandomValue: clientRandomValue,
         encryptedMasterKey: encryptedMasterKey,
         hashedAuthenticationKey: hashedAuthenticationKey,

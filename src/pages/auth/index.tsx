@@ -128,7 +128,7 @@ function LoginPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>)
                             </Button>
                             <br />
                             <p className="text-center text-txt-body-muted text-2xs">
-                                Need to create an account? <Link href="/auth/register"><a className="text-blue">Register</a></Link>
+                                First time connecting? <Link href="/auth/register"><a className="text-blue">Register</a></Link>
                             </p>
                         </form>
                     </div>

@@ -19,8 +19,14 @@ const TextInput = React.forwardRef((props: Props, ref: LegacyRef<HTMLInputElemen
     const [errored, setErrored] = useState(false);
 
     const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-        if (props.validator)
+        if (props.validator) {
             setErrored(!props.validator(e.target.value));
+            if (props.validator(e.target.value)) {
+                e.target.setCustomValidity("");
+            } else {
+                e.target.setCustomValidity("Invalid input.");
+            }
+        }
         if (props.onChange)
             props.onChange(e);
     }
