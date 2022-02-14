@@ -42,7 +42,6 @@ export async function request(method: Method, url: string, data: object, additio
                     data: response
                 })
         }).catch(reason => {
-            console.log(reason);
             try {
                 const response = JSON.parse(reason.request.response);
                 resolve({
