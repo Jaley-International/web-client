@@ -278,6 +278,10 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                     <OverwriteFileModal node={modalNodeTarget} closeCallback={() => {
                         setShowOverwriteModal(false);
                         setModalNodeTarget(null);
+                    }} submitCallback={(file) => {
+                        if (!file || !filesystem) return;
+                        // TODO Overwrite file
+                        alert("TODO Overwrite file");
                     }}/>
                 }
                 {showCreateFolderModal &&
