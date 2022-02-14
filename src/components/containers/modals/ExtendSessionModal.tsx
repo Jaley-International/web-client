@@ -1,42 +1,47 @@
 import ModalHeader from "./subcomponents/ModalHeader";
 import Button from "../../buttons/Button";
 import {useEffect, useState} from "react";
-import {logoutSession, Session, validateSession} from "../../../util/processes";
+import {logoutSession, Session, validateExtendSession} from "../../../util/processes";
 import {useRouter} from "next/router";
 import {getCookie} from "cookies-next";
 
-interface Props {
-    session: Session;
-}
-
-function ExtendSessionModal(props: Props): JSX.Element {
+function ExtendSessionModal(): JSX.Element {
 
     const router = useRouter();
 
-    const [expire, setExpire] = useState<number>(props.session.exp as number);
-    const [remaining, setRemaining] = useState<number>(expire - Date.now());
+    const getSession = (): Session => {
+        const cookieStr = getCookie("session");
+        if (typeof cookieStr === "string")
+            return JSON.parse(cookieStr);
+        return {};
+    };
+
+    const [expire, setExpire] = useState<number | undefined>(getSession().exp);
+    const [remaining, setRemaining] = useState<number>(Infinity);
 
     useEffect(() => {
         if (remaining > 0) {
-            const timer = setInterval(() => setRemaining(expire - Date.now()), 1000);
+            const timer = setInterval(() => {
+                if (expire) setRemaining(expire - Date.now())
+            }, 1000);
             return () => clearInterval(timer);
         } else {
             logoutSession();
             router.push("/").then(_ => {});
         }
-    }, [expire, remaining, setRemaining]);
+    }, [expire, remaining, setRemaining, router]);
 
     const extendSession = async () => {
-        await validateSession(props.session, "http://localhost:3001/api"); //FIXME use non hard coded variable for api url
-        const cookieStr = getCookie("session");
-        if (typeof cookieStr === "string") {
-            setExpire(JSON.parse(cookieStr).exp);
+        const session = getSession();
+        const newExpire = await validateExtendSession(session, "http://localhost:3001/api"); //FIXME use non hard coded variable for api url
+        if (typeof newExpire === "number") {
+            setRemaining(Infinity);
+            setExpire(newExpire);
         }
     };
 
     if (remaining > 60000)
         return <></>;
-
     return (
         <>
             <div className="z-10 top-0 left-0 absolute w-full h-full bg-white bg-opacity-40 firefox:bg-opacity-40 backdrop-filter backdrop-blur-sm" />

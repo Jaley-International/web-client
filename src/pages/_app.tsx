@@ -2,18 +2,11 @@ import "../styles/tailwind.css";
 import Head from "next/head";
 import App from "next/app";
 import ExtendSessionModal from "../components/containers/modals/ExtendSessionModal";
-import {getCookie} from "cookies-next";
-import {Session} from "../util/processes";
 
 class MyApp extends App {
     render() {
 
         const {Component, pageProps} = this.props;
-
-        let session: Session = {};
-        const sessionCookie = getCookie("session");
-        if (sessionCookie && typeof sessionCookie === "string")
-            session = JSON.parse(sessionCookie);
 
         return (
             <>
@@ -38,9 +31,7 @@ class MyApp extends App {
                 <main>
                     <>
                         <Component {...pageProps} />
-                        {session.exp &&
-                            <ExtendSessionModal session={session} />
-                        }
+                        <ExtendSessionModal />
                     </>
                 </main>
             </>

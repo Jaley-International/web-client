@@ -405,31 +405,32 @@ export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
 }
 
 
-// @ts-ignore
 /**
- * Validates user's session.
+ * Validates user's session and extends its validity.
  *
  * @param {Session}     session         Session to validate.
  * @param {string}      apiUrl          API URL.
- * @return {boolean}                    True if validation is successful, false otherwise
+ * @return {number}                     New session expiration timestamp if validation is successful, -1 otherwise
  */
-export async function validateSession(session: Session, apiUrl: string): Promise<boolean> {
+export async function validateExtendSession(session: Session, apiUrl: string): Promise<number> {
 
     // Session not set
     if (!session.id || !session.exp)
-        return false;
+        return -1;
 
     // Session expired
     if (Date.now() > session.exp)
-        return false;
+        return -1;
 
-    // API request using fetch function because communication.ts/request would not work
+    // FIXME Use request() function instead of fetch
     const response = await fetch(`${apiUrl}/users/session/extend`, {method: "POST", headers: {"Authorization": `Bearer ${session.id}`}});
     const parsed: APIResponse = await response.json();
-    if (parsed.status !== "SUCCESS")
-        return false;
 
-    // modifying session cookie
+    // Session invalidated by API
+    if (parsed.status !== "SUCCESS")
+        return -1;
+
+    // Update session cookie
     setCookies("session", {
         id: session.id,
         exp: parsed.data.expire,
@@ -437,7 +438,7 @@ export async function validateSession(session: Session, apiUrl: string): Promise
         sameSite: true,
         secure: true
     });
-    return true;
+    return parsed.data.expire;
 }
 
 
