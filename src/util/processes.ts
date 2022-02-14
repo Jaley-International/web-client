@@ -24,6 +24,9 @@ export interface ShareLink {
 
 export interface MetaData {
     name: string;
+    type?: string;
+    lastModified?: number;
+    size?: number;
     [key: string]: any;
 }
 

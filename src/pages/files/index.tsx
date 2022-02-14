@@ -4,9 +4,16 @@ import {
     faUserFriends,
     faCloudDownloadAlt,
     faShareAlt,
-    faUsersCog, faFileImport, faFileUpload, faFolderPlus, faLock
+    faUsersCog, faFileImport, faFileUpload, faFolderPlus, faLock, faFolder
 } from "@fortawesome/free-solid-svg-icons";
-import {faFile, faFileWord, faCalendar, faEye, faTimesCircle} from "@fortawesome/free-regular-svg-icons";
+import {
+    faFile,
+    faCalendar,
+    faEye,
+    faTimesCircle,
+    faFileAlt,
+    faFileAudio, faFileImage, faFileVideo, faFilePdf
+} from "@fortawesome/free-regular-svg-icons";
 import React, {useEffect, useRef, useState} from "react";
 import Breadcrumb from "../../components/navigation/breadcrumb/Breadcrumb";
 import Navbar from "../../components/navigation/navbar/Navbar";
@@ -32,6 +39,8 @@ import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
 import {request} from "../../util/communication";
 import ShareLinkModal from "../../components/containers/modals/ShareLinkModal";
+import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import {capitalize, formatBytes} from "../../util/util";
 
 function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
 
@@ -57,6 +66,22 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
             addToast({type: "error", title: "File system load error", message: "Could not fetch your file system."});
     }
 
+    const [rawFilesystem, setRawFilesystem] = useState<EncryptedNode>(fs)
+    const [filesystem, setFilesystem] = useState<Node | null>(null);
+
+    useEffect(() => {
+        if (rawFilesystem) {
+            const decrypted = decryptFileSystem(rawFilesystem as unknown as EncryptedNode);
+            if (decrypted)
+                setFilesystem(decrypted);
+            else
+                addToast({type: "error", title: "File system decryption error", message: "Could not decrypt your file system."});
+        } else {
+            addToast({type: "error", title: "File system load error", message: "Could not fetch your file system."});
+        }
+    }, [rawFilesystem, setFilesystem]);
+
+
     const processUpload = (files: FileList | null) => {
         if (!files || !filesystem) return;
 
@@ -80,20 +105,33 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
     };
 
 
-    const [rawFilesystem, setRawFilesystem] = useState<EncryptedNode>(fs)
-    const [filesystem, setFilesystem] = useState<Node | null>(null);
+    const nodeToIcon = (node: Node): IconProp => {
+        if (node.type === "FOLDER") return faFolder;
+        if (!node.metaData.type) return faFile;
 
-    useEffect(() => {
-        if (rawFilesystem) {
-            const decrypted = decryptFileSystem(rawFilesystem as unknown as EncryptedNode);
-            if (decrypted)
-                setFilesystem(decrypted);
-            else
-                addToast({type: "error", title: "File system decryption error", message: "Could not decrypt your file system."});
+        const [type, subtype] = node.metaData.type.split(/\//);
+        if (!type || !subtype) return faFile;
+
+        if (type === "text") return faFileAlt;
+        if (type === "image") return faFileImage;
+        if (type === "audio") return faFileAudio;
+        if (type === "video") return faFileVideo;
+        if (subtype === "pdf") return faFilePdf;
+        return faFile;
+    };
+
+
+    const nodeToDescription = (node: Node): string => {
+        if (node.type === "FOLDER") {
+            if (node.children.length === 0) return "Empty folder";
+            return `Folder, ${node.children.length} item${node.children.length >= 2 ? "s" : ""}`;
         } else {
-            addToast({type: "error", title: "File system load error", message: "Could not fetch your file system."});
+            const subtype = node.metaData.type?.split(/\//).pop();
+            const size = ", " + formatBytes(node.metaData.size || 0);
+            return `${capitalize(subtype || "")} file${node.metaData.size ? size : ""}`
         }
-    }, [rawFilesystem, setFilesystem]);
+    }
+
 
     return (
         <>
@@ -153,7 +191,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                     </th>
                                     <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
                                         <FontAwesomeIcon icon={faCalendar}/>
-                                        <span>Upload date</span>
+                                        <span>Last modified</span>
                                     </th>
                                     <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
                                         <FontAwesomeIcon icon={faUserFriends}/>
@@ -166,24 +204,35 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                 </thead>
                                 <tbody className="overflow-y-scroll h-4/6">
 
-                                {filesystem && filesystem.children.map(node => {
+                                {filesystem && filesystem.children
+                                    .sort((a, b) => a.metaData.name.toLowerCase() > b.metaData.name.toLowerCase() ? 1 : -1)
+                                    .sort((a, b) => a.type === "FOLDER" ? (b.type === "FOLDER" ? 0 : -1) : (b.type === "FOLDER" ? 1 : 0))
+                                    .map(node => {
                                     return (
                                         <tr className="border-b border-grey-200" key={node.id}>
                                             <td className="py-2 px-4">
                                                 <div className="flex space-x-3">
                                                     <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                        <FontAwesomeIcon className="m-auto text-silver-dark" icon={faFileWord}/>
+                                                        <FontAwesomeIcon
+                                                            className="m-auto text-silver-dark"
+                                                            icon={nodeToIcon(node)}
+                                                        />
                                                     </div>
                                                     <div className="grid content-center leading-4">
-                                                        <span className="text-txt-heading font-semibold text-2xs">{node.metaData.name}</span>
-                                                        <span
-                                                            className="text-txt-body-muted font-light text-4xs">{node.type === "FILE" ? "File" : "Folder"}</span>
+                                                        <span className="text-txt-heading font-semibold text-2xs">
+                                                            {node.metaData.name}
+                                                        </span>
+                                                        <span className="text-txt-body-muted font-light text-4xs">
+                                                            {nodeToDescription(node)}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="py-2 px-4">
                                             <span className="text-txt-body text-xs">
-                                                September 1, 2021
+                                                {node.metaData.lastModified &&
+                                                    new Date(node.metaData.lastModified).toUTCString()
+                                                }
                                             </span>
                                             </td>
                                             <td className="py-2 px-4">
