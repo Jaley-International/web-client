@@ -1,7 +1,6 @@
 import forge, {Hex} from "node-forge";
-import {request} from "./communication";
+import {APIResponse, request} from "./communication";
 import {removeCookies, setCookies} from "cookies-next";
-import {ToastProps} from "../components/toast/Toast";
 import {addPadding, decrypt, decryptBuffer, encrypt, encryptBuffer, generateRSAKeyPair, INSTANCE_ID, pbkdf2, rsaPrivateDecrypt, sha256, sha512,} from "./security";
 
 export interface EncryptedNode {
@@ -406,6 +405,7 @@ export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
 }
 
 
+// @ts-ignore
 /**
  * Validates user's session.
  *
@@ -413,7 +413,7 @@ export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
  * @param {string}      apiUrl          API URL.
  * @return {boolean}                    True if validation is successful, false otherwise
  */
-export function validateSession(session: Session, apiUrl: string): boolean {
+export async function validateSession(session: Session, apiUrl: string): Promise<boolean> {
 
     // Session not set
     if (!session.id || !session.exp)
@@ -423,8 +423,20 @@ export function validateSession(session: Session, apiUrl: string): boolean {
     if (Date.now() > session.exp)
         return false;
 
-    // TODO Session API verification
+    // API request using fetch function because communication.ts/request would not work
+    const response = await fetch(`${apiUrl}/users/session/extend`, {method: "POST", headers: {"Authorization": `Bearer ${session.id}`}});
+    const parsed: APIResponse = await response.json();
+    if (parsed.status !== "SUCCESS")
+        return false;
 
+    // modifying session cookie
+    setCookies("session", {
+        id: session.id,
+        exp: parsed.data.expire,
+    }, {
+        sameSite: true,
+        secure: true
+    });
     return true;
 }
 

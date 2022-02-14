@@ -1,5 +1,5 @@
 import axios, {AxiosRequestConfig, AxiosRequestHeaders, Method} from "axios";
-import {getCookie, getCookies} from "cookies-next";
+import {getCookie} from "cookies-next";
 
 export interface APIResponse {
     status: string;
@@ -42,6 +42,7 @@ export async function request(method: Method, url: string, data: object, additio
                     data: response
                 })
         }).catch(reason => {
+            console.log(reason);
             try {
                 const response = JSON.parse(reason.request.response);
                 resolve({

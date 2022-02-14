@@ -1,8 +1,9 @@
 import ModalHeader from "./subcomponents/ModalHeader";
 import Button from "../../buttons/Button";
 import {useEffect, useState} from "react";
-import {logoutSession, Session} from "../../../util/processes";
+import {logoutSession, Session, validateSession} from "../../../util/processes";
 import {useRouter} from "next/router";
+import {getCookie} from "cookies-next";
 
 interface Props {
     session: Session;
@@ -10,9 +11,9 @@ interface Props {
 
 function ExtendSessionModal(props: Props): JSX.Element {
 
-    const expire = props.session.exp as number;
     const router = useRouter();
 
+    const [expire, setExpire] = useState<number>(props.session.exp as number);
     const [remaining, setRemaining] = useState<number>(expire - Date.now());
 
     useEffect(() => {
@@ -23,7 +24,15 @@ function ExtendSessionModal(props: Props): JSX.Element {
             logoutSession();
             router.push("/").then(_ => {});
         }
-    }, [remaining, setRemaining]);
+    }, [expire, remaining, setRemaining]);
+
+    const extendSession = async () => {
+        await validateSession(props.session, "http://localhost:3001/api"); //FIXME use non hard coded variable for api url
+        const cookieStr = getCookie("session");
+        if (typeof cookieStr === "string") {
+            setExpire(JSON.parse(cookieStr).exp);
+        }
+    };
 
     if (remaining > 60000)
         return <></>;
@@ -42,7 +51,7 @@ function ExtendSessionModal(props: Props): JSX.Element {
                         </span>
 
                         <div className="pt-8 text-center space-x-4">
-                            <Button size="medium" type="regular" colour="orange" onClick={() => alert("TODO Extend session")}>Extend session</Button>
+                            <Button size="medium" type="regular" colour="orange" onClick={extendSession}>Extend session</Button>
                             <Button size="medium" type="regular" colour="dark" onClick={async () => {
                                 logoutSession();
                                 await router.push("/");
