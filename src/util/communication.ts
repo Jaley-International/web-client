@@ -1,5 +1,5 @@
 import axios, {AxiosRequestConfig, AxiosRequestHeaders, Method} from "axios";
-import {getCookie, getCookies} from "cookies-next";
+import {getCookie} from "cookies-next";
 
 export interface APIResponse {
     status: string;

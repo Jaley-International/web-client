@@ -1,7 +1,6 @@
 import forge, {Hex} from "node-forge";
-import {request} from "./communication";
+import {APIResponse, request} from "./communication";
 import {removeCookies, setCookies} from "cookies-next";
-import {ToastProps} from "../components/toast/Toast";
 import {addPadding, decrypt, decryptBuffer, encrypt, encryptBuffer, generateRSAKeyPair, INSTANCE_ID, pbkdf2, rsaPrivateDecrypt, sha256, sha512,} from "./security";
 
 export interface EncryptedNode {
@@ -407,25 +406,39 @@ export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
 
 
 /**
- * Validates user's session.
+ * Validates user's session and extends its validity.
  *
  * @param {Session}     session         Session to validate.
  * @param {string}      apiUrl          API URL.
- * @return {boolean}                    True if validation is successful, false otherwise
+ * @return {number}                     New session expiration timestamp if validation is successful, -1 otherwise
  */
-export function validateSession(session: Session, apiUrl: string): boolean {
+export async function validateExtendSession(session: Session, apiUrl: string): Promise<number> {
 
     // Session not set
     if (!session.id || !session.exp)
-        return false;
+        return -1;
 
     // Session expired
     if (Date.now() > session.exp)
-        return false;
+        return -1;
 
-    // TODO Session API verification
+    // FIXME Use request() function instead of fetch
+    const response = await fetch(`${apiUrl}/users/session/extend`, {method: "POST", headers: {"Authorization": `Bearer ${session.id}`}});
+    const parsed: APIResponse = await response.json();
 
-    return true;
+    // Session invalidated by API
+    if (parsed.status !== "SUCCESS")
+        return -1;
+
+    // Update session cookie
+    setCookies("session", {
+        id: session.id,
+        exp: parsed.data.expire,
+    }, {
+        sameSite: true,
+        secure: true
+    });
+    return parsed.data.expire;
 }
 
 
