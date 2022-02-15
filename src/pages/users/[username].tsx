@@ -14,13 +14,41 @@ import Badge from "../../components/Badge";
 import {UserAccountType} from "../../model/User";
 import TextInput from "../../components/inputs/TextInput";
 import Select from "../../components/inputs/Select";
+import {GetStaticPaths, GetStaticProps, InferGetStaticPropsType} from "next";
+import {request} from "../../util/communication";
 
 function UserPage(): JSX.Element {
 
     const router = useRouter();
-    const {id} = router.query;
 
-    const user = Users.filter((user) => user.userId.toString() === id)[0];
+    const [user, setUser] = useState<User | null>(null);
+    const [loaded, setLoaded] = useState<boolean>(false);
+
+    const fetchUser = async (username: string) => {
+        const response = await request("GET", `${apiUrl}/users/${username}`, {});
+        if (response.status === "SUCCESS") {
+            const rawUser = response.data.user;
+            //TODO update api response
+            setUser({
+                username: rawUser.username,
+                email: rawUser.email,
+                firstName: rawUser.username,
+                lastName: rawUser.username,
+                profilePicture: null,
+                job: "job",
+                group: "group",
+                accountType: UserAccountType.USER
+            });
+        } else {
+            setUser(null);
+        }
+        setLoaded(true);
+    };
+
+    useEffect(() => {
+        if (!loaded && router.query.username)
+            fetchUser(router.query.username as string).then(_ => {});
+    }, [router.query]);
 
     const firstnameRef = useRef<HTMLInputElement>(null);
     const lastnameRef = useRef<HTMLInputElement>(null);
