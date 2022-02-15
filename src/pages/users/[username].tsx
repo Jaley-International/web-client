@@ -4,20 +4,19 @@ import Link from "next/link";
 import Button from "../../components/buttons/Button";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowLeft, faUser, faUserFriends} from "@fortawesome/free-solid-svg-icons";
-import React, {useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
-import Users from "../../fixtures/Users";
 import Card from "../../components/containers/Card";
 import {Heading2} from "../../components/text/Headings";
 import {faCalendar, faFile, faFileWord} from "@fortawesome/free-regular-svg-icons";
 import Badge from "../../components/Badge";
-import {UserAccountType} from "../../model/User";
+import User, {UserAccountType} from "../../model/User";
 import TextInput from "../../components/inputs/TextInput";
 import Select from "../../components/inputs/Select";
 import {GetStaticPaths, GetStaticProps, InferGetStaticPropsType} from "next";
 import {request} from "../../util/communication";
 
-function UserPage(): JSX.Element {
+function UserPage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
 
     const router = useRouter();
 
@@ -330,5 +329,20 @@ function UserPage(): JSX.Element {
         );
     }
 }
+
+export const getStaticPaths: GetStaticPaths = () => {
+    return {
+        paths: [],
+        fallback: true
+    };
+};
+
+export const getStaticProps: GetStaticProps = () => {
+    return {
+        props: {
+            apiUrl: process.env.PEC_CLIENT_API_URL
+        }
+    };
+};
 
 export default UserPage;
