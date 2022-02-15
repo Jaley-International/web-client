@@ -4,7 +4,7 @@ import {
     faUserFriends,
     faCloudDownloadAlt,
     faShareAlt,
-    faUsersCog, faFileImport, faFileUpload, faFolderPlus, faLock, faFolder
+    faUsersCog, faFileImport, faFileUpload, faFolderPlus, faLock, faFolder, faGripVertical
 } from "@fortawesome/free-solid-svg-icons";
 import {
     faFile,
@@ -55,7 +55,10 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
     const [showShareLinkModal, setShowShareLinkModal] = useState<boolean>(false);
     const [modalNodeTarget, setModalNodeTarget] = useState<Node | null>(null);
 
-    const [isDragging, setIsDragging] = useState<boolean>(false);
+    const [dragNodeOrigin, setDragNodeOrigin] = useState<Node | null>(null);
+    const [dragNodeDest, setDragNodeDest] = useState<Node | null>(null);
+
+    const [isUploadDragging, setIsUploadDragging] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const fetchFilesystem = async () => {
@@ -169,16 +172,19 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                         </div>
                     </Header>
 
-                    <div className={`w-full ${isDragging ? " p-8 border-4 border-blue border-dashed" : "p-9"}`}
+                    <div className={`w-full ${isUploadDragging ? " p-8 border-4 border-blue border-dashed" : "p-9"}`}
                          onDragOver={(e) => {
                              e.preventDefault();
-                             setIsDragging(true);
+                             if (!dragNodeOrigin)
+                                setIsUploadDragging(true);
                          }}
-                         onDragLeave={() => setIsDragging(false)}
+                         onDragLeave={() => setIsUploadDragging(false)}
                          onDrop={(e) => {
                              e.preventDefault();
-                             setIsDragging(false);
-                             processUpload(e.dataTransfer.files);
+                             if (isUploadDragging) {
+                                 setIsUploadDragging(false);
+                                 processUpload(e.dataTransfer.files);
+                             }
                          }}
                     >
                         <Card title="Files" className="pb-2">
@@ -209,9 +215,31 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                     .sort((a, b) => a.type === "FOLDER" ? (b.type === "FOLDER" ? 0 : -1) : (b.type === "FOLDER" ? 1 : 0))
                                     .map(node => {
                                     return (
-                                        <tr className="border-b border-grey-200" key={node.id}>
-                                            <td className="py-2 px-4">
+                                        <tr className={`${dragNodeDest === node ? "border-2 border-blue border-dashed" : "border-b border-grey-200"}`} key={node.id}
+                                                onDragOver={(e) => {
+                                                e.preventDefault();
+                                                if (dragNodeOrigin && node.type === "FOLDER" && dragNodeOrigin !== node)
+                                                    setDragNodeDest(node);
+                                            }}
+                                            onDragLeave={() => setDragNodeDest(null)}
+                                            onDrop={(e) => {
+                                                e.preventDefault();
+                                                if (dragNodeOrigin && dragNodeDest) {
+                                                    // TODO Node drop in folder
+                                                    alert(`TODO Node drop in folder ${dragNodeOrigin.metaData.name} -> ${dragNodeDest.metaData.name}`);
+                                                    setDragNodeDest(null);
+                                                }
+                                            }}
+                                        >
+                                            <td className="py-2 px-4" draggable={true} onDragStart={() => {
+                                                setDragNodeOrigin(node);
+                                            }} onDragEnd={() => {
+                                                setDragNodeOrigin(null);
+                                            }}>
                                                 <div className="flex space-x-3">
+                                                    <div className="grid my-auto cursor-grab font-light">
+                                                        <FontAwesomeIcon icon={faGripVertical} className="text-grey-300" />
+                                                    </div>
                                                     <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
                                                         <FontAwesomeIcon
                                                             className="m-auto text-silver-dark"
@@ -347,7 +375,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                     <ShareLinkModal closeCallback={() => setShowShareLinkModal(false)} sharelink={modalNodeTarget.shareLink} />
                 }
             </div>
-            <ToastPortal ref={toastRef}/>
+            <ToastPortal ref={toastRef} />
         </>
     );
 }

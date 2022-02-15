@@ -212,6 +212,9 @@ module.exports = {
       },
       transitionProperty: {
         "width": "width"
+      },
+      cursor: {
+        "grab": "grab"
       }
     },
   },
