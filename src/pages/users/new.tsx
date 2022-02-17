@@ -8,11 +8,13 @@ import TextInput from "../../components/inputs/TextInput";
 import React, { useRef } from "react";
 import Select from "../../components/inputs/Select";
 import { request } from "../../util/communication";
-import {GetStaticProps, InferGetServerSidePropsType} from "next";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
+import getConfig from "next/config";
 
-function NewUser({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
+function NewUser(): JSX.Element {
+
+    const {publicRuntimeConfig} = getConfig();
 
     const toastRef = useRef<ToastRef>(null);
     const addToast = (toast: ToastProps) => {
@@ -92,7 +94,7 @@ function NewUser({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): 
                             const accessLevel = (accessLevelRef.current as HTMLSelectElement).value;
 
                             const createUserData = { firstname: firstname, lastname: lastname, username: username, email: email, group: group, job: job, accessLevel: accessLevel };
-                            const response = await request("POST", `${apiUrl}/users`, createUserData);
+                            const response = await request("POST", `${publicRuntimeConfig.apiUrl}/users`, createUserData);
 
                             if (response.status === "SUCCESS") {
                                 addToast({type: "success", title: "Account created", message: "User account created successfully."});
@@ -147,13 +149,5 @@ function NewUser({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): 
         </>
     );
 }
-
-export const getStaticProps: GetStaticProps = async () => {
-    return {
-        props: {
-            apiUrl: process.env.PEC_CLIENT_API_URL
-        }
-    };
-};
 
 export default NewUser;

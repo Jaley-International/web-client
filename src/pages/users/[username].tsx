@@ -13,10 +13,12 @@ import Badge from "../../components/Badge";
 import User, {UserAccountType} from "../../model/User";
 import TextInput from "../../components/inputs/TextInput";
 import Select from "../../components/inputs/Select";
-import {GetStaticPaths, GetStaticProps, InferGetStaticPropsType} from "next";
 import {request} from "../../util/communication";
+import getConfig from "next/config";
 
-function UserPage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
+function UserPage(): JSX.Element {
+
+    const {publicRuntimeConfig} = getConfig();
 
     const router = useRouter();
 
@@ -24,7 +26,7 @@ function UserPage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JSX
     const [loaded, setLoaded] = useState<boolean>(false);
 
     const fetchUser = async (username: string) => {
-        const response = await request("GET", `${apiUrl}/users/${username}`, {});
+        const response = await request("GET", `${publicRuntimeConfig.apiUrl}/users/${username}`, {});
         if (response.status === "SUCCESS") {
             const rawUser = response.data.user;
             //TODO update api response
@@ -329,20 +331,5 @@ function UserPage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JSX
         );
     }
 }
-
-export const getStaticPaths: GetStaticPaths = () => {
-    return {
-        paths: [],
-        fallback: true
-    };
-};
-
-export const getStaticProps: GetStaticProps = () => {
-    return {
-        props: {
-            apiUrl: process.env.PEC_CLIENT_API_URL
-        }
-    };
-};
 
 export default UserPage;

@@ -4,8 +4,11 @@ import {useEffect, useState} from "react";
 import {logoutSession, Session, validateExtendSession} from "../../../util/processes";
 import {useRouter} from "next/router";
 import {getCookie} from "cookies-next";
+import getConfig from "next/config";
 
 function ExtendSessionModal(): JSX.Element {
+
+    const {publicRuntimeConfig} = getConfig();
 
     const router = useRouter();
 
@@ -26,18 +29,17 @@ function ExtendSessionModal(): JSX.Element {
             }, 1000);
             return () => clearInterval(timer);
         } else {
-            logoutSession();
-            router.push("/").then(_ => {});
+            logoutSession().then(_ => {});
+            router.push("/").then(_ => {
+            });
         }
     }, [expire, remaining, setRemaining, router]);
 
     const extendSession = async () => {
         const session = getSession();
-        const newExpire = await validateExtendSession(session, "http://localhost:3001/api"); //FIXME use non hard coded variable for api url
-        if (typeof newExpire === "number") {
-            setRemaining(Infinity);
-            setExpire(newExpire);
-        }
+        const newExpire = await validateExtendSession(session, publicRuntimeConfig.apiUrl);
+        setRemaining(Infinity);
+        setExpire(newExpire);
     };
 
     if (remaining > 60000)
@@ -58,7 +60,7 @@ function ExtendSessionModal(): JSX.Element {
                         <div className="pt-8 text-center space-x-4">
                             <Button size="medium" type="regular" colour="orange" onClick={extendSession}>Extend session</Button>
                             <Button size="medium" type="regular" colour="dark" onClick={async () => {
-                                logoutSession();
+                                await logoutSession();
                                 await router.push("/");
                             }}>Logout immediately</Button>
                         </div>

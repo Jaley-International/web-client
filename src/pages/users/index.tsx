@@ -16,8 +16,10 @@ import {request} from "../../util/communication";
 import {deleteAccount} from "../../util/processes";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
+import getConfig from "next/config";
 
-function UserList({initialUsers, apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
+function UserList({initialUsers}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
+    const {publicRuntimeConfig} = getConfig();
 
     const toastRef = useRef<ToastRef>(null);
     const addToast = (toast: ToastProps) => {
@@ -30,7 +32,7 @@ function UserList({initialUsers, apiUrl}: InferGetStaticPropsType<typeof getStat
     const [users, setUsers] = useState<User[]>(initialUsers);
 
     const fetchUsers = async () => {
-        const usersListResponse = await request("GET", `${apiUrl}/users`, {});
+        const usersListResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/users`, {});
         const users = usersListResponse.data.users;
         setUsers(users);
     };
@@ -132,7 +134,7 @@ function UserList({initialUsers, apiUrl}: InferGetStaticPropsType<typeof getStat
                         user={modalUserTarget}
 
                         submitCallback={async () => {
-                            const statusCode = await deleteAccount(modalUserTarget?.username, apiUrl);
+                            const statusCode = await deleteAccount(modalUserTarget?.username);
                             if (statusCode === "SUCCESS") {
                                 await fetchUsers();
                                 addToast({
@@ -168,12 +170,12 @@ function UserList({initialUsers, apiUrl}: InferGetStaticPropsType<typeof getStat
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-    const usersListResponse = await request("GET", `${process.env.PEC_CLIENT_API_URL}/users`, {});
+    const {publicRuntimeConfig} = getConfig();
+    const usersListResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/users`, {});
     const users = usersListResponse.data.users;
     return {
         props: {
-            initialUsers: users,
-            apiUrl: process.env.PEC_CLIENT_API_URL,
+            initialUsers: users
         }
     };
 };

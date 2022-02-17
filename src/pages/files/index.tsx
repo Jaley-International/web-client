@@ -32,8 +32,10 @@ import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
 import {request} from "../../util/communication";
 import ShareLinkModal from "../../components/containers/modals/ShareLinkModal";
+import getConfig from "next/config";
 
-function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
+function FilesPage({fs}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
+    const {publicRuntimeConfig} = getConfig();
 
     const toastRef = useRef<ToastRef>(null);
     const addToast = (toast: ToastProps) => {
@@ -50,7 +52,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const fetchFilesystem = async () => {
-        const response = await request("GET", `${apiUrl}/file-system`, {});
+        const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system`, {});
         if (response.status === "SUCCESS")
             setRawFilesystem(response.data.filesystem);
         else
@@ -64,7 +66,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
             const file = files.item(i);
 
             if (file) {
-                uploadFile(file, filesystem.id, "abc", apiUrl).then(async success => {
+                uploadFile(file, filesystem.id, "abc").then(async success => {
                     if (success) {
                         addToast({type: "success", title: "File uploaded", message: `Your file ${file.name} has been uploaded successfully.`});
                         await fetchFilesystem();
@@ -211,7 +213,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                                     <OptionsButton>
                                                         <ContextMenuItem name="Preview" icon={faEye} action={() => alert("TODO File preview")}/>
                                                         <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={async () => {
-                                                            const status = await downloadFile(node, apiUrl);
+                                                            const status = await downloadFile(node);
                                                             if (status === "ERROR_FETCH")
                                                                 addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
                                                             else if (status === "ERROR_DECRYPT")
@@ -221,18 +223,17 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                                         }}/>
                                                         <ContextMenuItem name="Share" icon={faShareAlt} action={async () => {
 
-                                                            const response = await request("GET", `${apiUrl}/file-system/${node.id}/links`, {});
+                                                            const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/links`, {});
                                                             if (response.status !== "SUCCESS")
                                                                 return;
 
                                                             if (response.data.links.length === 0) {
-                                                                const shareLink = await createNodeShareLink(node, apiUrl);
+                                                                const shareLink = await createNodeShareLink(node);
                                                                 if (shareLink)
                                                                     node.shareLink = shareLink;
                                                             } else {
                                                                 node.shareLink = response.data.links[0];
                                                             }
-
 
                                                             setModalNodeTarget(node);
                                                             setShowShareLinkModal(true);
@@ -265,7 +266,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                         setShowDeleteModal(false);
                         setModalNodeTarget(null);
                     }} submitCallback={async () => {
-                        const response = await request("DELETE", `${apiUrl}/file-system/${modalNodeTarget.id}`, {});
+                        const response = await request("DELETE", `${publicRuntimeConfig.apiUrl}/file-system/${modalNodeTarget.id}`, {});
                         if (response.status === "SUCCESS")
                             addToast({type: "success", title: "File deleted", message: "File deleted successfully."});
                         else
@@ -281,7 +282,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                 }
                 {showCreateFolderModal &&
                     <CreateFolderModal closeCallback={() => setShowCreateFolderModal(false)} submitCallback={async (name: string) => {
-                        const success = filesystem && await createFolder(name, filesystem.id, "abc", apiUrl);
+                        const success = filesystem && await createFolder(name, filesystem.id, "abc");
                         if (success)
                             addToast({type: "success", title: "Folder created", message: `Folder ${name} created successfully.`});
                         else
@@ -299,16 +300,16 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
 }
 
 export const getStaticProps: GetStaticProps = async () => {
+    const {publicRuntimeConfig} = getConfig();
 
     // Requesting file system
     let filesystem = [];
-    const response = await request("GET", `${process.env.PEC_CLIENT_API_URL}/file-system`, {});
+    const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system`, {});
     if (response.status === "SUCCESS")
         filesystem = response.data.filesystem;
 
     return {
         props: {
-            apiUrl: process.env.PEC_CLIENT_API_URL,
             fs: filesystem
         }
     };

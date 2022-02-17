@@ -48,7 +48,7 @@ function Navbar(): JSX.Element {
                 <NavbarItem name="My&nbsp;account" activeRoutes={[]} icon={faUserCircle} />
 
                 <NavbarItem name="Logout" active={false} activeRoutes={[]} icon={faSignOutAlt} className="absolute inset-x-0 bottom-2" action={async () => {
-                    logoutSession();
+                    await logoutSession();
                     await router.push("/");
                 }} />
                 {

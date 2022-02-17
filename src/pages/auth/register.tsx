@@ -11,10 +11,8 @@ import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
 import NewPasswordInput from "../../components/inputs/NewPasswordInput";
 import Link from "next/link";
-import {request} from "../../util/communication";
-import {GetStaticProps, InferGetServerSidePropsType} from "next";
 
-function RegisterPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
+function RegisterPage(): JSX.Element {
 
     const toastRef = useRef<ToastRef>(null);
     const addToast = (toast: ToastProps) => {
@@ -105,7 +103,7 @@ function RegisterPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProp
                                         submitRef.current.innerText = message;
                                 }
 
-                                const statusCode = await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string, updateStatus, apiUrl);
+                                const statusCode = await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string, updateStatus);
                                 if (statusCode === "SUCCESS")
                                     addToast({type: "success", title: "Account created", message: "Please check your emails to finalize your registration."});
                                 else if (statusCode === "ERROR_USERNAME_ALREADY_USED" || statusCode === "ERROR_EMAIL_ALREADY_USED")
@@ -140,13 +138,5 @@ function RegisterPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProp
         </>
     );
 }
-
-export const getStaticProps: GetStaticProps = async () => {
-    return {
-        props: {
-            apiUrl: process.env.PEC_CLIENT_API_URL
-        }
-    };
-};
 
 export default RegisterPage;
