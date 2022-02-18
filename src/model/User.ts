@@ -1,4 +1,4 @@
-export enum UserAccountType {GUEST = "Guest", USER = "User", ADMINISTRATOR = "Administrator"}
+export enum UserAccessLevel {GUEST = "GUEST", USER = "USER", ADMINISTRATOR = "ADMINISTRATOR"}
 
 export default interface User {
     username: string;
@@ -8,5 +8,5 @@ export default interface User {
     profilePicture: string | null;
     job: string;
     group: string;
-    accountType: UserAccountType;
+    accessLevel: UserAccessLevel;
 }

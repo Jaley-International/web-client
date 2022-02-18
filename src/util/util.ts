@@ -17,6 +17,16 @@ export function randomString(length: number): string {
 
 
 /**
+ * Returns the input string capitalized
+ */
+export function capitalize(str: string): string {
+    if (str.length === 0)
+        return str;
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+
+/**
  * Converts a hexadecimal string to a base64 url encoded string
  */
 export function hexToBase64Url(hex: Hex): string {

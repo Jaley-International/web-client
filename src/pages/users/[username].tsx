@@ -10,11 +10,12 @@ import Card from "../../components/containers/Card";
 import {Heading2} from "../../components/text/Headings";
 import {faCalendar, faFile, faFileWord} from "@fortawesome/free-regular-svg-icons";
 import Badge from "../../components/Badge";
-import User, {UserAccountType} from "../../model/User";
+import User, {UserAccessLevel} from "../../model/User";
 import TextInput from "../../components/inputs/TextInput";
 import Select from "../../components/inputs/Select";
 import {request} from "../../util/communication";
 import getConfig from "next/config";
+import {capitalize} from "../../util/util";
 
 function UserPage(): JSX.Element {
 
@@ -37,7 +38,7 @@ function UserPage(): JSX.Element {
                 profilePicture: null,
                 job: rawUser.job || "Unknown",
                 group: rawUser.group || "Unknown",
-                accountType: UserAccountType.USER
+                accessLevel: UserAccessLevel.USER
             });
         } else {
             setUser(null);
@@ -98,7 +99,7 @@ function UserPage(): JSX.Element {
                                     </div>
                                 </div>
                                 <div className="w-80 text-right">
-                                    <Badge text={user.accountType} size="small" colour={user.accountType === UserAccountType.ADMINISTRATOR ? "orange" : (user.accountType === UserAccountType.USER ? "green" : "blue")} /><br /><br />
+                                    <Badge text={capitalize(user.accessLevel)} size="small" colour={user.accessLevel === UserAccessLevel.ADMINISTRATOR ? "orange" : (user.accessLevel === UserAccessLevel.USER ? "green" : "blue")} /><br /><br />
                                     <span className="text-txt-body">Member since 01/01/1970</span><br />
                                     <span className="text-txt-body">Last active 2 hours ago</span>
                                 </div>
@@ -247,9 +248,9 @@ function UserPage(): JSX.Element {
                                         <option selected={user.job === "Legal expert / Lawyer"}>Legal expert / Lawyer</option>
                                     </Select>
                                     <Select ref={accessLevelRef} className="lg:w-1/3 lg:pl-4" label="Access level" required={true}>
-                                        <option selected={user.accountType === UserAccountType.GUEST}>1 - Guest</option>
-                                        <option selected={user.accountType === UserAccountType.USER}>2 - User</option>
-                                        <option selected={user.accountType === UserAccountType.ADMINISTRATOR}>3 - Administrator</option>
+                                        <option selected={user.accessLevel === UserAccessLevel.GUEST}>1 - Guest</option>
+                                        <option selected={user.accessLevel === UserAccessLevel.USER}>2 - User</option>
+                                        <option selected={user.accessLevel === UserAccessLevel.ADMINISTRATOR}>3 - Administrator</option>
                                     </Select>
                                 </div>
 

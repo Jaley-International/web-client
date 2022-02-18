@@ -6,9 +6,9 @@ import Card from "../../components/containers/Card";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Button from "../../components/buttons/Button";
 import Link from "next/link";
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import DeleteUserModal from "../../components/containers/modals/DeleteUserModal";
-import User from "../../model/User";
+import User, {UserAccessLevel} from "../../model/User";
 import OptionsButton from "../../components/buttons/OptionsButton";
 import ContextMenuItem from "../../components/containers/contextmenu/ContextMenuItem";
 import {request} from "../../util/communication";
@@ -16,6 +16,8 @@ import {deleteAccount} from "../../util/processes";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
 import getConfig from "next/config";
+import Badge from "../../components/Badge";
+import {capitalize} from "../../util/util";
 
 function UserList(): JSX.Element {
     const {publicRuntimeConfig} = getConfig();
@@ -93,16 +95,13 @@ function UserList(): JSX.Element {
                                                             :
                                                             <div
                                                                 className="grid h-9 w-9 rounded-full bg-silver my-auto -mr-3">
-                                                                <FontAwesomeIcon className="m-auto text-silver-dark"
-                                                                                 icon={faUser}/>
+                                                                <FontAwesomeIcon className="m-auto text-silver-dark" icon={faUser}/>
                                                             </div>
                                                         }
                                                         <div className="grid content-center leading-4">
                                                             {/* TODO replace username by first name and last name */}
-                                                            <span
-                                                                className="text-txt-heading font-semibold text-2xs">{user.username}</span>
-                                                            <span
-                                                                className="text-txt-body-muted font-light text-4xs">{user.job}</span>
+                                                            <span className="text-txt-heading font-semibold text-2xs">{user.username}</span>
+                                                            <span className="text-txt-body-muted font-light text-4xs">{user.job}</span>
                                                         </div>
                                                     </div>
                                                 </Link>
@@ -111,7 +110,7 @@ function UserList(): JSX.Element {
                                                 <span className="text-txt-body text-xs">{user.group}</span>
                                             </td>
                                             <td className="py-2 px-4">
-                                                <span className="text-txt-body text-xs">{user.accountType}</span>
+                                                <Badge text={capitalize(user.accessLevel)} size="small" colour={user.accessLevel === UserAccessLevel.ADMINISTRATOR ? "orange" : (user.accessLevel === UserAccessLevel.USER ? "green" : "blue")} />
                                             </td>
                                             <td className="py-2 px-4">
                                                 <div className="w-full">
