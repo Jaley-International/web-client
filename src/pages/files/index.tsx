@@ -27,14 +27,13 @@ import {
     Node,
     uploadFile
 } from "../../util/processes";
-import {GetStaticProps, InferGetStaticPropsType} from "next";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
 import {request} from "../../util/communication";
 import ShareLinkModal from "../../components/containers/modals/ShareLinkModal";
 import getConfig from "next/config";
 
-function FilesPage({fs}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
+function FilesPage(): JSX.Element {
     const {publicRuntimeConfig} = getConfig();
 
     const toastRef = useRef<ToastRef>(null);
@@ -50,14 +49,6 @@ function FilesPage({fs}: InferGetStaticPropsType<typeof getStaticProps>): JSX.El
 
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const fetchFilesystem = async () => {
-        const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system`, {});
-        if (response.status === "SUCCESS")
-            setRawFilesystem(response.data.filesystem);
-        else
-            addToast({type: "error", title: "File system load error", message: "Could not fetch your file system."});
-    }
 
     const processUpload = (files: FileList | null) => {
         if (!files || !filesystem) return;
@@ -81,20 +72,28 @@ function FilesPage({fs}: InferGetStaticPropsType<typeof getStaticProps>): JSX.El
     };
 
 
-    const [rawFilesystem, setRawFilesystem] = useState<EncryptedNode>(fs)
     const [filesystem, setFilesystem] = useState<Node | null>(null);
+    const [loaded, setLoaded] = useState<boolean>(false);
+
+    const fetchFilesystem = async () => {
+        const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system`, {});
+        if (response.status !== "SUCCESS") {
+            addToast({type: "error", title: "File system load error", message: "Could not fetch your file system."});
+            return;
+        }
+        const decrypted = decryptFileSystem(response.data.filesystem as EncryptedNode);
+        if (!decrypted) {
+            addToast({type: "error", title: "File system decryption error", message: "Could not decrypt your file system."});
+            return;
+        }
+        setFilesystem(decrypted);
+        setLoaded(true);
+    };
 
     useEffect(() => {
-        if (rawFilesystem) {
-            const decrypted = decryptFileSystem(rawFilesystem as unknown as EncryptedNode);
-            if (decrypted)
-                setFilesystem(decrypted);
-            else
-                addToast({type: "error", title: "File system decryption error", message: "Could not decrypt your file system."});
-        } else {
-            addToast({type: "error", title: "File system load error", message: "Could not fetch your file system."});
-        }
-    }, [rawFilesystem, setFilesystem]);
+        if (!loaded)
+            fetchFilesystem().then(_ => {});
+    }, []);
 
     return (
         <>
@@ -298,21 +297,5 @@ function FilesPage({fs}: InferGetStaticPropsType<typeof getStaticProps>): JSX.El
         </>
     );
 }
-
-export const getStaticProps: GetStaticProps = async () => {
-    const {publicRuntimeConfig} = getConfig();
-
-    // Requesting file system
-    let filesystem = [];
-    const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system`, {});
-    if (response.status === "SUCCESS")
-        filesystem = response.data.filesystem;
-
-    return {
-        props: {
-            fs: filesystem
-        }
-    };
-};
 
 export default FilesPage;
