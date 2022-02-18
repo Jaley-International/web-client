@@ -1,7 +1,19 @@
 import forge, {Hex} from "node-forge";
 import {APIResponse, request} from "./communication";
 import {removeCookies, setCookies} from "cookies-next";
-import {addPadding, decrypt, decryptBuffer, encrypt, encryptBuffer, generateRSAKeyPair, INSTANCE_ID, pbkdf2, rsaPrivateDecrypt, sha256, sha512,} from "./security";
+import {
+    addPadding,
+    decrypt,
+    decryptBuffer,
+    encrypt,
+    encryptBuffer,
+    generateRSAKeyPair,
+    INSTANCE_ID,
+    pbkdf2,
+    rsaPrivateDecrypt,
+    sha256,
+    sha512,
+} from "./security";
 import getConfig from "next/config";
 
 export interface EncryptedNode {
@@ -25,6 +37,7 @@ export interface ShareLink {
 
 export interface MetaData {
     name: string;
+
     [key: string]: any;
 }
 
@@ -103,7 +116,7 @@ export async function register(
     };
 
     updateStatus("Submitting...");
-    const response = await request("POST", `${publicRuntimeConfig.apiUrl}/users`, registerData);
+    const response = await request("POST", `${publicRuntimeConfig.apiUrl}/users/register`, registerData);
     return response.status;
 }
 
@@ -415,7 +428,7 @@ export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
         try {
             // TODO Check node ownership
             decryptedFilesystem.children.push(decryptNode(
-                encryptedChild,  sessionStorage.getItem("masterKey") || ""
+                encryptedChild, sessionStorage.getItem("masterKey") || ""
             ));
         } catch (_) {
             console.warn(`Could not decrypt node ${encryptedChild.id}. Not owner ?`);
