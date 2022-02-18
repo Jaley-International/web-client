@@ -111,11 +111,23 @@ function NewUser(): JSX.Element {
                                     title: "Account created",
                                     message: "User account created successfully."
                                 });
-                            } else if (response.status === "ERROR_USERNAME_ALREADY_USED" || response.status === "ERROR_EMAIL_ALREADY_USED") {
+                            } else if (response.status === "ERROR_USERNAME_ALREADY_USED") {
+                                addToast({
+                                    type: "warning",
+                                    title: "Username already in use",
+                                    message: "Failed to create an account : Username already in use."
+                                });
+                            } else if (response.status === "ERROR_EMAIL_ALREADY_USED") {
+                                addToast({
+                                    type: "warning",
+                                    title: "Email already in use",
+                                    message: "Failed to create an account : Email already in use."
+                                });
+                            } else if (response.status === "ERROR_INVALID_ACCESS_LEVEL") {
                                 addToast({
                                     type: "error",
-                                    title: "Failed to create an account",
-                                    message: "Email or username already in use."
+                                    title: "Insufficient permissions",
+                                    message: "Administrator privileges are required to create an account."
                                 });
                             } else {
                                 addToast({
