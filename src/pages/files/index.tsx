@@ -4,7 +4,14 @@ import {
     faUserFriends,
     faCloudDownloadAlt,
     faShareAlt,
-    faUsersCog, faFileImport, faFileUpload, faFolderPlus, faLock, faFolder, faGripVertical
+    faUsersCog,
+    faFileImport,
+    faFileUpload,
+    faFolderPlus,
+    faLock,
+    faFolder,
+    faPencilAlt,
+    faGripLinesVertical
 } from "@fortawesome/free-solid-svg-icons";
 import {
     faFile,
@@ -22,7 +29,7 @@ import Card from "../../components/containers/Card";
 import OptionsButton from "../../components/buttons/OptionsButton";
 import ContextMenuItem from "../../components/containers/contextmenu/ContextMenuItem";
 import Header from "components/sections/Header";
-import DeleteFileModal from "../../components/containers/modals/DeleteFileModal";
+import DeleteNodeModal from "../../components/containers/modals/DeleteNodeModal";
 import CreateFolderModal from "../../components/containers/modals/CreateFolderModal";
 import OverwriteFileModal from "../../components/containers/modals/OverwriteFileModal";
 import {
@@ -226,7 +233,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                                 e.preventDefault();
                                                 if (dragNodeOrigin && dragNodeDest) {
                                                     // TODO Node drop in folder
-                                                    alert(`TODO Node drop in folder ${dragNodeOrigin.metaData.name} -> ${dragNodeDest.metaData.name}`);
+                                                    addToast({type: "info", title: "Work in progress feature", message: "Folder moving is currently a work-in-progress/planned feature."});
                                                     setDragNodeDest(null);
                                                 }
                                             }}
@@ -238,7 +245,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                             }}>
                                                 <div className="flex space-x-3">
                                                     <div className="grid my-auto cursor-grab font-light">
-                                                        <FontAwesomeIcon icon={faGripVertical} className="text-grey-300" />
+                                                        <FontAwesomeIcon icon={faGripLinesVertical} className="text-grey-300" />
                                                     </div>
                                                     <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
                                                         <FontAwesomeIcon
@@ -286,46 +293,74 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                                             </td>
                                             <td className="py-2 px-4">
                                                 <div className="w-full">
-                                                    <OptionsButton>
-                                                        <ContextMenuItem name="Preview" icon={faEye} action={() => alert("TODO File preview")}/>
-                                                        <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={async () => {
-                                                            const status = await downloadFile(node, apiUrl);
-                                                            if (status === "ERROR_FETCH")
-                                                                addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
-                                                            else if (status === "ERROR_DECRYPT")
-                                                                addToast({type: "error", title: "Failed to decrypt", message: "An error occurred while decrypting the file."});
-                                                            else if (status !== "SUCCESS")
-                                                                addToast({type: "error", title: "Failed to download", message: "An unexpected error occurred while downloading the file."});
-                                                        }}/>
-                                                        <ContextMenuItem name="Share" icon={faShareAlt} action={async () => {
+                                                    {
+                                                        node.type === "FOLDER" ?
+                                                            <OptionsButton>
+                                                                <ContextMenuItem name="Rename" icon={faPencilAlt} action={() => {
+                                                                    addToast({type: "info", title: "Work in progress feature", message: "Folder renaming is currently a work-in-progress/planned feature."});
+                                                                }}/>
+                                                                <ContextMenuItem name="Share" icon={faShareAlt} action={() => {
+                                                                    addToast({type: "info", title: "Work in progress feature", message: "Folder sharing is currently a work-in-progress/planned feature."});
+                                                                }}/>
+                                                                <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => {
+                                                                    addToast({type: "info", title: "Work in progress feature", message: "Permission system is currently a work-in-progress/planned feature."});
+                                                                }}/>
+                                                                <ContextMenuItem name="Lock folder" icon={faLock} action={() => {
+                                                                    addToast({type: "info", title: "Work in progress feature", message: "Node locking is currently a work-in-progress/planned feature."});
+                                                                }}/>
+                                                                <ContextMenuItem name="Delete" icon={faTimesCircle} action={() => {
+                                                                    setModalNodeTarget(node);
+                                                                    setShowDeleteModal(true);
+                                                                }}/>
+                                                            </OptionsButton>
+                                                            :
+                                                            <OptionsButton>
+                                                                <ContextMenuItem name="Preview" icon={faEye} action={() => {
+                                                                    addToast({type: "info", title: "Work in progress feature", message: "File preview is currently a work-in-progress/planned feature."});
+                                                                }}/>
+                                                                <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={async () => {
+                                                                    const status = await downloadFile(node, apiUrl);
+                                                                    if (status === "ERROR_FETCH")
+                                                                        addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
+                                                                    else if (status === "ERROR_DECRYPT")
+                                                                        addToast({type: "error", title: "Failed to decrypt", message: "An error occurred while decrypting the file."});
+                                                                    else if (status !== "SUCCESS")
+                                                                        addToast({type: "error", title: "Failed to download", message: "An unexpected error occurred while downloading the file."});
+                                                                }}/>
+                                                                <ContextMenuItem name="Share" icon={faShareAlt} action={async () => {
 
-                                                            const response = await request("GET", `${apiUrl}/file-system/${node.id}/links`, {});
-                                                            if (response.status !== "SUCCESS")
-                                                                return;
+                                                                    const response = await request("GET", `${apiUrl}/file-system/${node.id}/links`, {});
+                                                                    if (response.status !== "SUCCESS")
+                                                                        return;
 
-                                                            if (response.data.links.length === 0) {
-                                                                const shareLink = await createNodeShareLink(node, apiUrl);
-                                                                if (shareLink)
-                                                                    node.shareLink = shareLink;
-                                                            } else {
-                                                                node.shareLink = response.data.links[0];
-                                                            }
+                                                                    if (response.data.links.length === 0) {
+                                                                        const shareLink = await createNodeShareLink(node, apiUrl);
+                                                                        if (shareLink)
+                                                                            node.shareLink = shareLink;
+                                                                    } else {
+                                                                        node.shareLink = response.data.links[0];
+                                                                    }
 
 
-                                                            setModalNodeTarget(node);
-                                                            setShowShareLinkModal(true);
-                                                        }}/>
-                                                        <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => alert("TODO Permission modal")}/>
-                                                        <ContextMenuItem name="Lock file" icon={faLock} action={() => alert("TODO File locking")}/>
-                                                        <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
-                                                            setModalNodeTarget(node);
-                                                            setShowOverwriteModal(true);
-                                                        }}/>
-                                                        <ContextMenuItem name="Delete" icon={faTimesCircle} action={() => {
-                                                            setModalNodeTarget(node);
-                                                            setShowDeleteModal(true);
-                                                        }}/>
-                                                    </OptionsButton>
+                                                                    setModalNodeTarget(node);
+                                                                    setShowShareLinkModal(true);
+                                                                }}/>
+                                                                <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => {
+                                                                    addToast({type: "info", title: "Work in progress feature", message: "Permission system is currently a work-in-progress/planned feature."});
+                                                                }}/>
+                                                                <ContextMenuItem name="Lock file" icon={faLock} action={() => {
+                                                                    addToast({type: "info", title: "Work in progress feature", message: "Node locking is currently a work-in-progress/planned feature."});
+                                                                }}/>
+                                                                <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
+                                                                    setModalNodeTarget(node);
+                                                                    setShowOverwriteModal(true);
+                                                                }}/>
+                                                                <ContextMenuItem name="Delete" icon={faTimesCircle} action={() => {
+                                                                    setModalNodeTarget(node);
+                                                                    setShowDeleteModal(true);
+                                                                }}/>
+                                                            </OptionsButton>
+                                                    }
                                                 </div>
                                             </td>
                                         </tr>
@@ -339,7 +374,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
 
                 </div>
                 {showDeleteModal && modalNodeTarget &&
-                    <DeleteFileModal node={modalNodeTarget} closeCallback={() => {
+                    <DeleteNodeModal node={modalNodeTarget} closeCallback={() => {
                         setShowDeleteModal(false);
                         setModalNodeTarget(null);
                     }} submitCallback={async () => {
@@ -358,7 +393,7 @@ function FilesPage({apiUrl, fs}: InferGetStaticPropsType<typeof getStaticProps>)
                     }} submitCallback={(file) => {
                         if (!file || !filesystem) return;
                         // TODO Overwrite file
-                        alert("TODO Overwrite file");
+                        addToast({type: "info", title: "Work in progress feature", message: "File overwrite is currently a work-in-progress/planned feature."});
                     }}/>
                 }
                 {showCreateFolderModal &&
