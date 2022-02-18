@@ -1,5 +1,13 @@
-import {useMemo} from "react";
-import {faCheckCircle, faTimes, faInfoCircle, faExclamationTriangle, faExclamationCircle, IconDefinition} from "@fortawesome/free-solid-svg-icons";
+import {useMemo, useState} from "react";
+import {
+    faCheckCircle,
+    faTimes,
+    faInfoCircle,
+    faExclamationTriangle,
+    faExclamationCircle,
+    IconDefinition,
+    faChevronUp, faChevronDown
+} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 export type ToastType = "info" | "success" | "warning" | "error";
@@ -18,6 +26,8 @@ interface style {
 }
 
 function Toast(props: ToastProps): JSX.Element {
+
+    const [expanded, setExpanded] = useState<boolean>(false);
 
     const style = useMemo((): style => {
         switch (props.type) {
@@ -41,14 +51,19 @@ function Toast(props: ToastProps): JSX.Element {
                             <FontAwesomeIcon icon={style.icon} className={`h-6 w-6 text-${style.colour}`} aria-hidden="true" />
                         </div>
                         <div className="ml-4 flex-1">
-                            <p className="text-sm font-medium text-txt-heading">{props.title}</p>
-                            <p className="mt-1 text-sm text-txt-body">{props.message}</p>
+                            <p className="text-sm font-medium text-txt-heading cursor-pointer" onClick={() => setExpanded(!expanded)}>
+                                {props.title}
+                            </p>
+                            {expanded &&
+                                <p className="mt-1 text-sm text-txt-body">{props.message}</p>
+                            }
                         </div>
-                        <div className="ml-4 flex-shrink-0 flex">
-                            <button
-                                className="bg-white rounded-md inline-flex text-grey-500 transition-colors hover:text-grey-600 focus:outline-none"
-                                onClick={props.onClose}
-                            >
+                        <div className="ml-4 flex-shrink-0 flex space-x-3">
+                            <button className="bg-white rounded-md inline-flex text-grey-500 transition-colors hover:text-grey-600 focus:outline-none" onClick={() => setExpanded(!expanded)}>
+                                <span className="sr-only">{expanded ? "Retract" : "Expand"}</span>
+                                <FontAwesomeIcon icon={expanded ? faChevronUp : faChevronDown} className="h-5 w-5" aria-hidden="true" />
+                            </button>
+                            <button className="bg-white rounded-md inline-flex text-grey-500 transition-colors hover:text-grey-600 focus:outline-none" onClick={props.onClose}>
                                 <span className="sr-only">Close</span>
                                 <FontAwesomeIcon icon={faTimes} className="h-5 w-5" aria-hidden="true" />
                             </button>

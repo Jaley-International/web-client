@@ -4,23 +4,52 @@ import Link from "next/link";
 import Button from "../../components/buttons/Button";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowLeft, faUser, faUserFriends} from "@fortawesome/free-solid-svg-icons";
-import React, {useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
-import Users from "../../fixtures/Users";
 import Card from "../../components/containers/Card";
 import {Heading2} from "../../components/text/Headings";
 import {faCalendar, faFile, faFileWord} from "@fortawesome/free-regular-svg-icons";
 import Badge from "../../components/Badge";
-import {UserAccountType} from "../../model/User";
+import User, {UserAccountType} from "../../model/User";
 import TextInput from "../../components/inputs/TextInput";
 import Select from "../../components/inputs/Select";
+import {request} from "../../util/communication";
+import getConfig from "next/config";
 
 function UserPage(): JSX.Element {
 
-    const router = useRouter();
-    const {id} = router.query;
+    const {publicRuntimeConfig} = getConfig();
 
-    const user = Users.filter((user) => user.userId.toString() === id)[0];
+    const router = useRouter();
+
+    const [user, setUser] = useState<User | null>(null);
+    const [loaded, setLoaded] = useState<boolean>(false);
+
+    const fetchUser = async (username: string) => {
+        const response = await request("GET", `${publicRuntimeConfig.apiUrl}/users/${username}`, {});
+        if (response.status === "SUCCESS") {
+            const rawUser = response.data.user;
+            //TODO update api response
+            setUser({
+                username: rawUser.username,
+                email: rawUser.email,
+                firstName: rawUser.username,
+                lastName: rawUser.username,
+                profilePicture: null,
+                job: "job",
+                group: "group",
+                accountType: UserAccountType.USER
+            });
+        } else {
+            setUser(null);
+        }
+        setLoaded(true);
+    };
+
+    useEffect(() => {
+        if (!loaded && router.query.username)
+            fetchUser(router.query.username as string).then(_ => {});
+    }, [router.query]);
 
     const firstnameRef = useRef<HTMLInputElement>(null);
     const lastnameRef = useRef<HTMLInputElement>(null);

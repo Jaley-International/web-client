@@ -1,5 +1,5 @@
 import axios, {AxiosRequestConfig, AxiosRequestHeaders, Method} from "axios";
-import {getCookie, getCookies} from "cookies-next";
+import {getCookie} from "cookies-next";
 
 export interface APIResponse {
     status: string;
@@ -16,7 +16,14 @@ export interface APIResponse {
  * @param {AxiosRequestConfig}  additionalOptions   Additional axios config.
  * @return {Promise<APIResponse>}
  */
-export async function request(method: Method, url: string, data: object, additionalHeaders?: AxiosRequestHeaders, additionalOptions?: AxiosRequestConfig): Promise<APIResponse> {
+export async function request(
+    method: Method,
+    url: string,
+    data: object,
+    additionalHeaders?: AxiosRequestHeaders,
+    additionalOptions?: AxiosRequestConfig
+): Promise<APIResponse> {
+
     const sessionJSON = getCookie("session");
     let sessionId: string;
     if (typeof sessionJSON === "string")
