@@ -248,9 +248,9 @@ function UserPage(): JSX.Element {
                                         <option selected={user.job === "Legal expert / Lawyer"}>Legal expert / Lawyer</option>
                                     </Select>
                                     <Select ref={accessLevelRef} className="lg:w-1/3 lg:pl-4" label="Access level" required={true}>
-                                        <option selected={user.accessLevel === UserAccessLevel.GUEST}>1 - Guest</option>
-                                        <option selected={user.accessLevel === UserAccessLevel.USER}>2 - User</option>
-                                        <option selected={user.accessLevel === UserAccessLevel.ADMINISTRATOR}>3 - Administrator</option>
+                                        <option selected={user.accessLevel === UserAccessLevel.GUEST} value="GUEST">1 - Guest</option>
+                                        <option selected={user.accessLevel === UserAccessLevel.USER} value="USER">2 - User</option>
+                                        <option selected={user.accessLevel === UserAccessLevel.ADMINISTRATOR} value="ADMINISTRATOR">3 - Administrator</option>
                                     </Select>
                                 </div>
 
