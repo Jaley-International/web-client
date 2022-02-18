@@ -56,8 +56,7 @@ export interface Session {
  * @return {string}                     Status code returned by API.
  */
 export async function register(
-    username: string,
-    email: string,
+    registerKey: string,
     password: string,
     updateStatus: (message: string) => void
 ): Promise<string> {
