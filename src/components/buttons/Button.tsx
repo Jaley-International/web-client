@@ -8,6 +8,7 @@ interface Props {
     colour: "blue" | "green" | "orange" | "red" | "cyan" | "dark";
     onClick?: MouseEventHandler<HTMLButtonElement>;
     className?: string;
+    disabled?: boolean;
 }
 
 const Button = React.forwardRef((props: Props, ref: LegacyRef<HTMLButtonElement> | undefined) => {
@@ -24,7 +25,7 @@ const Button = React.forwardRef((props: Props, ref: LegacyRef<HTMLButtonElement>
         typeClass = `text-${props.colour} border border-${props.colour} bg-${props.colour}-soft bg-opacity-0 hover:bg-opacity-50 active:bg-opacity-70 disabled:bg-opacity-0 disabled:border-grey-400`;
 
     return (
-        <button ref={ref} type={props.action} onClick={props.onClick}
+        <button ref={ref} type={props.action} onClick={props.onClick} disabled={props.disabled}
                 className={`font-semibold transition-colors duration-100 ease-in-out disabled:cursor-default ${sizeClass} ${typeClass} ${props.className}`}>
             {props.children}
         </button>

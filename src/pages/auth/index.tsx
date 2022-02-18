@@ -6,15 +6,13 @@ import {Heading2, Heading3} from "../../components/text/Headings";
 import TextInput from "../../components/inputs/TextInput";
 import Button from "../../components/buttons/Button";
 import Link from 'next/link';
-import {request} from "../../util/communication";
 import {authenticate} from "../../util/processes";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
-import {GetStaticProps, InferGetServerSidePropsType} from "next";
 import {useRouter} from "next/router";
 import {removeCookies} from "cookies-next";
 
-function LoginPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
+function LoginPage(): JSX.Element {
 
     const router = useRouter();
     const [loaded, setLoaded] = useState<boolean>(false);
@@ -109,7 +107,7 @@ function LoginPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>)
                                 const password = passwordRef.current?.value as string;
 
                                 // Authentication request
-                                const success = await authenticate(username, password, apiUrl, updateStatus);
+                                const success = await authenticate(username, password, updateStatus);
                                 if (success) {
                                     updateStatus("Redirecting...");
                                     addToast({type: "success", title: "Welcome!", message: "Successfully authenticated."});
@@ -138,13 +136,5 @@ function LoginPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>)
         </>
     );
 }
-
-export const getStaticProps: GetStaticProps = async () => {
-    return {
-        props: {
-            apiUrl: process.env.PEC_CLIENT_API_URL
-        }
-    };
-};
 
 export default LoginPage;

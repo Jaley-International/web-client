@@ -7,12 +7,14 @@ import {faArrowLeft, faUser} from "@fortawesome/free-solid-svg-icons";
 import TextInput from "../../components/inputs/TextInput";
 import React, {useRef} from "react";
 import Select from "../../components/inputs/Select";
-import {request} from "../../util/communication";
-import {GetStaticProps, InferGetServerSidePropsType} from "next";
+import { request } from "../../util/communication";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
+import getConfig from "next/config";
 
-function NewUser({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
+function NewUser(): JSX.Element {
+
+    const {publicRuntimeConfig} = getConfig();
 
     const toastRef = useRef<ToastRef>(null);
     const addToast = (toast: ToastProps) => {
@@ -92,16 +94,8 @@ function NewUser({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): 
                             const job = (jobRef.current as HTMLSelectElement).value;
                             const accessLevel = (accessLevelRef.current as HTMLSelectElement).value;
 
-                            const createUserData = {
-                                firstName: firstname,
-                                lastName: lastname,
-                                username: username,
-                                email: email,
-                                group: group,
-                                job: job,
-                                accessLevel: accessLevel
-                            };
-                            const response = await request("POST", `${apiUrl}/users/preregister`, createUserData);
+                            const createUserData = { firstName: firstname, lastName: lastname, username: username, email: email, group: group, job: job, accessLevel: accessLevel };
+                            const response = await request("POST", `${publicRuntimeConfig.apiUrl}/users/preregister`, createUserData);
 
                             if (response.status === "SUCCESS") {
                                 addToast({
@@ -192,13 +186,5 @@ function NewUser({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): 
         </>
     );
 }
-
-export const getStaticProps: GetStaticProps = async () => {
-    return {
-        props: {
-            apiUrl: process.env.PEC_CLIENT_API_URL
-        }
-    };
-};
 
 export default NewUser;
