@@ -29,15 +29,14 @@ function UserPage(): JSX.Element {
         const response = await request("GET", `${publicRuntimeConfig.apiUrl}/users/${username}`, {});
         if (response.status === "SUCCESS") {
             const rawUser = response.data.user;
-            //TODO update api response
             setUser({
                 username: rawUser.username,
                 email: rawUser.email,
-                firstName: rawUser.username,
-                lastName: rawUser.username,
+                firstName: rawUser.firstName,
+                lastName: rawUser.lastName,
                 profilePicture: null,
-                job: "job",
-                group: "group",
+                job: rawUser.job || "Unknown",
+                group: rawUser.group || "Unknown",
                 accountType: UserAccountType.USER
             });
         } else {
@@ -48,7 +47,8 @@ function UserPage(): JSX.Element {
 
     useEffect(() => {
         if (!loaded && router.query.username)
-            fetchUser(router.query.username as string).then(_ => {});
+            fetchUser(router.query.username as string).then(_ => {
+            });
     }, [router.query]);
 
     const firstnameRef = useRef<HTMLInputElement>(null);
@@ -58,7 +58,11 @@ function UserPage(): JSX.Element {
     const jobRef = useRef<HTMLSelectElement>(null);
     const accessLevelRef = useRef<HTMLSelectElement>(null);
 
-    if (user) {
+    if (!loaded) {
+        return (
+            <></>
+        );
+    } else if (user) {
 
         return (
             <div className="flex bg-bg-light">

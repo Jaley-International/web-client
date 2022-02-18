@@ -6,19 +6,18 @@ import Card from "../../components/containers/Card";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Button from "../../components/buttons/Button";
 import Link from "next/link";
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import DeleteUserModal from "../../components/containers/modals/DeleteUserModal";
 import User from "../../model/User";
 import OptionsButton from "../../components/buttons/OptionsButton";
 import ContextMenuItem from "../../components/containers/contextmenu/ContextMenuItem";
-import {GetStaticProps, InferGetStaticPropsType} from "next";
 import {request} from "../../util/communication";
 import {deleteAccount} from "../../util/processes";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
 import getConfig from "next/config";
 
-function UserList({initialUsers}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
+function UserList(): JSX.Element {
     const {publicRuntimeConfig} = getConfig();
 
     const toastRef = useRef<ToastRef>(null);
@@ -29,13 +28,20 @@ function UserList({initialUsers}: InferGetStaticPropsType<typeof getStaticProps>
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
     const [modalUserTarget, setModalUserTarget] = useState<User | null>(null);
 
-    const [users, setUsers] = useState<User[]>(initialUsers);
+    const [users, setUsers] = useState<User[]>([]);
+    const [loaded, setLoaded] = useState<boolean>(false);
 
     const fetchUsers = async () => {
         const usersListResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/users`, {});
         const users = usersListResponse.data.users;
         setUsers(users);
+        setLoaded(true);
     };
+
+    useEffect(() => {
+        if (!loaded)
+            fetchUsers().then(_ => {});
+    }, []);
 
     return (
         <>
@@ -168,16 +174,5 @@ function UserList({initialUsers}: InferGetStaticPropsType<typeof getStaticProps>
         </>
     );
 }
-
-export const getStaticProps: GetStaticProps = async () => {
-    const {publicRuntimeConfig} = getConfig();
-    const usersListResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/users`, {});
-    const users = usersListResponse.data.users;
-    return {
-        props: {
-            initialUsers: users
-        }
-    };
-};
 
 export default UserList;
