@@ -20,11 +20,11 @@ export interface EncryptedNode {
     id: number;
     iv: Hex;
     tag: Hex;
-    encryptedKey: Hex;
+    encryptedNodeKey: Hex;
     encryptedMetadata: Hex;
     type: "FOLDER" | "FILE";
     ref: string;
-    encryptedParentKey: Hex;
+    parentEncryptedKey: Hex;
     children: EncryptedNode[];
 }
 
@@ -254,10 +254,10 @@ export async function uploadFile(
         ref: ref,
         iv: forge.util.bytesToHex(iv),
         tag: tag,
-        encryptedKey: encryptedNodeKey,
+        encryptedNodeKey: encryptedNodeKey,
         parentId: containingFolderID,
         encryptedMetadata: encryptedMetadata,
-        encryptedParentKey: parentEncryptedKey
+        parentEncryptedKey: parentEncryptedKey
     });
 
     return fileResponse.status === "SUCCESS";
@@ -338,9 +338,9 @@ export async function createFolder(
     const response = await request("POST", `${publicRuntimeConfig.apiUrl}/file-system/folder`, {
         iv: forge.util.bytesToHex(iv),
         tag: "",
-        encryptedKey: encryptedNodeKey,
+        encryptedNodeKey: encryptedNodeKey,
         encryptedMetadata: encryptedMetadata,
-        encryptedParentKey: "abc",
+        parentEncryptedKey: "abc",
         parentId: containingFolderID
     });
 
@@ -398,14 +398,14 @@ export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
 
     const decryptNode = (encryptedNode: EncryptedNode, masterKey: Hex): Node => {
         const iv = forge.util.hexToBytes(encryptedNode.iv);
-        const nodeKey = decrypt("AES-CTR", masterKey, iv, encryptedNode.encryptedKey);
+        const nodeKey = decrypt("AES-CTR", masterKey, iv, encryptedNode.encryptedNodeKey);
         return {
             id: encryptedNode.id,
             children: [],
             iv: encryptedNode.iv,
             tag: encryptedNode.tag,
             nodeKey: nodeKey,
-            parentKey: "", //decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedParentKey),
+            parentKey: "", //decrypt("AES-CTR", nodeKey, iv, encryptedNode.parentEncryptedKey),
             metaData: JSON.parse(decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedMetadata)),
             ref: encryptedNode.ref,
             type: encryptedNode.type
