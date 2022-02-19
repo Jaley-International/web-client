@@ -66,7 +66,7 @@ function SharePage(): JSX.Element {
                 }
             });
         }
-    }, []);
+    });
 
 
 
@@ -118,7 +118,7 @@ function SharePage(): JSX.Element {
         return (
             <>
                 <div className="h-screen bg-bg-light">
-                    <Link href="/" passHref={true}>
+                    <Link href="/" passHref>
                         <div className="p-8 h-8 inline-flex space-x-3 cursor-pointer">
                             <div className="w-12 h-12 rounded-2lg bg-gradient-to-bl from-blue-gradient-from to-blue-gradient-to text-center text-2lg text-white py-1">
                                 <FontAwesomeIcon icon={faCloud} /> {/* TODO Change icon */}

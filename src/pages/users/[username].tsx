@@ -306,7 +306,7 @@ function UserPage(): JSX.Element {
                 <Navbar />
                 <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
                     <Header title="User details">
-                        <Link href="/users">
+                        <Link href="/users" passHref>
                             <Button size="small" type="regular" colour="dark">
                                 <span><FontAwesomeIcon icon={faArrowLeft} />&nbsp;&nbsp;Back to user list</span>
                             </Button>
@@ -322,7 +322,7 @@ function UserPage(): JSX.Element {
                                 </div>
                                 <div className="p-12 bg-red-soft rounded-xl">
                                     <div className="w-full h-full flex justify-center">
-                                        <Link href="/users">
+                                        <Link href="/users" passHref>
                                             <Button className="mx-auto my-auto w-24" size="medium" type="regular" colour="red">Go back</Button>
                                         </Link>
                                     </div>

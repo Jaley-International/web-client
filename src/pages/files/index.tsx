@@ -317,7 +317,7 @@ function FilesPage(): JSX.Element {
                                                                     addToast({type: "info", title: "Work in progress feature", message: "File preview is currently a work-in-progress/planned feature."});
                                                                 }}/>
                                                                 <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={async () => {
-                                                                    const status = await downloadFile(node, apiUrl);
+                                                                    const status = await downloadFile(node);
                                                                     if (status === "ERROR_FETCH")
                                                                         addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
                                                                     else if (status === "ERROR_DECRYPT")
@@ -327,12 +327,12 @@ function FilesPage(): JSX.Element {
                                                                 }}/>
                                                                 <ContextMenuItem name="Share" icon={faShareAlt} action={async () => {
 
-                                                                    const response = await request("GET", `${apiUrl}/file-system/${node.id}/links`, {});
+                                                                    const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/links`, {});
                                                                     if (response.status !== "SUCCESS")
                                                                         return;
 
                                                                     if (response.data.links.length === 0) {
-                                                                        const shareLink = await createNodeShareLink(node, apiUrl);
+                                                                        const shareLink = await createNodeShareLink(node);
                                                                         if (shareLink)
                                                                             node.shareLink = shareLink;
                                                                     } else {
