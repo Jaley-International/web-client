@@ -15,6 +15,7 @@ import {
     sha512,
 } from "./security";
 import getConfig from "next/config";
+import User, {UserAccessLevel} from "../model/User";
 
 export interface EncryptedNode {
     id: number;
@@ -504,5 +505,39 @@ export async function logoutSession(): Promise<boolean> {
 export async function deleteAccount(username: string) {
     const {publicRuntimeConfig} = getConfig();
     const response = await request("DELETE", `${publicRuntimeConfig.apiUrl}/users/${username}`, {});
+    return response.status;
+}
+
+/**
+ * Updates a user account.
+ *
+ * @param {User}                user
+ * @param {string}              firstName
+ * @param {string}              lastName
+ * @param {string}              email
+ * @param {string}              group
+ * @param {string}              job
+ * @param {UserAccessLevel}     accessLevel
+ */
+export async function updateAccount(
+    user: User,
+    firstName?: string,
+    lastName?: string,
+    email?: string,
+    group?: string,
+    job?: string,
+    accessLevel?: UserAccessLevel
+): Promise<string> {
+    const {publicRuntimeConfig} = getConfig();
+
+    const response = await request("PATCH", `${publicRuntimeConfig.apiUrl}/users/${user.username}`, {
+        firstName: firstName || user.firstName,
+        lastName: lastName || user.lastName,
+        email: email || user.email,
+        group: group || user.group,
+        job: job || user.job,
+        accessLevel: accessLevel || user.accessLevel
+    });
+
     return response.status;
 }
