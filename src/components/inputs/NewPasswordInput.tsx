@@ -43,7 +43,7 @@ const NewPasswordInput = React.forwardRef((props: Props, ref: LegacyRef<HTMLInpu
     const bars = (level: number): JSX.Element[] => {
         let divs: JSX.Element[] = [];
         for (let i = 1 ; i < 5 ; ++i)
-            divs.push(<div className={`flex-1 ${i > level ? "bg-grey-300" : (level === 1 ? "bg-red" : (level === 2 ? "bg-orange" : (level === 3 ? "bg-green-light" : "bg-green")))} h-1.5 rounded-full`}> </div>)
+            divs.push(<div key={i} className={`flex-1 ${i > level ? "bg-grey-300" : (level === 1 ? "bg-red" : (level === 2 ? "bg-orange" : (level === 3 ? "bg-green-light" : "bg-green")))} h-1.5 rounded-full`}> </div>)
         return divs;
     }
 

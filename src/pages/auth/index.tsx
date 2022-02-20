@@ -6,15 +6,13 @@ import {Heading2, Heading3} from "../../components/text/Headings";
 import TextInput from "../../components/inputs/TextInput";
 import Button from "../../components/buttons/Button";
 import Link from 'next/link';
-import {request} from "../../util/communication";
 import {authenticate} from "../../util/processes";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
-import {GetStaticProps, InferGetServerSidePropsType} from "next";
 import {useRouter} from "next/router";
 import {removeCookies} from "cookies-next";
 
-function LoginPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
+function LoginPage(): JSX.Element {
 
     const router = useRouter();
     const [loaded, setLoaded] = useState<boolean>(false);
@@ -109,11 +107,11 @@ function LoginPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>)
                                 const password = passwordRef.current?.value as string;
 
                                 // Authentication request
-                                const success = await authenticate(username, password, apiUrl, updateStatus);
+                                const success = await authenticate(username, password, updateStatus);
                                 if (success) {
                                     updateStatus("Redirecting...");
                                     addToast({type: "success", title: "Welcome!", message: "Successfully authenticated."});
-                                    setTimeout(() => router.push("/"), 2000);
+                                    setTimeout(() => router.reload(), 2000);
                                 } else {
                                     updateStatus("Login");
                                     setSubmitting(false);
@@ -121,14 +119,14 @@ function LoginPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>)
                                 }
                             }
                         }}>
-                            <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
+                            <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" autoFocus={true} required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
                             <TextInput ref={passwordRef} type="password" autoComplete="password" label="Password" name="password" required={true} />
                             <Button ref={submitRef} size="large" type="regular" colour="blue" className="w-full">
                                 Login
                             </Button>
                             <br />
                             <p className="text-center text-txt-body-muted text-2xs">
-                                Need to create an account? <Link href="/auth/register"><a className="text-blue">Register</a></Link>
+                                First time connecting? <Link href="/auth/register"><a className="text-blue">Register</a></Link>
                             </p>
                         </form>
                     </div>
@@ -138,13 +136,5 @@ function LoginPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>)
         </>
     );
 }
-
-export const getStaticProps: GetStaticProps = async () => {
-    return {
-        props: {
-            apiUrl: process.env.PEC_CLIENT_API_URL
-        }
-    };
-};
 
 export default LoginPage;

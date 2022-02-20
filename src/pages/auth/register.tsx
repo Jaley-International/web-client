@@ -11,18 +11,15 @@ import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
 import NewPasswordInput from "../../components/inputs/NewPasswordInput";
 import Link from "next/link";
-import {request} from "../../util/communication";
-import {GetStaticProps, InferGetServerSidePropsType} from "next";
 
-function RegisterPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProps>): JSX.Element {
+function RegisterPage(): JSX.Element {
 
     const toastRef = useRef<ToastRef>(null);
     const addToast = (toast: ToastProps) => {
         toastRef.current?.addMessage(toast);
     };
 
-    const usernameRef = useRef<HTMLInputElement>(null);
-    const emailRef = useRef<HTMLInputElement>(null);
+    const registerKeyRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
     const passwordConfirmRef = useRef<HTMLInputElement>(null);
     const tosRef = useRef<HTMLInputElement>(null);
@@ -32,16 +29,14 @@ function RegisterPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProp
 
     useEffect(() => {
         if (submitting) {
-            (usernameRef.current as HTMLInputElement).disabled = true;
-            (emailRef.current as HTMLInputElement).disabled = true;
+            (registerKeyRef.current as HTMLInputElement).disabled = true;
             (passwordRef.current as HTMLInputElement).disabled = true;
             (passwordConfirmRef.current as HTMLInputElement).disabled = true;
             (tosRef.current as HTMLInputElement).disabled = true;
             (submitRef.current as HTMLButtonElement).disabled = true;
             (submitRef.current as HTMLButtonElement).classList.add("animate-pulse");
         } else {
-            (usernameRef.current as HTMLInputElement).disabled = false;
-            (emailRef.current as HTMLInputElement).disabled = false;
+            (registerKeyRef.current as HTMLInputElement).disabled = false;
             (passwordRef.current as HTMLInputElement).disabled = false;
             (passwordConfirmRef.current as HTMLInputElement).disabled = false;
             (tosRef.current as HTMLInputElement).disabled = false;
@@ -105,7 +100,7 @@ function RegisterPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProp
                                         submitRef.current.innerText = message;
                                 }
 
-                                const statusCode = await register(usernameRef.current?.value as string, emailRef.current?.value as string, passwordRef.current?.value as string, updateStatus, apiUrl);
+                                const statusCode = await register(registerKeyRef.current?.value as string, passwordRef.current?.value as string, updateStatus);
                                 if (statusCode === "SUCCESS")
                                     addToast({type: "success", title: "Account created", message: "Please check your emails to finalize your registration."});
                                 else if (statusCode === "ERROR_USERNAME_ALREADY_USED" || statusCode === "ERROR_EMAIL_ALREADY_USED")
@@ -116,8 +111,7 @@ function RegisterPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProp
                                 setSubmitting(false);
                             }
                         }}>
-                            <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" hint="Must be between 3 and 16 characters long." required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
-                            <TextInput ref={emailRef} type="email" autoComplete="email" label="Email address" name="email" hint="Please use your company email address." placeholder="*********@company.com" required={true} validator={(str: string) => /\S+@\S+\.\S+/.test(str)} />
+                            <TextInput ref={registerKeyRef} type="text" label="Register Key" name="registerKey" hint="Code received by email to register your account." autoFocus={true} required={true} minLength={16} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-_]{16}$/.test(str)} />
                             <NewPasswordInput ref={passwordRef} label="Password" name="password" required={true} />
                             <TextInput ref={passwordConfirmRef} type="password" autoComplete="new-password" label="Confirm password" name="password2" hint="Must match the password you entered above." required={true} validator={(str: string) => str === passwordRef.current?.value} onChange={() => passwordRef.current?.value !== passwordConfirmRef.current?.value ? passwordConfirmRef.current?.setCustomValidity("Passwords don't match.") : passwordConfirmRef.current?.setCustomValidity("")} />
                             <Checkbox ref={tosRef} name="tos" check={false} required={true}>
@@ -130,7 +124,7 @@ function RegisterPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProp
                             </Button>
                             <br />
                             <p className="text-center text-txt-body-muted text-2xs">
-                                Already have an account? <Link href="/auth"><a className="text-blue">Sign in</a></Link>
+                                Already registered? <Link href="/auth"><a className="text-blue">Sign in</a></Link>
                             </p>
                         </form>
                     </div>
@@ -140,13 +134,5 @@ function RegisterPage({apiUrl}: InferGetServerSidePropsType<typeof getStaticProp
         </>
     );
 }
-
-export const getStaticProps: GetStaticProps = async () => {
-    return {
-        props: {
-            apiUrl: process.env.PEC_CLIENT_API_URL
-        }
-    };
-};
 
 export default RegisterPage;

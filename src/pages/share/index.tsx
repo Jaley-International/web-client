@@ -9,14 +9,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {faCloud, faDownload, faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {base64UrlToHex} from "../../util/util";
 import {request} from "../../util/communication";
-import {GetStaticProps, InferGetStaticPropsType} from "next";
 import {ShareLink, Node, EncryptedNode, downloadFile} from "../../util/processes";
 import forge from "node-forge";
 import ToastPortal, {ToastRef} from "../../components/toast/ToastPortal";
 import {ToastProps} from "../../components/toast/Toast";
 import {decrypt} from "../../util/security";
+import getConfig from "next/config";
 
-function SharePage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
+function SharePage(): JSX.Element {
+
+    const {publicRuntimeConfig} = getConfig();
 
     const toastRef = useRef<ToastRef>(null);
     const addToast = (toast: ToastProps) => {
@@ -35,7 +37,7 @@ function SharePage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JS
             id = base64UrlToHex(params[1]);
             const shareKey = base64UrlToHex(params[2]);
 
-            request("GET", `${apiUrl}/links/${id}/node`, {}).then((response) => {
+            request("GET", `${publicRuntimeConfig.apiUrl}/links/${id}/node`, {}).then((response) => {
 
                 if (response.status === "SUCCESS") {
 
@@ -64,7 +66,7 @@ function SharePage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JS
                 }
             });
         }
-    }, []);
+    });
 
 
 
@@ -93,7 +95,7 @@ function SharePage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JS
                             <div className="p-12 bg-blue-soft rounded-xl">
                                 <div className="w-full h-full flex justify-center">
                                     <Button className="mx-auto my-auto w-32" size="medium" type="regular" colour="blue" onClick={async () => {
-                                        const status = await downloadFile(node, apiUrl);
+                                        const status = await downloadFile(node);
                                         if (status === "ERROR_FETCH")
                                             addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
                                         else if (status === "ERROR_DECRYPT")
@@ -116,7 +118,7 @@ function SharePage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JS
         return (
             <>
                 <div className="h-screen bg-bg-light">
-                    <Link href="/">
+                    <Link href="/" passHref>
                         <div className="p-8 h-8 inline-flex space-x-3 cursor-pointer">
                             <div className="w-12 h-12 rounded-2lg bg-gradient-to-bl from-blue-gradient-from to-blue-gradient-to text-center text-2lg text-white py-1">
                                 <FontAwesomeIcon icon={faCloud} /> {/* TODO Change icon */}
@@ -146,13 +148,5 @@ function SharePage({apiUrl}: InferGetStaticPropsType<typeof getStaticProps>): JS
     }
 
 }
-
-export const getStaticProps: GetStaticProps = async () => {
-    return {
-        props: {
-            apiUrl: process.env.PEC_CLIENT_API_URL
-        }
-    };
-};
 
 export default SharePage;

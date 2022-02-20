@@ -1,12 +1,14 @@
 import NavbarItem from "./NavbarItem";
 import {faFile, faFolderOpen, faBell, faUserCircle} from "@fortawesome/free-regular-svg-icons";
-import {faUserShield, faSlidersH, faExchangeAlt} from "@fortawesome/free-solid-svg-icons";
+import {faUserShield, faSignOutAlt} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCloud} from "@fortawesome/free-solid-svg-icons";
 import {Heading3} from "../../text/Headings";
 import Link from "next/link";
 import {useState} from "react";
 import TransferList from "../../transfers/TransferList";
+import {terminateSession} from "../../../util/processes";
+import {useRouter} from "next/router";
 
 function Navbar(): JSX.Element {
 
@@ -16,6 +18,7 @@ function Navbar(): JSX.Element {
         setShowFileTransfers(prev => !prev);
     }
 
+    const router = useRouter();
 
     return (
         <>
@@ -33,18 +36,24 @@ function Navbar(): JSX.Element {
                 </Link>
 
                 <NavbarItem name="Files" icon={faFile} activeRoutes={[/^\/files$/]} href="/files" />
-                <NavbarItem name="Tracked&nbsp;folders" activeRoutes={[]} icon={faFolderOpen} />
+                <NavbarItem name="Tracked&nbsp;folders" activeRoutes={[]} icon={faFolderOpen} className="cursor-not-allowed" />
                 <NavbarItem name="Admin&nbsp;panel" activeRoutes={[/^\/users.*$/]} icon={faUserShield} href="/users" />
 
                 <div className="w-full py-6">
                     <hr className="mx-auto w-2/3 text-grey-200" />
                 </div>
 
-                <NavbarItem name="Notifications" activeRoutes={[]} icon={faBell} badge="12" />
-                <NavbarItem name="Settings" activeRoutes={[]} icon={faSlidersH} />
-                <NavbarItem name="My&nbsp;account" activeRoutes={[]} icon={faUserCircle} />
+                <NavbarItem name="Notifications" activeRoutes={[]} icon={faBell} badge="12" className="cursor-not-allowed" />
+                <NavbarItem name="My&nbsp;account" activeRoutes={[]} icon={faUserCircle} className="cursor-not-allowed" />
 
-                <NavbarItem name="File&nbsp;transfers" active={showFileTransfers} activeRoutes={[]} icon={faExchangeAlt} className="absolute inset-x-0 bottom-2" badge="3" action={() => toggleFileTransfers()} />
+                <NavbarItem name="Logout" active={false} activeRoutes={[]} icon={faSignOutAlt} className="absolute inset-x-0 bottom-2" action={async () => {
+                    await terminateSession();
+                    await router.reload();
+                }} />
+                {
+                    // FIXME File transfer view
+                    /* <NavbarItem name="File&nbsp;transfers" active={showFileTransfers} activeRoutes={[]} icon={faExchangeAlt} className="absolute inset-x-0 bottom-2" badge="3" action={() => toggleFileTransfers()} />*/
+                }
 
             </nav>
         </>

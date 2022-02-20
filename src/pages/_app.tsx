@@ -1,10 +1,13 @@
 import "../styles/tailwind.css";
 import Head from "next/head";
 import App from "next/app";
+import ExtendSessionModal from "../components/containers/modals/ExtendSessionModal";
 
 class MyApp extends App {
     render() {
+
         const {Component, pageProps} = this.props;
+
         return (
             <>
                 <Head>
@@ -26,7 +29,10 @@ class MyApp extends App {
                     <meta property="twitter:image" content="/banner.png" />
                 </Head>
                 <main>
-                    <Component {...pageProps} />
+                    <>
+                        <Component {...pageProps} />
+                        <ExtendSessionModal />
+                    </>
                 </main>
             </>
         );

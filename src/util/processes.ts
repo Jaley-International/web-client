@@ -1,18 +1,31 @@
 import forge, {Hex} from "node-forge";
-import {request} from "./communication";
-import {setCookies} from "cookies-next";
-import {ToastProps} from "../components/toast/Toast";
-import {addPadding, decrypt, decryptBuffer, encrypt, encryptBuffer, generateRSAKeyPair, INSTANCE_ID, pbkdf2, rsaPrivateDecrypt, sha256, sha512,} from "./security";
+import {APIResponse, request} from "./communication";
+import {removeCookies, setCookies} from "cookies-next";
+import {
+    addPadding,
+    decrypt,
+    decryptBuffer,
+    encrypt,
+    encryptBuffer,
+    generateRSAKeyPair,
+    INSTANCE_ID,
+    pbkdf2,
+    rsaPrivateDecrypt,
+    sha256,
+    sha512,
+} from "./security";
+import getConfig from "next/config";
+import User, {UserAccessLevel} from "../model/User";
 
 export interface EncryptedNode {
     id: number;
     iv: Hex;
     tag: Hex;
-    encryptedKey: Hex;
+    encryptedNodeKey: Hex;
     encryptedMetadata: Hex;
     type: "FOLDER" | "FILE";
     ref: string;
-    encryptedParentKey: Hex;
+    parentEncryptedKey: Hex;
     children: EncryptedNode[];
 }
 
@@ -25,6 +38,9 @@ export interface ShareLink {
 
 export interface MetaData {
     name: string;
+    type?: string;
+    lastModified?: number;
+    size?: number;
     [key: string]: any;
 }
 
@@ -50,14 +66,19 @@ export interface Session {
  * User registration client-side process
  * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
  *
- * @param {string}      username        New account's username.
- * @param {string}      email           New account's email address.
+ * @param {string}      registerKey     New account's username.
  * @param {string}      password        New account's password.
  * @param {function}    updateStatus    Function to update the registration status.
- * @param {string}      apiUrl          API URL.
  * @return {string}                     Status code returned by API.
  */
-export async function register(username: string, email: string, password: string, updateStatus: (message: string) => void, apiUrl: string): Promise<string> {
+export async function register(
+    registerKey: string,
+    password: string,
+    updateStatus: (message: string) => void
+): Promise<string> {
+
+    const {publicRuntimeConfig} = getConfig();
+
     // Generate AES MasterKey (256 bits)
     updateStatus("Generating Master Key...");
     const masterKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
@@ -74,7 +95,7 @@ export async function register(username: string, email: string, password: string
 
     // Generate Salt
     updateStatus("Computing Salt...");
-    const salt = sha256(addPadding(username + INSTANCE_ID + clientRandomValue, 128));
+    const salt = sha256(addPadding(registerKey + INSTANCE_ID + clientRandomValue, 128));
 
     // PPF
     updateStatus("Processing password...");
@@ -89,8 +110,7 @@ export async function register(username: string, email: string, password: string
     const hashedAuthenticationKey = sha512(derivedAuthenticationKey);
 
     const registerData = {
-        username: username,
-        email: email,
+        registerKey: registerKey,
         clientRandomValue: clientRandomValue,
         encryptedMasterKey: encryptedMasterKey,
         hashedAuthenticationKey: hashedAuthenticationKey,
@@ -99,7 +119,7 @@ export async function register(username: string, email: string, password: string
     };
 
     updateStatus("Submitting...");
-    const response = await request("POST", `${apiUrl}/users`, registerData);
+    const response = await request("POST", `${publicRuntimeConfig.apiUrl}/users/register`, registerData);
     return response.status;
 }
 
@@ -110,15 +130,20 @@ export async function register(username: string, email: string, password: string
  *
  * @param {string}      username        Account's username.
  * @param {string}      password        Account's password.
- * @param {string}      apiUrl          API URL.
  * @param {function}    updateStatus    Function to update the authentication status.
  * @return {boolean}                    True if authentication is successful, false otherwise
  */
-export async function authenticate(username: string, password: string, apiUrl: string, updateStatus: (message: string) => void): Promise<boolean> {
+export async function authenticate(
+    username: string,
+    password: string,
+    updateStatus: (message: string) => void
+): Promise<boolean> {
+
+    const {publicRuntimeConfig} = getConfig();
 
     // Salt request
     updateStatus("Requesting salt...");
-    const saltResponse = await request("GET", `${apiUrl}/users/${username}/salt`, {});
+    const saltResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/users/${username}/salt`, {});
 
     if (saltResponse.status !== "SUCCESS")
         return false;
@@ -133,7 +158,7 @@ export async function authenticate(username: string, password: string, apiUrl: s
 
     // Authenticating (session identifier request with encrypted keys)
     updateStatus("Requesting keys...");
-    const authResponse = await request("POST", `${apiUrl}/users/login`, {
+    const authResponse = await request("POST", `${publicRuntimeConfig.apiUrl}/users/login`, {
         username: username,
         derivedAuthenticationKey: derivedAuthenticationKey
     });
@@ -172,10 +197,14 @@ export async function authenticate(username: string, password: string, apiUrl: s
  * @param {File}        file                File to upload.
  * @param {number}      containingFolderID  ID of the containing folder.
  * @param {Hex}         parentFolderKey     Parent folder's key.
- * @param {string}      apiUrl              API URL.
  * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
  */
-export async function uploadFile(file: File, containingFolderID: number, parentFolderKey: Hex, apiUrl: string): Promise<boolean> {
+export async function uploadFile(
+    file: File, containingFolderID: number,
+    parentFolderKey: Hex
+): Promise<boolean> {
+
+    const {publicRuntimeConfig} = getConfig();
 
     // Generate Node Key (256 bits)
     const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
@@ -198,7 +227,7 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
 
     const contentResponse = await request(
         "POST",
-        `${apiUrl}/file-system/content`,
+        `${publicRuntimeConfig.apiUrl}/file-system/content`,
         formData,
         {"Content-Type": "multipart/form-data; "});
     if (contentResponse.status !== "SUCCESS")
@@ -222,14 +251,14 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
     const parentEncryptedKey = "abc";
 
     // Submitting file data to the API
-    const fileResponse = await request("POST", `${apiUrl}/file-system/file`, {
+    const fileResponse = await request("POST", `${publicRuntimeConfig.apiUrl}/file-system/file`, {
         ref: ref,
         iv: forge.util.bytesToHex(iv),
         tag: tag,
-        encryptedKey: encryptedNodeKey,
+        encryptedNodeKey: encryptedNodeKey,
         parentId: containingFolderID,
         encryptedMetadata: encryptedMetadata,
-        encryptedParentKey: parentEncryptedKey
+        parentEncryptedKey: parentEncryptedKey
     });
 
     return fileResponse.status === "SUCCESS";
@@ -241,12 +270,12 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
  * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
  *
  * @param {Node}        node                File to download
- * @param {string}      apiUrl              API URL.
  * @return {Promise<string>}                Download status
  */
-export async function downloadFile(node: Node, apiUrl: string): Promise<string> {
+export async function downloadFile(node: Node): Promise<string> {
+    const {publicRuntimeConfig} = getConfig();
 
-    const response = await request("GET", `${apiUrl}/file-system/${node.id}/content`, {}, {
+    const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/content`, {}, {
         "Content-Encoding": "identity"
     }, {
         responseType: "arraybuffer"
@@ -283,10 +312,15 @@ export async function downloadFile(node: Node, apiUrl: string): Promise<string> 
  * @param {string}      name                Name of the folder.
  * @param {number}      containingFolderID  ID of the containing folder.
  * @param {Hex}         parentFolderKey     Parent folder's key.
- * @param {string}      apiUrl              API URL.
  * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
  */
-export async function createFolder(name: string, containingFolderID: number, parentFolderKey: Hex, apiUrl: string): Promise<boolean> {
+export async function createFolder(
+    name: string,
+    containingFolderID: number,
+    parentFolderKey: Hex,
+): Promise<boolean> {
+
+    const {publicRuntimeConfig} = getConfig();
 
     // Generate Node Key (256 bits)
     const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
@@ -302,12 +336,12 @@ export async function createFolder(name: string, containingFolderID: number, par
     // Compute Encrypted Node Key
     const encryptedNodeKey = encrypt("AES-CTR", sessionStorage.masterKey, iv, nodeKey);
 
-    const response = await request("POST", `${apiUrl}/file-system/folder`, {
+    const response = await request("POST", `${publicRuntimeConfig.apiUrl}/file-system/folder`, {
         iv: forge.util.bytesToHex(iv),
         tag: "",
-        encryptedKey: encryptedNodeKey,
+        encryptedNodeKey: encryptedNodeKey,
         encryptedMetadata: encryptedMetadata,
-        encryptedParentKey: "abc",
+        parentEncryptedKey: "abc",
         parentId: containingFolderID
     });
 
@@ -320,10 +354,10 @@ export async function createFolder(name: string, containingFolderID: number, par
  * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
  *
  * @param {Node}            node            Node to share.
- * @param {string}          apiUrl          API URL.
  * @return {string | null}                  Share Link path, or null if request failed
  */
-export async function createNodeShareLink(node: Node, apiUrl: string): Promise<ShareLink | null> {
+export async function createNodeShareLink(node: Node): Promise<ShareLink | null> {
+    const {publicRuntimeConfig} = getConfig();
 
     // Generate Share Key (256 bits)
     const shareKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
@@ -333,9 +367,10 @@ export async function createNodeShareLink(node: Node, apiUrl: string): Promise<S
 
     // Generate Encrypted Keys
     const encryptedNodeKey = encrypt("AES-CTR", shareKey, iv, node.nodeKey);
-    const encryptedShareKey = encrypt("AES-CTR", sessionStorage.getItem("masterKey") || "", iv, node.nodeKey);
+    const encryptedShareKey = encrypt("AES-CTR",
+        sessionStorage.getItem("masterKey") || "", iv, node.nodeKey);
 
-    const response = await request("POST", `${apiUrl}/links`, {
+    const response = await request("POST", `${publicRuntimeConfig.apiUrl}/links`, {
         nodeId: node.id,
         iv: forge.util.bytesToHex(iv),
         encryptedNodeKey: encryptedNodeKey,
@@ -364,14 +399,14 @@ export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
 
     const decryptNode = (encryptedNode: EncryptedNode, masterKey: Hex): Node => {
         const iv = forge.util.hexToBytes(encryptedNode.iv);
-        const nodeKey = decrypt("AES-CTR", masterKey, iv, encryptedNode.encryptedKey);
+        const nodeKey = decrypt("AES-CTR", masterKey, iv, encryptedNode.encryptedNodeKey);
         return {
             id: encryptedNode.id,
             children: [],
             iv: encryptedNode.iv,
             tag: encryptedNode.tag,
             nodeKey: nodeKey,
-            parentKey: "", //decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedParentKey),
+            parentKey: "", //decrypt("AES-CTR", nodeKey, iv, encryptedNode.parentEncryptedKey),
             metaData: JSON.parse(decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedMetadata)),
             ref: encryptedNode.ref,
             type: encryptedNode.type
@@ -396,7 +431,7 @@ export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
         try {
             // TODO Check node ownership
             decryptedFilesystem.children.push(decryptNode(
-                encryptedChild,  sessionStorage.getItem("masterKey") || ""
+                encryptedChild, sessionStorage.getItem("masterKey") || ""
             ));
         } catch (_) {
             console.warn(`Could not decrypt node ${encryptedChild.id}. Not owner ?`);
@@ -407,23 +442,102 @@ export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
 
 
 /**
- * Validates user's session.
+ * Validates user's session and extends its validity.
  *
  * @param {Session}     session         Session to validate.
  * @param {string}      apiUrl          API URL.
- * @return {boolean}                    True if validation is successful, false otherwise
+ * @return {number}                     New session expiration timestamp if validation is successful, -1 otherwise
  */
-export function validateSession(session: Session, apiUrl: string): boolean {
+export async function validateExtendSession(session: Session, apiUrl: string): Promise<number> {
 
     // Session not set
     if (!session.id || !session.exp)
-        return false;
+        return -1;
 
     // Session expired
     if (Date.now() > session.exp)
-        return false;
+        return -1;
 
-    // TODO Session API verification
+    // FIXME Use request() function instead of fetch
+    const response = await fetch(`${apiUrl}/users/session/extend`, {
+        method: "POST", headers: {"Authorization": `Bearer ${session.id}`}
+    });
+    const parsed: APIResponse = await response.json();
 
-    return true;
+    // Session invalidated by API
+    if (parsed.status !== "SUCCESS")
+        return -1;
+
+    // Update session cookie
+    setCookies("session", {
+        id: session.id,
+        exp: parsed.data.expire,
+    }, {
+        sameSite: true,
+        secure: true
+    });
+    return parsed.data.expire;
+}
+
+
+/**
+ * Logs out the user.
+ */
+export async function terminateSession(): Promise<boolean> {
+    const {publicRuntimeConfig} = getConfig();
+
+    // API Call for session termination
+    const response = await request("POST", `${publicRuntimeConfig.apiUrl}/users/logout`, {});
+
+    // Clearing cookies and session storage
+    removeCookies("session");
+    sessionStorage.clear();
+
+    return response.status === "SUCCESS";
+}
+
+/**
+ * Deletes a user account.
+ *
+ * @param {string}      username        Account's username.
+ * @return {string}                     Deletion status.
+ */
+export async function deleteAccount(username: string) {
+    const {publicRuntimeConfig} = getConfig();
+    const response = await request("DELETE", `${publicRuntimeConfig.apiUrl}/users/${username}`, {});
+    return response.status;
+}
+
+/**
+ * Updates a user account.
+ *
+ * @param {User}                user
+ * @param {string}              firstName
+ * @param {string}              lastName
+ * @param {string}              email
+ * @param {string}              group
+ * @param {string}              job
+ * @param {UserAccessLevel}     accessLevel
+ */
+export async function updateAccount(
+    user: User,
+    firstName?: string,
+    lastName?: string,
+    email?: string,
+    group?: string,
+    job?: string,
+    accessLevel?: UserAccessLevel
+): Promise<string> {
+    const {publicRuntimeConfig} = getConfig();
+
+    const response = await request("PATCH", `${publicRuntimeConfig.apiUrl}/users/${user.username}`, {
+        firstName: firstName || user.firstName,
+        lastName: lastName || user.lastName,
+        email: email || user.email,
+        group: group || user.group,
+        job: job || user.job,
+        accessLevel: accessLevel || user.accessLevel
+    });
+
+    return response.status;
 }

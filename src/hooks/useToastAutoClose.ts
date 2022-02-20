@@ -6,10 +6,9 @@ export function useToastAutoClose(toasts: ToastProps[], setToasts: (toasts: Toas
     const [removing, setRemoving] = useState("");
 
     useEffect(() => {
-        if (removing) {
+        if (removing)
             setToasts(toasts.filter(t => t.key !== removing));
-        }
-    }, [removing]);
+    }, [removing, setToasts]);
 
     useEffect(() => {
         if (toasts.length) {
