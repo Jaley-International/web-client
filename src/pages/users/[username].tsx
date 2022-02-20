@@ -58,7 +58,7 @@ function UserPage(): JSX.Element {
         if (!loaded && router.query.username)
             fetchUser(router.query.username as string).then(_ => {
             });
-    }, [router.query, fetchUser]);
+    });
 
     const firstnameRef = useRef<HTMLInputElement>(null);
     const lastnameRef = useRef<HTMLInputElement>(null);

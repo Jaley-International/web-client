@@ -1,5 +1,7 @@
 module.exports = {
-  plugins: [
-      "tailwindcss"
-  ],
+    plugins: {
+        tailwindcss: {},
+        autoprefixer: {},
+        ...(process.env.PEC_API_MODE === 'production' ? { cssnano: {} } : {})
+    }
 }
