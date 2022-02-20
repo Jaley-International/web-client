@@ -111,7 +111,7 @@ function RegisterPage(): JSX.Element {
                                 setSubmitting(false);
                             }
                         }}>
-                            <TextInput ref={registerKeyRef} type="text" label="Register Key" name="registerKey" hint="Code received by email to register your account." required={true} minLength={16} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-_]{16}$/.test(str)} />
+                            <TextInput ref={registerKeyRef} type="text" label="Register Key" name="registerKey" hint="Code received by email to register your account." autoFocus={true} required={true} minLength={16} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-_]{16}$/.test(str)} />
                             <NewPasswordInput ref={passwordRef} label="Password" name="password" required={true} />
                             <TextInput ref={passwordConfirmRef} type="password" autoComplete="new-password" label="Confirm password" name="password2" hint="Must match the password you entered above." required={true} validator={(str: string) => str === passwordRef.current?.value} onChange={() => passwordRef.current?.value !== passwordConfirmRef.current?.value ? passwordConfirmRef.current?.setCustomValidity("Passwords don't match.") : passwordConfirmRef.current?.setCustomValidity("")} />
                             <Checkbox ref={tosRef} name="tos" check={false} required={true}>

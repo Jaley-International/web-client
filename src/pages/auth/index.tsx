@@ -111,7 +111,7 @@ function LoginPage(): JSX.Element {
                                 if (success) {
                                     updateStatus("Redirecting...");
                                     addToast({type: "success", title: "Welcome!", message: "Successfully authenticated."});
-                                    setTimeout(() => router.push("/"), 2000);
+                                    setTimeout(() => router.reload(), 2000);
                                 } else {
                                     updateStatus("Login");
                                     setSubmitting(false);
@@ -119,7 +119,7 @@ function LoginPage(): JSX.Element {
                                 }
                             }
                         }}>
-                            <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
+                            <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" autoFocus={true} required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
                             <TextInput ref={passwordRef} type="password" autoComplete="password" label="Password" name="password" required={true} />
                             <Button ref={submitRef} size="large" type="regular" colour="blue" className="w-full">
                                 Login

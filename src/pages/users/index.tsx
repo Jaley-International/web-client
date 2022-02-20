@@ -43,7 +43,7 @@ function UserList(): JSX.Element {
     useEffect(() => {
         if (!loaded)
             fetchUsers().then(_ => {});
-    }, []);
+    });
 
     return (
         <>

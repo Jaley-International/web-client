@@ -1,7 +1,7 @@
 import ModalHeader from "./subcomponents/ModalHeader";
 import Button from "../../buttons/Button";
 import {useEffect, useState} from "react";
-import {logoutSession, Session, validateExtendSession} from "../../../util/processes";
+import {terminateSession, Session, validateExtendSession} from "../../../util/processes";
 import {useRouter} from "next/router";
 import {getCookie} from "cookies-next";
 import getConfig from "next/config";
@@ -29,9 +29,8 @@ function ExtendSessionModal(): JSX.Element {
             }, 1000);
             return () => clearInterval(timer);
         } else {
-            logoutSession().then(_ => {});
-            router.push("/").then(_ => {
-            });
+            terminateSession().then(_ => {});
+            router.reload();
         }
     }, [expire, remaining, setRemaining, router]);
 
@@ -60,8 +59,8 @@ function ExtendSessionModal(): JSX.Element {
                         <div className="pt-8 text-center space-x-4">
                             <Button size="medium" type="regular" colour="orange" onClick={extendSession}>Extend session</Button>
                             <Button size="medium" type="regular" colour="dark" onClick={async () => {
-                                await logoutSession();
-                                await router.push("/");
+                                await terminateSession();
+                                router.reload();
                             }}>Logout immediately</Button>
                         </div>
                     </div>

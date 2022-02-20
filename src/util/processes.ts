@@ -481,9 +481,9 @@ export async function validateExtendSession(session: Session, apiUrl: string): P
 
 
 /**
- * Terminates user's session.
+ * Logs out the user.
  */
-export async function logoutSession(): Promise<boolean> {
+export async function terminateSession(): Promise<boolean> {
     const {publicRuntimeConfig} = getConfig();
 
     // API Call for session termination

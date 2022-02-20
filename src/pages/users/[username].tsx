@@ -58,7 +58,7 @@ function UserPage(): JSX.Element {
         if (!loaded && router.query.username)
             fetchUser(router.query.username as string).then(_ => {
             });
-    }, [router.query]);
+    }, [router.query, fetchUser]);
 
     const firstnameRef = useRef<HTMLInputElement>(null);
     const lastnameRef = useRef<HTMLInputElement>(null);
@@ -364,7 +364,7 @@ function UserPage(): JSX.Element {
                                         </div>
                                         <div className="w-96 text-center my-auto h-full">
                                             <Button size="medium" type="regular" colour="orange" onClick={() => {
-                                                alert("TODO User suspension")
+                                                addToast({type: "info", title: "Work in progress feature", message: "User suspension is currently a work-in-progress/planned feature."});
                                             }}>Suspend account</Button>
                                         </div>
                                     </div>
@@ -380,7 +380,7 @@ function UserPage(): JSX.Element {
                                         </div>
                                         <div className="w-96 text-center my-auto h-full">
                                             <Button size="medium" type="regular" colour="red" onClick={() => {
-                                                alert("TODO User deletion")
+                                                addToast({type: "info", title: "Work in progress feature", message: "User deletion is currently a work-in-progress/planned feature."});
                                             }}>Delete account</Button>
                                         </div>
                                     </div>
