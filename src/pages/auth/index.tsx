@@ -35,21 +35,6 @@ function LoginPage(): JSX.Element {
 
     const [submitting, setSubmitting] = useState(false);
 
-    useEffect(() => {
-        if (submitting) {
-            (usernameRef.current as HTMLInputElement).disabled = true;
-            (passwordRef.current as HTMLInputElement).disabled = true;
-            (submitRef.current as HTMLButtonElement).disabled = true;
-            (submitRef.current as HTMLButtonElement).classList.add("animate-pulse");
-        } else {
-            (usernameRef.current as HTMLInputElement).disabled = false;
-            (passwordRef.current as HTMLInputElement).disabled = false;
-            (submitRef.current as HTMLButtonElement).disabled = false;
-            (submitRef.current as HTMLButtonElement).classList.remove("animate-pulse");
-            (passwordRef.current as HTMLInputElement).value = "";
-        }
-    }, [submitting]);
-
     return (
         <>
             <section className="flex">
@@ -117,11 +102,12 @@ function LoginPage(): JSX.Element {
                                     setSubmitting(false);
                                     addToast({type: "warning", title: "Invalid credentials", message: "Please check your username and password then try again."});
                                 }
+                                (passwordRef.current as HTMLInputElement).value = "";
                             }
                         }}>
-                            <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" autoFocus={true} required={true} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
-                            <TextInput ref={passwordRef} type="password" autoComplete="password" label="Password" name="password" required={true} />
-                            <Button ref={submitRef} size="large" type="regular" colour="blue" className="w-full">
+                            <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" autoFocus={true} required={true} disabled={submitting} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
+                            <TextInput ref={passwordRef} type="password" autoComplete="password" label="Password" name="password" required={true} disabled={submitting} />
+                            <Button ref={submitRef} size="large" type="regular" colour="blue" disabled={submitting} className={`w-full${submitting ? " animate-pulse" : ""}`}>
                                 Login
                             </Button>
                             <br />

@@ -99,8 +99,7 @@ function UserList(): JSX.Element {
                                                             </div>
                                                         }
                                                         <div className="grid content-center leading-4">
-                                                            {/* TODO replace username by first name and last name */}
-                                                            <span className="text-txt-heading font-semibold text-2xs">{user.username}</span>
+                                                            <span className="text-txt-heading font-semibold text-2xs">{user.firstName} {user.lastName}</span>
                                                             <span className="text-txt-body-muted font-light text-4xs">{user.job}</span>
                                                         </div>
                                                     </div>

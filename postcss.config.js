@@ -2,6 +2,6 @@ module.exports = {
     plugins: {
         tailwindcss: {},
         autoprefixer: {},
-        ...(process.env.PEC_API_MODE === 'production' ? { cssnano: {} } : {})
+        ...(process.env.PEC_CLIENT_MODE === "production" ? { cssnano: {} } : {})
     }
 }

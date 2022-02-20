@@ -37,7 +37,10 @@ function OptionsButton(props: Props): JSX.Element {
         <>
             <Button ref={btnRef} size="medium" type="soft" colour="dark" className="context pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500" onClick={(e) => {
                 setShowContextMenu(!showContextMenu);
-                setContextMenuCoords({x: e.pageX - 420, y: e.pageY}); // FIXME Arbitrary left offset
+                if (btnRef.current) {
+                    const bounds = btnRef.current.getBoundingClientRect();
+                    setContextMenuCoords({x: bounds.x, y: bounds.y});
+                }
             }}>
                 <FontAwesomeIcon icon={faEllipsisV} />
             </Button>

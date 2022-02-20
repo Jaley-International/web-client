@@ -1,4 +1,4 @@
-import {forwardRef, Ref, useEffect, useImperativeHandle, useState} from "react";
+import {forwardRef, Ref, useImperativeHandle, useState} from "react";
 import {createPortal} from "react-dom";
 import {useToastPortal} from "../../hooks/useToastPortal";
 import Toast, {ToastProps} from "./Toast";

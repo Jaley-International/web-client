@@ -7,7 +7,7 @@ import React, {useEffect, useRef, useState} from "react";
 import Badge from "../../components/Badge";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {faCloud, faDownload, faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
-import {base64UrlToHex} from "../../util/util";
+import {base64UrlToHex, formatBytes} from "../../util/util";
 import {request} from "../../util/communication";
 import {ShareLink, Node, EncryptedNode, downloadFile} from "../../util/processes";
 import forge from "node-forge";
@@ -25,6 +25,7 @@ function SharePage(): JSX.Element {
         toastRef.current?.addMessage(toast);
     };
 
+    const [loaded, setLoaded] = useState<boolean>(false);
     const [node, setNode] = useState<Node | null>(null);
 
     const router = useRouter();
@@ -62,12 +63,13 @@ function SharePage(): JSX.Element {
                         });
                     } catch (e) {
                         console.error(e)
+                    } finally {
+                        setLoaded(true);
                     }
                 }
             });
         }
     });
-
 
 
     if (node) {
@@ -88,7 +90,7 @@ function SharePage(): JSX.Element {
                             <div className="w-full p-10">
                                 <Heading2>{node.metaData.name}</Heading2>
                                 <div className="flex space-x-2 pt-2">
-                                    <Badge text="238 kB" size="small" colour="blue" />
+                                    <Badge text={formatBytes(node.metaData.size || 0)} size="small" colour="blue" />
                                     <Badge text={node.metaData.name.split(".").pop()?.toUpperCase() + " File"} size="small" colour="blue" />
                                 </div>
                             </div>
@@ -114,7 +116,7 @@ function SharePage(): JSX.Element {
                 <ToastPortal ref={toastRef}/>
             </>
         );
-    } else {
+    } else if (loaded) {
         return (
             <>
                 <div className="h-screen bg-bg-light">
@@ -145,6 +147,10 @@ function SharePage(): JSX.Element {
                 <ToastPortal ref={toastRef}/>
             </>
         );
+    } else {
+        return (
+            <></>
+        )
     }
 
 }

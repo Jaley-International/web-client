@@ -1,6 +1,5 @@
 import {randomString} from "../../util/util";
 import React, {LegacyRef, useState} from "react";
-import Button from "../buttons/Button";
 
 interface Props {
     children: JSX.Element | JSX.Element[] | string;
@@ -8,6 +7,7 @@ interface Props {
     check: boolean;
     required?: boolean;
     className?: string;
+    disabled?: boolean;
 }
 
 const Checkbox = React.forwardRef((props: Props, ref: LegacyRef<HTMLInputElement> | undefined) => {
@@ -18,7 +18,7 @@ const Checkbox = React.forwardRef((props: Props, ref: LegacyRef<HTMLInputElement
     return (
         <div className={props.className}>
             <label className="block text-txt-body text-xs inline-flex space-x-2" htmlFor={id}>
-                <input ref={ref} className="w-5 h-5 focus:ring-blue-light disabled:cursor-not-allowed rounded-sm border-input-border outline-none transition-colors duration-200 ease-in-out" required={props.required} type="checkbox" id={id} name={props.name} checked={checked} onChange={() => setChecked(!checked)} />
+                <input ref={ref} className="w-5 h-5 focus:ring-blue-light disabled:cursor-not-allowed rounded-sm border-input-border outline-none transition-colors duration-200 ease-in-out" required={props.required} disabled={props.disabled} type="checkbox" id={id} name={props.name} checked={checked} onChange={() => setChecked(!checked)} />
                 {props.children}
             </label>
         </div>

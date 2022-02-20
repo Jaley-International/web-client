@@ -46,7 +46,7 @@ function UserPage(): JSX.Element {
                 profilePicture: null,
                 job: rawUser.job || "Unknown",
                 group: rawUser.group || "Unknown",
-                accessLevel: UserAccessLevel.USER
+                accessLevel: rawUser.accessLevel
             });
         } else {
             setUser(null);
@@ -67,25 +67,21 @@ function UserPage(): JSX.Element {
     const jobRef = useRef<HTMLSelectElement>(null);
     const accessLevelRef = useRef<HTMLSelectElement>(null);
 
-    if (!loaded) {
-        return (
-            <></>
-        );
-    } else if (user) {
 
-        return (
-            <>
-                <div className="flex bg-bg-light">
-                    <Navbar/>
-                    <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
-                        <Header title="User details">
-                            <Link href="/users" passHref>
-                                <Button size="small" type="regular" colour="dark">
-                                    <span><FontAwesomeIcon icon={faArrowLeft}/>&nbsp;&nbsp;Back to user list</span>
-                                </Button>
-                            </Link>
-                        </Header>
+    return (
+        <>
+            <div className="flex bg-bg-light">
+                <Navbar/>
+                <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
+                    <Header title="User details">
+                        <Link href="/users" passHref>
+                            <Button size="small" type="regular" colour="dark">
+                                <span><FontAwesomeIcon icon={faArrowLeft}/>&nbsp;&nbsp;Back to user list</span>
+                            </Button>
+                        </Link>
+                    </Header>
 
+                    {loaded && user &&
                         <div className="w-full p-8 space-y-8">
 
                             {/* User summary */}
@@ -114,7 +110,8 @@ function UserPage(): JSX.Element {
                                     </div>
                                     <div className="w-80 text-right">
                                         <Badge text={capitalize(user.accessLevel)} size="small"
-                                               colour={user.accessLevel === UserAccessLevel.ADMINISTRATOR ? "orange" : (user.accessLevel === UserAccessLevel.USER ? "green" : "blue")}/><br/><br/>
+                                               colour={user.accessLevel === UserAccessLevel.ADMINISTRATOR ? "orange" : (user.accessLevel === UserAccessLevel.USER ? "green" : "blue")}/>
+                                        <br/><br/>
                                         <span className="text-txt-body">Member since 01/01/1970</span><br/>
                                         <span className="text-txt-body">Last active 2 hours ago</span>
                                     </div>
@@ -155,9 +152,9 @@ function UserPage(): JSX.Element {
                                             </div>
                                         </td>
                                         <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
+                                            <span className="text-txt-body text-xs">
+                                                September 1, 2021
+                                            </span>
                                         </td>
                                         <td className="py-2 px-4">
                                             <div className="flex">
@@ -195,9 +192,9 @@ function UserPage(): JSX.Element {
                                             </div>
                                         </td>
                                         <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
+                                            <span className="text-txt-body text-xs">
+                                                September 1, 2021
+                                            </span>
                                         </td>
                                         <td className="py-2 px-4">
                                             <div className="flex">
@@ -235,9 +232,9 @@ function UserPage(): JSX.Element {
                                             </div>
                                         </td>
                                         <td className="py-2 px-4">
-                                        <span className="text-txt-body text-xs">
-                                            September 1, 2021
-                                        </span>
+                                            <span className="text-txt-body text-xs">
+                                                September 1, 2021
+                                            </span>
                                         </td>
                                         <td className="py-2 px-4">
                                             <div className="flex">
@@ -358,9 +355,9 @@ function UserPage(): JSX.Element {
                                 <Card className="text-orange-light w-1/2" title="Suspend account" separator={false}>
                                     <div className="flex text-txt-body px-6 pb-6 pt-2">
                                         <div className="w-full">
-                                        <span>
-                                            By suspending this account, the user will no longer be able to log in. Their files will still be available by those it has been shared with and all administrators.
-                                        </span>
+                                            <span>
+                                                By suspending this account, the user will no longer be able to log in. Their files will still be available by those it has been shared with and all administrators.
+                                            </span>
                                         </div>
                                         <div className="w-96 text-center my-auto h-full">
                                             <Button size="medium" type="regular" colour="orange" onClick={() => {
@@ -372,11 +369,11 @@ function UserPage(): JSX.Element {
                                 <Card className="text-red w-1/2" title="Delete account" separator={false}>
                                     <div className="flex text-txt-body px-6 pb-6 pt-2">
                                         <div className="w-full">
-                                        <span>
-                                            By deleting this account, all the user&apos;s data will be lost.<br/>
-                                            Their files and folders will be transferred to you.<br/>
-                                            This process is definitive and cannot be reversed.
-                                        </span>
+                                            <span>
+                                                By deleting this account, all the user&apos;s data will be lost.<br/>
+                                                Their files and folders will be transferred to you.<br/>
+                                                This process is definitive and cannot be reversed.
+                                            </span>
                                         </div>
                                         <div className="w-96 text-center my-auto h-full">
                                             <Button size="medium" type="regular" colour="red" onClick={() => {
@@ -388,48 +385,35 @@ function UserPage(): JSX.Element {
                             </div>
 
                         </div>
+                    }
 
-                    </div>
-                </div>
-                <ToastPortal ref={toastRef}/>
-            </>
-        );
-    } else {
-        return (
-            <div className="flex bg-bg-light">
-                <Navbar/>
-                <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
-                    <Header title="User details">
-                        <Link href="/users" passHref>
-                            <Button size="small" type="regular" colour="dark">
-                                <span><FontAwesomeIcon icon={faArrowLeft}/>&nbsp;&nbsp;Back to user list</span>
-                            </Button>
-                        </Link>
-                    </Header>
-
-                    <div className="w-full py-40">
-                        <Card className="w-1/2 mx-auto my-auto">
-                            <div className="flex p-4">
-                                <div className="w-full p-10">
-                                    <Heading2>User not found.</Heading2>
-                                    <span className="text-txt-body">The user you are looking does not exists or has been deleted.</span>
-                                </div>
-                                <div className="p-12 bg-red-soft rounded-xl">
-                                    <div className="w-full h-full flex justify-center">
-                                        <Link href="/users" passHref>
-                                            <Button className="mx-auto my-auto w-24" size="medium" type="regular"
-                                                    colour="red">Go back</Button>
-                                        </Link>
+                    {loaded && !user &&
+                        <div className="w-full py-40">
+                            <Card className="w-1/2 mx-auto my-auto">
+                                <div className="flex p-4">
+                                    <div className="w-full p-10">
+                                        <Heading2>User not found.</Heading2>
+                                        <span className="text-txt-body">The user you are looking does not exists or has been deleted.</span>
+                                    </div>
+                                    <div className="p-12 bg-red-soft rounded-xl">
+                                        <div className="w-full h-full flex justify-center">
+                                            <Link href="/users" passHref>
+                                                <Button className="mx-auto my-auto w-24" size="medium" type="regular"
+                                                        colour="red">Go back</Button>
+                                            </Link>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </Card>
-                    </div>
+                            </Card>
+                        </div>
+                    }
+
 
                 </div>
             </div>
-        );
-    }
+            <ToastPortal ref={toastRef}/>
+        </>
+    );
 }
 
 export default UserPage;
