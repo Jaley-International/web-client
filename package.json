@@ -14,7 +14,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.16",
     "autoprefixer": "^10.4.0",
-    "axios": "^0.24.0",
+    "axios": "^0.25.0",
     "cookies-next": "^2.0.3",
     "dotenv": "^16.0.0",
     "fs": "^0.0.1-security",
