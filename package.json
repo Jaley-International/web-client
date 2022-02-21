@@ -17,7 +17,7 @@
     "axios": "^0.24.0",
     "cookies-next": "^2.0.3",
     "dotenv": "^16.0.0",
-    "fs": "^0.0.1-security",
+    "fs": "^0.0.2",
     "next": "12.1.0",
     "node-forge": "^1.0.0",
     "postcss": "^8.3.11",
