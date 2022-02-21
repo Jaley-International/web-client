@@ -18,7 +18,7 @@ function ShareLinkModal(props: Props): JSX.Element {
 
     const shareKey = decrypt(
         "AES-CTR",
-        sessionStorage.getItem("masterKey") || "",
+        localStorage.getItem("masterKey") || "",
         forge.util.hexToBytes(props.sharelink.iv),
         props.sharelink.encryptedShareKey);
 

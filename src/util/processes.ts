@@ -173,9 +173,9 @@ export async function authenticate(
     const sessionIdentifier = rsaPrivateDecrypt(privateSharingKey, authResponse.data.loginDetails.encryptedSessionIdentifier);
 
     // Storing keys to the session storage
-    sessionStorage.setItem("masterKey", masterKey);
-    sessionStorage.setItem("publicSharingKey", authResponse.data.loginDetails.rsaPublicSharingKey);
-    sessionStorage.setItem("privateSharingKey", privateSharingKey);
+    localStorage.setItem("masterKey", masterKey);
+    localStorage.setItem("publicSharingKey", authResponse.data.loginDetails.rsaPublicSharingKey);
+    localStorage.setItem("privateSharingKey", privateSharingKey);
 
     // Storing session in cookies
     setCookies("session", {
@@ -244,7 +244,7 @@ export async function uploadFile(
     const encryptedMetadata = encrypt("AES-CTR", nodeKey, iv, JSON.stringify(metaData));
 
     // Compute Encrypted Node Key
-    const encryptedNodeKey = encrypt("AES-CTR", sessionStorage.masterKey, iv, nodeKey);
+    const encryptedNodeKey = encrypt("AES-CTR", localStorage.masterKey, iv, nodeKey);
 
     // Compute Parent Encrypted Key
     //const parentEncryptedKey = encrypt("AES-CTR", parentFolderKey, nodeKey, iv);
@@ -334,7 +334,7 @@ export async function createFolder(
     }));
 
     // Compute Encrypted Node Key
-    const encryptedNodeKey = encrypt("AES-CTR", sessionStorage.masterKey, iv, nodeKey);
+    const encryptedNodeKey = encrypt("AES-CTR", localStorage.masterKey, iv, nodeKey);
 
     const response = await request("POST", `${publicRuntimeConfig.apiUrl}/file-system/folder`, {
         iv: forge.util.bytesToHex(iv),
@@ -368,7 +368,7 @@ export async function createNodeShareLink(node: Node): Promise<ShareLink | null>
     // Generate Encrypted Keys
     const encryptedNodeKey = encrypt("AES-CTR", shareKey, iv, node.nodeKey);
     const encryptedShareKey = encrypt("AES-CTR",
-        sessionStorage.getItem("masterKey") || "", iv, node.nodeKey);
+        localStorage.getItem("masterKey") || "", iv, node.nodeKey);
 
     const response = await request("POST", `${publicRuntimeConfig.apiUrl}/links`, {
         nodeId: node.id,
@@ -431,7 +431,7 @@ export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
         try {
             // TODO Check node ownership
             decryptedFilesystem.children.push(decryptNode(
-                encryptedChild, sessionStorage.getItem("masterKey") || ""
+                encryptedChild, localStorage.getItem("masterKey") || ""
             ));
         } catch (_) {
             console.warn(`Could not decrypt node ${encryptedChild.id}. Not owner ?`);
@@ -491,7 +491,7 @@ export async function terminateSession(): Promise<boolean> {
 
     // Clearing cookies and session storage
     removeCookies("session");
-    sessionStorage.clear();
+    localStorage.clear();
 
     return response.status === "SUCCESS";
 }

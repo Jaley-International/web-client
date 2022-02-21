@@ -20,7 +20,7 @@ function LoginPage(): JSX.Element {
         if (window && !loaded) {
             setLoaded(true);
             removeCookies("session");
-            sessionStorage.clear();
+            localStorage.clear();
         }
     }, [loaded]);
 
