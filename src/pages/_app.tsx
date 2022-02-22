@@ -2,6 +2,7 @@ import "../styles/tailwind.css";
 import Head from "next/head";
 import App from "next/app";
 import ExtendSessionModal from "../components/containers/modals/ExtendSessionModal";
+import ToastProvider from "../components/toast/ToastProvider";
 
 class MyApp extends App {
     render() {
@@ -29,10 +30,12 @@ class MyApp extends App {
                     <meta property="twitter:image" content="/banner.png" />
                 </Head>
                 <main>
-                    <>
-                        <Component {...pageProps} />
-                        <ExtendSessionModal />
-                    </>
+                    <ToastProvider>
+                        <>
+                            <Component {...pageProps} />
+                            <ExtendSessionModal />
+                        </>
+                    </ToastProvider>
                 </main>
             </>
         );
