@@ -10,6 +10,7 @@ import {authenticate} from "../../util/processes";
 import {useRouter} from "next/router";
 import {removeCookies} from "cookies-next";
 import ToastContext from "../../contexts/ToastContext";
+import ContentTransition from "../../components/sections/ContentTransition";
 
 function LoginPage(): JSX.Element {
 
@@ -60,7 +61,7 @@ function LoginPage(): JSX.Element {
                     </svg>
                 </div>
             </div>
-            <div className="flex-auto w-7/12 min-h-screen bg-bg-light">
+            <ContentTransition className="flex-auto w-7/12 min-h-screen bg-bg-light">
 
                 <div className="px-8 md:px-20 lg:px-36 xl:px-48">
 
@@ -113,7 +114,7 @@ function LoginPage(): JSX.Element {
                         </p>
                     </form>
                 </div>
-            </div>
+            </ContentTransition>
         </section>
     );
 }

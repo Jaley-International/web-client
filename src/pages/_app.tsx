@@ -3,6 +3,7 @@ import Head from "next/head";
 import App from "next/app";
 import ExtendSessionModal from "../components/containers/modals/ExtendSessionModal";
 import ToastProvider from "../components/toast/ToastProvider";
+import {AnimatePresence} from "framer-motion";
 
 class MyApp extends App {
     render() {
@@ -32,7 +33,9 @@ class MyApp extends App {
                 <main>
                     <ToastProvider>
                         <>
-                            <Component {...pageProps} />
+                            <AnimatePresence>
+                                <Component {...pageProps} />
+                            </AnimatePresence>
                             <ExtendSessionModal />
                         </>
                     </ToastProvider>

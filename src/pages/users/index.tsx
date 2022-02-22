@@ -17,6 +17,7 @@ import getConfig from "next/config";
 import Badge from "../../components/Badge";
 import {capitalize} from "../../util/util";
 import ToastContext from "../../contexts/ToastContext";
+import ContentTransition from "../../components/sections/ContentTransition";
 
 function UserList(): JSX.Element {
     const {publicRuntimeConfig} = getConfig();
@@ -53,7 +54,7 @@ function UserList(): JSX.Element {
                     </Link>
                 </Header>
 
-                <div className="w-full p-8">
+                <ContentTransition className="w-full p-8">
                     <Card title="Users" className="pb-2">
                         <table className="w-full">
                             <thead>
@@ -125,7 +126,7 @@ function UserList(): JSX.Element {
                             </tbody>
                         </table>
                     </Card>
-                </div>
+                </ContentTransition>
 
             </div>
             {showDeleteModal && modalUserTarget !== null &&

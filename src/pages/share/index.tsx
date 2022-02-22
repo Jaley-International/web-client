@@ -14,6 +14,7 @@ import forge from "node-forge";
 import {decrypt} from "../../util/security";
 import getConfig from "next/config";
 import ToastContext from "../../contexts/ToastContext";
+import ContentTransition from "../../components/sections/ContentTransition";
 
 function SharePage(): JSX.Element {
 
@@ -70,7 +71,7 @@ function SharePage(): JSX.Element {
 
     if (node) {
         return (
-            <div className="h-screen bg-bg-light">
+            <ContentTransition className="h-screen bg-bg-light">
                 <Link href="/" passHref>
                     <div className="p-8 h-8 inline-flex space-x-3 cursor-pointer">
                         <div className="w-12 h-12 rounded-2lg bg-gradient-to-bl from-blue-gradient-from to-blue-gradient-to text-center text-2lg text-white py-1">
@@ -107,11 +108,11 @@ function SharePage(): JSX.Element {
                     </div>
                 </Card>
 
-            </div>
+            </ContentTransition>
         );
     } else if (loaded) {
         return (
-            <div className="h-screen bg-bg-light">
+            <ContentTransition className="h-screen bg-bg-light">
                 <Link href="/" passHref>
                     <div className="p-8 h-8 inline-flex space-x-3 cursor-pointer">
                         <div className="w-12 h-12 rounded-2lg bg-gradient-to-bl from-blue-gradient-from to-blue-gradient-to text-center text-2lg text-white py-1">
@@ -135,7 +136,7 @@ function SharePage(): JSX.Element {
                     </div>
                 </Card>
 
-            </div>
+            </ContentTransition>
         );
     } else {
         return (

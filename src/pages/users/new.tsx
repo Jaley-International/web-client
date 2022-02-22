@@ -10,6 +10,7 @@ import Select from "../../components/inputs/Select";
 import {request} from "../../util/communication";
 import getConfig from "next/config";
 import ToastContext from "../../contexts/ToastContext";
+import ContentTransition from "../../components/sections/ContentTransition";
 
 function NewUser(): JSX.Element {
 
@@ -62,7 +63,7 @@ function NewUser(): JSX.Element {
                     </Link>
                 </Header>
 
-                <div className="w-full p-8">
+                <ContentTransition className="w-full p-8">
 
                     <div className="mb-10">
                         <div className="flex space-x-4">
@@ -193,7 +194,7 @@ function NewUser(): JSX.Element {
                         </Button>
 
                     </form>
-                </div>
+                </ContentTransition>
 
             </div>
         </div>

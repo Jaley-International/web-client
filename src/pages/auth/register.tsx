@@ -7,11 +7,11 @@ import TextInput from "../../components/inputs/TextInput";
 import Button from "../../components/buttons/Button";
 import Checkbox from "../../components/inputs/Checkbox";
 import {register} from "../../util/processes";
-import ToastPortal from "../../components/toast/ToastPortal";
 import NewPasswordInput from "../../components/inputs/NewPasswordInput";
 import Link from "next/link";
 import {useRouter} from "next/router";
 import ToastContext from "../../contexts/ToastContext";
+import ContentTransition from "../../components/sections/ContentTransition";
 
 function RegisterPage(): JSX.Element {
 
@@ -56,7 +56,7 @@ function RegisterPage(): JSX.Element {
                     </svg>
                 </div>
             </div>
-            <div className="flex-auto w-7/12 min-h-screen bg-bg-light">
+            <ContentTransition className="flex-auto w-7/12 min-h-screen bg-bg-light">
 
                 <div className="px-8 md:px-20 lg:px-36 xl:px-48">
 
@@ -114,7 +114,7 @@ function RegisterPage(): JSX.Element {
                         </p>
                     </form>
                 </div>
-            </div>
+            </ContentTransition>
         </section>
     );
 }

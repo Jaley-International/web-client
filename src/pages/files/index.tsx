@@ -11,6 +11,7 @@ import Button from "../../components/buttons/Button";
 import Header from "components/sections/Header";
 import FileListView, {FileListViewRef} from "../../components/sections/FileListView";
 import ToastContext from "../../contexts/ToastContext";
+import ContentTransition from "../../components/sections/ContentTransition";
 
 function FilesPage(): JSX.Element {
 
@@ -44,7 +45,9 @@ function FilesPage(): JSX.Element {
                     </div>
                 </Header>
 
-                <FileListView ref={fileListRef} addToast={addToast} />
+                <ContentTransition>
+                    <FileListView ref={fileListRef} addToast={addToast} />
+                </ContentTransition>
 
             </div>
         </div>
