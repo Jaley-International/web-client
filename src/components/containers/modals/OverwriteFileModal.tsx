@@ -40,7 +40,7 @@ function OverwriteFileModal(props: Props): JSX.Element {
                             <p className="mb-3 font-semibold text-txt-body-muted flex flex-wrap justify-center">
                                 <span>Drag and drop your file here or</span>
                             </p>
-                            <input ref={fileInputRef} type="file" className="hidden" onChange={(e) => {
+                            <input ref={fileInputRef} type="file" className="hidden" onChange={_ => {
                                 if (fileInputRef.current && fileInputRef.current.files)
                                     props.submitCallback(fileInputRef.current.files.item(0));
                             }} />

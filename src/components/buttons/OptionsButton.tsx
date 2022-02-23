@@ -35,7 +35,7 @@ function OptionsButton(props: Props): JSX.Element {
 
     return (
         <>
-            <Button ref={btnRef} size="medium" type="soft" colour="dark" className="context pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500" onClick={(e) => {
+            <Button ref={btnRef} size="medium" type="soft" colour="dark" className="context pl-4 pr-4 pt-2 pb-2 text-txt-body-muted bg-bg hover:bg-grey-400 active:bg-grey-500" onClick={_ => {
                 setShowContextMenu(!showContextMenu);
                 if (btnRef.current) {
                     const bounds = btnRef.current.getBoundingClientRect();
