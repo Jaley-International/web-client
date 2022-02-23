@@ -23,6 +23,7 @@ function ExtendSessionModal(): JSX.Element {
     const [remaining, setRemaining] = useState<number>(Infinity);
 
     useEffect(() => {
+        setExpire(getSession().exp);
         if (remaining > 0) {
             const timer = setInterval(() => {
                 if (expire) setRemaining(expire - Date.now())

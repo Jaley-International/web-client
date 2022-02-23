@@ -1,6 +1,6 @@
 import NavbarItem from "./NavbarItem";
-import {faFile, faFolderOpen, faBell, faUserCircle} from "@fortawesome/free-regular-svg-icons";
-import {faUserShield, faSignOutAlt} from "@fortawesome/free-solid-svg-icons";
+import {faFile, faBell, faUserCircle} from "@fortawesome/free-regular-svg-icons";
+import {faUserShield, faSignOutAlt, faListUl} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCloud} from "@fortawesome/free-solid-svg-icons";
 import {Heading3} from "../../text/Headings";
@@ -36,15 +36,15 @@ function Navbar(): JSX.Element {
                 </Link>
 
                 <NavbarItem name="Files" icon={faFile} activeRoutes={[/^\/files$/]} href="/files" />
-                <NavbarItem name="Tracked&nbsp;folders" activeRoutes={[]} icon={faFolderOpen} className="cursor-not-allowed" />
-                <NavbarItem name="Admin&nbsp;panel" activeRoutes={[/^\/users.*$/]} icon={faUserShield} href="/users" />
+                <NavbarItem name="Notifications" activeRoutes={[]} icon={faBell} badge="12" className="cursor-not-allowed" />
+                <NavbarItem name="My&nbsp;account" activeRoutes={[]} icon={faUserCircle} className="cursor-not-allowed" />
 
                 <div className="w-full py-6">
                     <hr className="mx-auto w-2/3 text-grey-200" />
                 </div>
 
-                <NavbarItem name="Notifications" activeRoutes={[]} icon={faBell} badge="12" className="cursor-not-allowed" />
-                <NavbarItem name="My&nbsp;account" activeRoutes={[]} icon={faUserCircle} className="cursor-not-allowed" />
+                <NavbarItem name="Activity&nbsp;log" activeRoutes={[]} icon={faListUl} className="cursor-not-allowed" />
+                <NavbarItem name="Admin&nbsp;panel" activeRoutes={[/^\/users.*$/]} icon={faUserShield} href="/users" />
 
                 <NavbarItem name="Logout" active={false} activeRoutes={[]} icon={faSignOutAlt} className="absolute inset-x-0 bottom-2" action={async () => {
                     await terminateSession();
