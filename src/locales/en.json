@@ -1,0 +1,35 @@
+{
+    "generic": {
+        "app": {
+            "name": "Private Encrypted Cloud",
+            "abbr": "PEC",
+            "moto": "Keep control over your data."
+        }
+    },
+    "pages": {
+        "auth": {
+            "login": {
+                "description": "Sign in and start storing and sharing your files securely.",
+                "title": "Welcome back \uD83D\uDC4B",
+                "sub-description": "Please enter your credentials.",
+                "redirecting": "Redirecting...",
+                "login": "Login",
+                "register-link": "First time connecting? <link>Register</link>",
+                "form": {
+                    "username": "Username",
+                    "password": "Password"
+                },
+                "toast": {
+                    "success": {
+                        "title": "Welcome!",
+                        "message": "Successfully authenticated."
+                    },
+                    "error":{
+                        "title": "Invalid credentials",
+                        "message": "Please check your username and password then try again."
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,35 @@
+{
+    "generic": {
+        "app": {
+            "name": "Private Encrypted Cloud",
+            "abbr": "PEC",
+            "moto": "Restez maître sur vos données."
+        }
+    },
+    "pages": {
+        "auth": {
+            "login": {
+                "description": "Connectez-vous et commencez à stocker et partager vos fichiers de manière sécurisée.",
+                "title": "Bonjour \uD83D\uDC4B",
+                "sub-description": "Veuillez saisir vos identifiants.",
+                "redirecting": "Redirection...",
+                "login": "Connexion",
+                "register-link": "Première connexion ? <link>S'enregistrer</link>",
+                "form": {
+                    "username": "Nom d'utilisateur",
+                    "password": "Mot de passe"
+                },
+                "toast": {
+                    "success": {
+                        "title": "Bienvenue !",
+                        "message": "Connecté avec succès."
+                    },
+                    "error":{
+                        "title": "Identifiants invalides",
+                        "message": "Vérifiez vos identifiants et réessayez."
+                    }
+                }
+            }
+        }
+    }
+}
