@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faChevronCircleLeft, faCloud, faDownload, faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
+import {faChevronCircleLeft, faCloud, faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {Heading2, Heading3} from "../components/text/Headings";
 import Card from "../components/containers/Card";
 import React from "react";
