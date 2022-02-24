@@ -6,6 +6,14 @@
             "moto": "Keep control over your data."
         }
     },
+    "navbar": {
+        "files": "Files",
+        "notifications": "Notifications",
+        "my-account": "My account",
+        "activity-log": "Activity log",
+        "admin-panel": "Admin panel",
+        "logout": "Logout"
+    },
     "pages": {
         "404": {
             "title": "404 Error",
