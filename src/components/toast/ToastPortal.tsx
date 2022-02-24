@@ -2,7 +2,7 @@ import {forwardRef, Ref, useImperativeHandle, useState} from "react";
 import {createPortal} from "react-dom";
 import {useToastPortal} from "../../hooks/useToastPortal";
 import Toast, {ToastProps} from "./Toast";
-import {randomString} from "../../util/util";
+import {randomString} from "../../util/string";
 import {useToastAutoClose} from "../../hooks/useToastAutoClose";
 
 export interface ToastRef {

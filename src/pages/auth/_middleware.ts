@@ -1,5 +1,5 @@
 import {NextRequest, NextResponse} from "next/server";
-import {validateExtendSession} from "../../util/processes";
+import {validateExtendSession} from "../../helper/processes";
 
 export async function middleware(req: NextRequest) {
 

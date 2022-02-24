@@ -1,5 +1,5 @@
 import React, {ChangeEventHandler, LegacyRef, useState} from "react";
-import {randomString} from "../../util/util";
+import {randomString} from "../../util/string";
 import zxcvbn from "zxcvbn";
 
 interface Props {

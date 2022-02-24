@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import {randomString} from "../util/util";
+import {randomString} from "../util/string";
 
 export function useToastPortal() {
     const [loaded, setLoaded] = useState(false);

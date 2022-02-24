@@ -1,7 +1,7 @@
 import ModalHeader from "./subcomponents/ModalHeader";
 import Button from "../../buttons/Button";
 import {useEffect, useState} from "react";
-import {terminateSession, Session, validateExtendSession} from "../../../util/processes";
+import {terminateSession, Session, validateExtendSession} from "../../../helper/processes";
 import {useRouter} from "next/router";
 import {getCookie} from "cookies-next";
 import getConfig from "next/config";

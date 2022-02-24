@@ -1,5 +1,5 @@
 import React, {LegacyRef} from "react";
-import {randomString} from "../../util/util";
+import {randomString} from "../../util/string";
 
 interface Props {
     children: JSX.Element[];

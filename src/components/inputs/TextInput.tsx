@@ -1,5 +1,5 @@
 import React, {ChangeEventHandler, LegacyRef, useState} from "react";
-import {randomString} from "../../util/util";
+import {randomString} from "../../util/string";
 
 interface Props {
     type: "text" | "number" | "email" | "password" | "tel" | "date" | "time" | "datetime-local" | "url";

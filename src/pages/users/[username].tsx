@@ -13,12 +13,14 @@ import Badge from "../../components/Badge";
 import User, {UserAccessLevel} from "../../model/User";
 import TextInput from "../../components/inputs/TextInput";
 import Select from "../../components/inputs/Select";
-import {request} from "../../util/communication";
+import {request} from "../../helper/communication";
 import getConfig from "next/config";
-import {capitalize} from "../../util/util";
-import {updateAccount} from "../../util/processes";
+import {capitalize} from "../../util/string";
+import {updateAccount} from "../../helper/processes";
 import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
+import AutocompleteTextInput from "../../components/inputs/AutocompleteTextInput";
+import {getGroupsJobsSuggestions} from "../../util/user";
 
 function UserPage(): JSX.Element {
 
@@ -60,10 +62,22 @@ function UserPage(): JSX.Element {
     const firstnameRef = useRef<HTMLInputElement>(null);
     const lastnameRef = useRef<HTMLInputElement>(null);
     const emailRef = useRef<HTMLInputElement>(null);
-    const groupRef = useRef<HTMLSelectElement>(null);
-    const jobRef = useRef<HTMLSelectElement>(null);
-    const accessLevelRef = useRef<HTMLSelectElement>(null);
+    const groupRef = useRef<HTMLInputElement>(null);
+    const jobRef = useRef<HTMLInputElement>(null);
+    const accessLevelRef = useRef<HTMLInputElement>(null);
 
+
+    const [loadedSuggestions, setLoadedSuggestions] = useState<boolean>(false);
+    const [suggestions, setSuggestions] = useState<string[][]>([[],[]]);
+
+    const fetchSuggestions = async () => {
+        setSuggestions(await getGroupsJobsSuggestions());
+        setLoadedSuggestions(true);
+    }
+    useEffect(() => {
+        if (!loadedSuggestions)
+            fetchSuggestions().then(_ => {});
+    });
 
     return (
         <div className="flex bg-bg-light">
@@ -267,9 +281,9 @@ function UserPage(): JSX.Element {
                                         const firstname = (firstnameRef.current as HTMLInputElement).value;
                                         const lastname = (lastnameRef.current as HTMLInputElement).value;
                                         const email = (emailRef.current as HTMLInputElement).value;
-                                        const group = (groupRef.current as HTMLSelectElement).value;
-                                        const job = (jobRef.current as HTMLSelectElement).value;
-                                        const accessLevel = (accessLevelRef.current as HTMLSelectElement).value;
+                                        const group = (groupRef.current as HTMLInputElement).value;
+                                        const job = (jobRef.current as HTMLInputElement).value;
+                                        const accessLevel = (accessLevelRef.current as HTMLInputElement).value.toUpperCase();
 
                                         const status = await updateAccount(user, firstname, lastname, email, group, job, accessLevel as UserAccessLevel);
 
@@ -286,55 +300,31 @@ function UserPage(): JSX.Element {
                                         <div className="lg:flex">
                                             <TextInput ref={firstnameRef} className="lg:w-1/3 lg:pr-4" type="text"
                                                        autoComplete="given-name" label="First name"
-                                                       placeholder={user.firstName} name="firstname" minLength={1}
+                                                       defaultValue={user.firstName} name="firstname" minLength={1}
                                                        maxLength={32}
                                                        validator={(str: string) => /^[0-9a-zA-Z-]{0,32}$/.test(str)}/>
                                             <TextInput ref={lastnameRef} className="lg:w-1/3 lg:px-2" type="text"
                                                        autoComplete="family-name" label="Last name"
-                                                       placeholder={user.lastName} name="lastname" minLength={1}
+                                                       defaultValue={user.lastName} name="lastname" minLength={1}
                                                        maxLength={32}
                                                        validator={(str: string) => /^[0-9a-zA-Z-]{0,32}$/.test(str)}/>
                                             <TextInput ref={emailRef} className="lg:w-1/3 lg:pl-4" type="email"
-                                                       autoComplete="email" label="Email address" placeholder={user.email}
+                                                       autoComplete="email" label="Email address" defaultValue={user.email}
                                                        name="email"
                                                        validator={(str: string) => str.length == 0 || /\S+@\S+\.\S+/.test(str)}/>
                                         </div>
                                         <div className="lg:flex">
-                                            <Select ref={groupRef} className="lg:w-1/3 lg:pr-4" label="Group">
-                                                <option selected={user.group === "Clients"}>Clients</option>
-                                                <option selected={user.group === "Debt recovery department"}>Debt recovery
-                                                    department
-                                                </option>
-                                                <option selected={user.group === "Human resources"}>Human resources</option>
-                                                <option selected={user.group === "Legal department"}>Legal department
-                                                </option>
-                                            </Select>
-                                            <Select ref={jobRef} className="lg:w-1/3 lg:px-2" label="Job title">
-                                                <option selected={user.job === "CEO"}>CEO</option>
-                                                <option selected={user.job === "Debt Collection Officer"}>Debt Collection
-                                                    Officer
-                                                </option>
-                                                <option selected={user.job === "HR director"}>HR director</option>
-                                                <option
-                                                    selected={user.job === "Individuals Litigation Collection Officer"}>Individuals
-                                                    Litigation Collection Officer
-                                                </option>
-                                                <option selected={user.job === "Legal expert / Lawyer"}>Legal expert /
-                                                    Lawyer
-                                                </option>
-                                            </Select>
-                                            <Select ref={accessLevelRef} className="lg:w-1/3 lg:pl-4" label="Access level"
-                                                    required={true}>
-                                                <option selected={user.accessLevel === UserAccessLevel.GUEST}
-                                                        value="GUEST">1 - Guest
-                                                </option>
-                                                <option selected={user.accessLevel === UserAccessLevel.USER} value="USER">2
-                                                    - User
-                                                </option>
-                                                <option selected={user.accessLevel === UserAccessLevel.ADMINISTRATOR}
-                                                        value="ADMINISTRATOR">3 - Administrator
-                                                </option>
-                                            </Select>
+                                            <AutocompleteTextInput ref={groupRef} defaultValue={user.group} containerClassName="lg:w-1/3 lg:pr-4" type="text" label="Group" required={true} suggestions={suggestions[0]} />
+
+                                            <AutocompleteTextInput ref={jobRef} defaultValue={user.job} containerClassName="lg:w-1/3 lg:px-2" type="text" label="Job title" required={true} suggestions={suggestions[1]} />
+
+                                            <AutocompleteTextInput ref={accessLevelRef}  defaultValue={capitalize(user.accessLevel)} containerClassName="lg:w-1/3 lg:pl-4" type="text" label="Access level" required={true} suggestions={[
+                                                "Guest",
+                                                "User",
+                                                "Administrator"
+                                            ]} validator={(str: string) => {
+                                                return ["GUEST", "USER", "ADMINISTRATOR"].includes(str.toUpperCase());
+                                            }} />
                                         </div>
 
                                         <br/>
