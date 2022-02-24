@@ -34,6 +34,21 @@
                         "message": "Vérifiez vos identifiants et réessayez."
                     }
                 }
+            },
+            "register": {
+                "description": "Create your account and start storing and sharing your files securely.",
+                "title": "Create your account",
+                "sub-description": "All fields are required.",
+                "agreement": "By creating an account you agree to the <terms>Terms and Conditions</terms>, and the <privacy>Privacy Policy</privacy>",
+                "register": "Register",
+                "login-link": "Already registered? <link>Sign in</link>",
+                "form": {
+                    "registration-key": "Registration key",
+                    "registration-key-hint": "Code received by email to register your account.",
+                    "password": "Password",
+                    "confirm-password": "Confirm password",
+                    "confirm-password-hint": "Must match the password you entered above."
+                }
             }
         }
     }

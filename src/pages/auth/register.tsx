@@ -12,10 +12,14 @@ import Link from "next/link";
 import {useRouter} from "next/router";
 import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
+import {GetStaticProps} from "next";
+import {useTranslations} from "use-intl";
 
 function RegisterPage(): JSX.Element {
 
     const addToast = useContext(ToastContext);
+
+    const t = useTranslations();
 
     const router = useRouter();
     const params = router.asPath.split("#");
@@ -36,13 +40,13 @@ function RegisterPage(): JSX.Element {
                     <div className="w-12 h-12 rounded-2lg bg-gradient-to-bl from-silver-gradient-from to-silver-gradient-to text-center text-2lg text-blue py-1">
                         <FontAwesomeIcon icon={faCloud} /> {/* TODO Change icon */}
                     </div>
-                    <Heading3 className="text-txt-heading-light h-12 py-2">Private Encrypted Cloud</Heading3>
+                    <Heading3 className="text-txt-heading-light h-12 py-2">{t("generic.app.name")}</Heading3>
                 </div>
 
                 <div className="py-52 px-20 xl:px-28 pt-48 bg-blue">
-                    <Display6 className="text-txt-heading-light leading-tight">Keep control over your data.</Display6>
+                    <Display6 className="text-txt-heading-light leading-tight">{t("generic.app.moto")}</Display6>
                     <br />
-                    <span className="text-txt-body-light">Create your account and start storing and sharing your files securely.</span>
+                    <span className="text-txt-body-light">{t("pages.auth.register.description")}</span>
                 </div>
 
                 <div className="curve-divider">
@@ -64,12 +68,12 @@ function RegisterPage(): JSX.Element {
                         <div className="w-12 h-12 rounded-2lg bg-gradient-to-bl from-blue-gradient-from to-blue-gradient-to text-center text-2lg text-txt-heading-light py-1">
                             <FontAwesomeIcon icon={faCloud} /> {/* TODO Change icon */}
                         </div>
-                        <Heading3 className="hidden md:flex text-blue h-12 py-2">Private Encrypted Cloud</Heading3>
-                        <Heading3 className="flex md:hidden text-blue h-12 py-2">PEC</Heading3>
+                        <Heading3 className="hidden md:flex text-blue h-12 py-2">{t("generic.app.name")}</Heading3>
+                        <Heading3 className="flex md:hidden text-blue h-12 py-2">{t("generic.app.abbr")}</Heading3>
                     </div>
 
-                    <Heading2>Create your account</Heading2>
-                    <span className="text-txt-heading">All fields are required.</span>
+                    <Heading2>{t("pages.auth.register.title")}</Heading2>
+                    <span className="text-txt-heading">{t("pages.auth.register.sub-description")}</span>
 
                     <form className="py-10 space-y-7" onSubmit={async (e) => {
                         e.preventDefault();
@@ -97,20 +101,25 @@ function RegisterPage(): JSX.Element {
                             (passwordConfirmRef.current as HTMLInputElement).value = "";
                         }
                     }}>
-                        <TextInput ref={registerKeyRef} type="text" label="Registration key" defaultValue={registrationKey} name="registerKey" hint="Code received by email to register your account." autoFocus={true} required={true} disabled={submitting} minLength={16} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-_]{16}$/.test(str)} />
-                        <NewPasswordInput ref={passwordRef} label="Password" name="password" required={true} disabled={submitting} />
-                        <TextInput ref={passwordConfirmRef} type="password" autoComplete="new-password" label="Confirm password" name="password2" hint="Must match the password you entered above." required={true} disabled={submitting} validator={(str: string) => str === passwordRef.current?.value} onChange={() => passwordRef.current?.value !== passwordConfirmRef.current?.value ? passwordConfirmRef.current?.setCustomValidity("Passwords don't match.") : passwordConfirmRef.current?.setCustomValidity("")} />
+                        <TextInput ref={registerKeyRef} type="text" label={t("pages.auth.register.form.registration-key")} defaultValue={registrationKey} name="registerKey" hint={t("pages.auth.register.form.registration-key-hint")} autoFocus={true} required={true} disabled={submitting} minLength={16} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-_]{16}$/.test(str)} />
+                        <NewPasswordInput ref={passwordRef} label={t("pages.auth.register.form.password")} name="password" required={true} disabled={submitting} />
+                        <TextInput ref={passwordConfirmRef} type="password" autoComplete="new-password" label={t("pages.auth.register.form.confirm-password")} name="password2" hint={t("pages.auth.register.form.confirm-password-hint")} required={true} disabled={submitting} validator={(str: string) => str === passwordRef.current?.value} onChange={() => passwordRef.current?.value !== passwordConfirmRef.current?.value ? passwordConfirmRef.current?.setCustomValidity("Passwords don't match.") : passwordConfirmRef.current?.setCustomValidity("")} />
                         <Checkbox ref={tosRef} name="tos" check={false} required={true} disabled={submitting}>
                             <span className="text-txt-body">
-                                By creating an account you agree to the <a href="#" className="font-semibold">Terms and Conditions</a>, and the <a href="#" className="font-semibold">Privacy Policy</a>.
+                                {t.rich("pages.auth.register.agreement", {
+                                    terms: (children => <a href="#" className="font-semibold">{children}</a>),
+                                    privacy: (children => <a href="#" className="font-semibold">{children}</a>)
+                                })}
                             </span>
                         </Checkbox>
                         <Button ref={submitRef} size="large" type="regular" colour="blue" className={`w-full${submitting ? " animate-pulse" : ""}`} disabled={submitting}>
-                            Register
+                            {t("pages.auth.register.register")}
                         </Button>
                         <br />
                         <p className="text-center text-txt-body-muted text-2xs">
-                            Already registered? <Link href="/auth"><a className="text-blue">Sign in</a></Link>
+                            {t.rich("pages.auth.register.login-link", {
+                                link: (children => <Link href="/auth"><a className="text-blue">{children}</a></Link>)
+                            })}
                         </p>
                     </form>
                 </div>
@@ -118,5 +127,13 @@ function RegisterPage(): JSX.Element {
         </section>
     );
 }
+
+export const getStaticProps: GetStaticProps = async ({locale}) => {
+    return {
+        props: {
+            messages: require(`../../locales/${locale}.json`)
+        }
+    }
+};
 
 export default RegisterPage;
