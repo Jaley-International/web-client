@@ -5,8 +5,13 @@ import {Heading2, Heading3} from "../components/text/Headings";
 import Card from "../components/containers/Card";
 import React from "react";
 import Button from "../components/buttons/Button";
+import {useTranslations} from "use-intl";
+import {GetStaticProps} from "next";
 
 function NotFoundPage(): JSX.Element {
+
+    const t = useTranslations();
+
     return (
         <div className="h-screen bg-bg-light">
             <Link href="/" passHref>
@@ -14,7 +19,7 @@ function NotFoundPage(): JSX.Element {
                     <div className="w-12 h-12 rounded-2lg bg-gradient-to-bl from-blue-gradient-from to-blue-gradient-to text-center text-2lg text-white py-1">
                         <FontAwesomeIcon icon={faCloud} /> {/* TODO Change icon */}
                     </div>
-                    <Heading3 className="text-blue h-12 py-2">Private Encrypted Cloud</Heading3>
+                    <Heading3 className="text-blue h-12 py-2">{t("generic.app.name")}</Heading3>
                 </div>
             </Link>
 
@@ -26,15 +31,15 @@ function NotFoundPage(): JSX.Element {
                             </span>
                     </div>
                     <div className="w-full p-10">
-                        <Heading2>404 Error</Heading2>
-                        <span className="text-txt-body">The page/resource you requested does not exist or has been moved.</span>
+                        <Heading2>{t("pages.404.title")}</Heading2>
+                        <span className="text-txt-body">{t("pages.404.description")}</span>
                     </div>
                     <div className="p-12">
                         <div className="w-full h-full flex justify-center">
                             <Button className="mx-auto my-auto w-32" size="medium" type="regular" colour="dark" onClick={() => {
                                 window.history.back();
                             }}>
-                                <span><FontAwesomeIcon icon={faChevronCircleLeft} />&nbsp;&nbsp;Back</span>
+                                <span><FontAwesomeIcon icon={faChevronCircleLeft} />&nbsp;&nbsp;{t("pages.404.back-button")}</span>
                             </Button>
                         </div>
                     </div>
@@ -44,5 +49,13 @@ function NotFoundPage(): JSX.Element {
         </div>
     );
 }
+
+export const getStaticProps: GetStaticProps = async ({locale}) => {
+    return {
+        props: {
+            messages: require(`../locales/${locale}.json`)
+        }
+    }
+};
 
 export default NotFoundPage;

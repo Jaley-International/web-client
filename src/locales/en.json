@@ -7,6 +7,11 @@
         }
     },
     "pages": {
+        "404": {
+            "title": "404 Error",
+            "description": "The page/resource you requested does not exist or has been moved.",
+            "back-button": "Back"
+        },
         "auth": {
             "login": {
                 "description": "Sign in and start storing and sharing your files securely.",
