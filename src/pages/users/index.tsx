@@ -65,18 +65,18 @@ function UserList(): JSX.Element {
                             <tr className="border-b border-grey-200 bg-bg-light text-3xs text-txt-body-lightmuted uppercase">
                                 <th className="w-4/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faUser}/>
-                                    <span>{t("generic.pages.name")}</span>
+                                    <span>{t("generic.table.name")}</span>
                                 </th>
                                 <th className="w-3/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faUserFriends}/>
-                                    <span>{t("generic.pages.group")}</span>
+                                    <span>{t("generic.table.group")}</span>
                                 </th>
                                 <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faIdCardAlt}/>
-                                    <span>{t("generic.pages.account-type")}</span>
+                                    <span>{t("generic.table.account-type")}</span>
                                 </th>
                                 <th className="w-1/10 font-semibold text-left px-6 py-4 space-x-3">
-                                    <span>{t("generic.pages.actions")}</span>
+                                    <span>{t("generic.table.actions")}</span>
                                 </th>
                             </tr>
                             </thead>
@@ -114,9 +114,9 @@ function UserList(): JSX.Element {
                                         <td className="py-2 px-4">
                                             <div className="w-full">
                                                 <OptionsButton>
-                                                    <ContextMenuItem name="View/Edit" icon={faEye}
+                                                    <ContextMenuItem name={t("generic.button.view-edit")} icon={faEye}
                                                                      href={`/users/${user.username}`}/>
-                                                    <ContextMenuItem name="Delete" icon={faTimesCircle}
+                                                    <ContextMenuItem name={t("generic.button.delete")} icon={faTimesCircle}
                                                                      action={() => {
                                                                          setModalUserTarget(user);
                                                                          setShowDeleteModal(true);

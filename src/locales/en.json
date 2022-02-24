@@ -5,11 +5,15 @@
             "abbr": "PEC",
             "moto": "Keep control over your data."
         },
-        "pages": {
+        "table": {
             "name": "Name",
             "group": "Group",
             "account-type": "Account Type",
             "actions": "Actions"
+        },
+        "button": {
+            "view-edit": "View/Edit",
+            "delete": "Delete"
         }
     },
     "navbar": {
