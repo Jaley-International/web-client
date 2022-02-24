@@ -65,15 +65,15 @@ function UserList(): JSX.Element {
                             <tr className="border-b border-grey-200 bg-bg-light text-3xs text-txt-body-lightmuted uppercase">
                                 <th className="w-4/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faUser}/>
-                                    <span>{t("generic.table.name")}</span>
+                                    <span>{t("pages.user.table.name")}</span>
                                 </th>
                                 <th className="w-3/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faUserFriends}/>
-                                    <span>{t("generic.table.group")}</span>
+                                    <span>{t("pages.user.table.group")}</span>
                                 </th>
                                 <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faIdCardAlt}/>
-                                    <span>{t("generic.table.account-type")}</span>
+                                    <span>{t("pages.user.table.account-type")}</span>
                                 </th>
                                 <th className="w-1/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <span>{t("generic.table.actions")}</span>

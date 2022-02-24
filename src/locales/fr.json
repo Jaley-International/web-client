@@ -6,9 +6,6 @@
             "moto": "Keep control over your data."
         },
         "table": {
-            "name": "Name",
-            "group": "Group",
-            "account-type": "Account Type",
             "actions": "Actions"
         },
         "button": {
@@ -102,11 +99,21 @@
                         "message": "An unknown error occurred while deleting an account."
                     }
                 }
+            },
+            "table": {
+                "name": "Name",
+                "group": "Group",
+                "account-type": "Account Type"
             }
         },
-        "files": {
+        "file": {
             "upload-file": "Upload file",
-            "create-folder": "Create folder"
+            "create-folder": "Create folder",
+            "table": {
+                "name": "File name",
+                "last-modified": "Last modified",
+                "shared-with": "Shared with"
+            }
         }
     }
 }
