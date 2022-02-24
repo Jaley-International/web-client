@@ -59,7 +59,7 @@
                 }
             }
         },
-        "users": {
+        "user": {
             "new-user": "New user",
             "title": "Users",
             "name": "Name",

@@ -50,33 +50,33 @@ function UserList(): JSX.Element {
         <div className="flex bg-bg-light">
             <Navbar/>
             <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
-                <Header title="User management">
+                <Header title={t("pages.user.list.title")}>
                     <Link href="/users/new" passHref>
                         <Button size="small" type="regular" colour="green">
-                            <span><FontAwesomeIcon icon={faPlus}/>&nbsp;&nbsp;{t("pages.users.new-user")}</span>
+                            <span><FontAwesomeIcon icon={faPlus}/>&nbsp;&nbsp;{t("pages.user.list.new-user")}</span>
                         </Button>
                     </Link>
                 </Header>
 
                 <ContentTransition className="w-full p-8">
-                    <Card title={t("pages.users.title")} className="pb-2">
+                    <Card title={t("pages.user.list.sub-title")} className="pb-2">
                         <table className="w-full">
                             <thead>
                             <tr className="border-b border-grey-200 bg-bg-light text-3xs text-txt-body-lightmuted uppercase">
                                 <th className="w-4/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faUser}/>
-                                    <span>{t("pages.users.name")}</span>
+                                    <span>{t("generic.pages.name")}</span>
                                 </th>
                                 <th className="w-3/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faUserFriends}/>
-                                    <span>{t("pages.users.group")}</span>
+                                    <span>{t("generic.pages.group")}</span>
                                 </th>
                                 <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faIdCardAlt}/>
-                                    <span>{t("pages.users.account-type")}</span>
+                                    <span>{t("generic.pages.account-type")}</span>
                                 </th>
                                 <th className="w-1/10 font-semibold text-left px-6 py-4 space-x-3">
-                                    <span>{t("pages.users.actions")}</span>
+                                    <span>{t("generic.pages.actions")}</span>
                                 </th>
                             </tr>
                             </thead>
@@ -143,20 +143,20 @@ function UserList(): JSX.Element {
                             await fetchUsers();
                             addToast({
                                 type: "success",
-                                title: t("pages.users.toast.success.title"),
-                                message: t("pages.users.toast.success.message")
+                                title: t("pages.user.list.toast.success.title"),
+                                message: t("pages.user.list.toast.success.message")
                             });
                         } else if (statusCode === "ERROR_USER_NOT_FOUND") {
                             addToast({
                                 type: "error",
-                                title: t("pages.users.toast.not-found.title"),
-                                message: t("pages.users.toast.not-found.message")
+                                title: t("pages.user.list.toast.not-found.title"),
+                                message: t("pages.user.list.toast.not-found.message")
                             });
                         } else {
                             addToast({
                                 type: "error",
-                                title: t("pages.users.toast.error.title"),
-                                message: t("pages.users.toast.error.message")
+                                title: t("pages.user.list.toast.error.title"),
+                                message: t("pages.user.list.toast.error.message")
                             });
                         }
                     }}

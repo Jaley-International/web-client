@@ -4,6 +4,12 @@
             "name": "Private Encrypted Cloud",
             "abbr": "PEC",
             "moto": "Keep control over your data."
+        },
+        "pages": {
+            "name": "Name",
+            "group": "Group",
+            "account-type": "Account Type",
+            "actions": "Actions"
         }
     },
     "navbar": {
@@ -59,25 +65,24 @@
                 }
             }
         },
-        "users": {
-            "new-user": "New user",
-            "title": "Users",
-            "name": "Name",
-            "group": "Group",
-            "account-type": "Account Type",
-            "actions": "Actions",
-            "toast": {
-                "success": {
-                    "title": "User deleted",
-                    "message": "Account successfully deleted"
-                },
-                "not-found": {
-                    "title": "Failed to delete a user",
-                    "message": "Account to delete was not found."
-                },
-                "error": {
-                    "title": "Failed to delete a user",
-                    "message": "An unknown error occurred while deleting an account."
+        "user": {
+            "list": {
+                "title": "User management",
+                "new-user": "New user",
+                "sub-title": "Users",
+                "toast": {
+                    "success": {
+                        "title": "User deleted",
+                        "message": "Account successfully deleted"
+                    },
+                    "not-found": {
+                        "title": "Failed to delete a user",
+                        "message": "Account to delete was not found."
+                    },
+                    "error": {
+                        "title": "Failed to delete a user",
+                        "message": "An unknown error occurred while deleting an account."
+                    }
                 }
             }
         },
