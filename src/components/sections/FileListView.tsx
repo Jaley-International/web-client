@@ -3,13 +3,10 @@ import {
     faCalendar,
     faEye,
     faFile,
-    faFileAlt,
-    faFileAudio,
-    faFileImage, faFilePdf, faFileVideo,
     faTimesCircle
 } from "@fortawesome/free-regular-svg-icons";
 import {
-    faCloudDownloadAlt, faFileImport, faFolder,
+    faCloudDownloadAlt, faFileImport,
     faGripLinesVertical, faLock,
     faPencilAlt,
     faShareAlt,
@@ -25,18 +22,17 @@ import {
     downloadFile, EncryptedNode,
     Node,
     uploadFile
-} from "../../util/processes";
-import {request} from "../../util/communication";
+} from "../../helper/processes";
+import {request} from "../../helper/communication";
 import React, {forwardRef, Ref, useEffect, useImperativeHandle, useRef, useState} from "react";
 import {ToastProps} from "../toast/Toast";
 import getConfig from "next/config";
-import {IconProp} from "@fortawesome/fontawesome-svg-core";
-import {capitalize, formatBytes} from "../../util/util";
 import DeleteNodeModal from "../containers/modals/DeleteNodeModal";
 import OverwriteFileModal from "../containers/modals/OverwriteFileModal";
 import CreateFolderModal from "../containers/modals/CreateFolderModal";
 import ShareLinkModal from "../containers/modals/ShareLinkModal";
 import Card from "components/containers/Card";
+import {nodeToDescription, nodeToIcon} from "../../util/node";
 
 interface Props {
     addToast: (toast: ToastProps) => void;
@@ -90,33 +86,6 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
         if (!loaded)
             fetchFilesystem().then(_ => {});
     });
-
-
-    // Util function for node display
-    const nodeToIcon = (node: Node): IconProp => {
-        if (node.type === "FOLDER") return faFolder;
-        if (!node.metaData.type) return faFile;
-
-        const [type, subtype] = node.metaData.type.split(/\//);
-        if (!type || !subtype) return faFile;
-
-        if (type === "text") return faFileAlt;
-        if (type === "image") return faFileImage;
-        if (type === "audio") return faFileAudio;
-        if (type === "video") return faFileVideo;
-        if (subtype === "pdf") return faFilePdf;
-        return faFile;
-    };
-    const nodeToDescription = (node: Node): string => {
-        if (node.type === "FOLDER") {
-            if (node.children.length === 0) return "Empty folder";
-            return `Folder, ${node.children.length} item${node.children.length >= 2 ? "s" : ""}`;
-        } else {
-            const subtype = node.metaData.type?.split(/\//).pop();
-            const size = ", " + formatBytes(node.metaData.size || 0);
-            return `${capitalize(subtype || "")} file${node.metaData.size ? size : ""}`
-        }
-    }
 
 
     // File upload

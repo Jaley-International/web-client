@@ -11,11 +11,11 @@ import DeleteUserModal from "../../components/containers/modals/DeleteUserModal"
 import User, {UserAccessLevel} from "../../model/User";
 import OptionsButton from "../../components/buttons/OptionsButton";
 import ContextMenuItem from "../../components/containers/contextmenu/ContextMenuItem";
-import {request} from "../../util/communication";
-import {deleteAccount} from "../../util/processes";
+import {request} from "../../helper/communication";
+import {deleteAccount} from "../../helper/processes";
 import getConfig from "next/config";
 import Badge from "../../components/Badge";
-import {capitalize} from "../../util/util";
+import {capitalize} from "../../util/string";
 import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
 import {GetStaticProps} from "next";
@@ -82,7 +82,10 @@ function UserList(): JSX.Element {
                             </thead>
                             <tbody className="overflow-y-scroll h-4/6">
 
-                            {users.map((user: User) => {
+                            {users
+                                .sort((a, b) => a.group > b.group ? 1 : (b.group < a.group ? -1 : 0))
+                                .sort((a, b) => a.accessLevel > b.accessLevel ? 1 : (b.accessLevel < a.accessLevel ? -1 : 0))
+                                .map((user: User) => {
                                 return (
                                     <tr className="border-b border-grey-200" key={user.username}>
                                         <td className="py-2 px-4">

@@ -1,4 +1,4 @@
-import {randomString} from "../../util/util";
+import {randomString} from "../../util/string";
 import React, {LegacyRef, useState} from "react";
 
 interface Props {

@@ -6,7 +6,7 @@ import {Heading2, Heading3} from "../../components/text/Headings";
 import TextInput from "../../components/inputs/TextInput";
 import Button from "../../components/buttons/Button";
 import Link from 'next/link';
-import {authenticate} from "../../util/processes";
+import {authenticate} from "../../helper/processes";
 import {useRouter} from "next/router";
 import {removeCookies} from "cookies-next";
 import ToastContext from "../../contexts/ToastContext";
