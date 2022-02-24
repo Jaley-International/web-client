@@ -3,7 +3,13 @@
         "app": {
             "name": "Private Encrypted Cloud",
             "abbr": "PEC",
-            "moto": "Restez maître sur vos données."
+            "moto": "Keep control over your data."
+        },
+        "pages": {
+            "name": "Name",
+            "group": "Group",
+            "account-type": "Account Type",
+            "actions": "Actions"
         }
     },
     "navbar": {
@@ -56,28 +62,41 @@
                     "password": "Password",
                     "confirm-password": "Confirm password",
                     "confirm-password-hint": "Must match the password you entered above."
+                },
+                "toast": {
+                    "success": {
+                        "title": "Account created",
+                        "message": "Please check your emails to finalize your registration."
+                    },
+                    "invalid": {
+                        "title": "Invalid registration key",
+                        "message": "The registration key you provided is invalid."
+                    },
+                    "error": {
+                        "title": "Failed to create an account",
+                        "message": "An unknown error occurred while creating your account."
+                    }
                 }
             }
         },
         "user": {
-            "new-user": "New user",
-            "title": "Users",
-            "name": "Name",
-            "group": "Group",
-            "account-type": "Account Type",
-            "actions": "Actions",
-            "toast": {
-                "success": {
-                    "title": "User deleted",
-                    "message": "Account successfully deleted"
-                },
-                "not-found": {
-                    "title": "Failed to delete a user",
-                    "message": "Account to delete was not found."
-                },
-                "error": {
-                    "title": "Failed to delete a user",
-                    "message": "An unknown error occurred while deleting an account."
+            "list": {
+                "title": "User management",
+                "new-user": "New user",
+                "sub-title": "Users",
+                "toast": {
+                    "success": {
+                        "title": "User deleted",
+                        "message": "Account successfully deleted"
+                    },
+                    "not-found": {
+                        "title": "Failed to delete a user",
+                        "message": "Account to delete was not found."
+                    },
+                    "error": {
+                        "title": "Failed to delete a user",
+                        "message": "An unknown error occurred while deleting an account."
+                    }
                 }
             }
         },

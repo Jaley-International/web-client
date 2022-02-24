@@ -87,12 +87,12 @@ function RegisterPage(): JSX.Element {
 
                             const statusCode = await register(registerKeyRef.current?.value as string, passwordRef.current?.value as string, updateStatus);
                             if (statusCode === "SUCCESS") {
-                                addToast({type: "success", title: "Account created", message: "Please check your emails to finalize your registration."});
+                                addToast({type: "success", title: t("pages.auth.register.toast.success.title"), message: t("pages.user.list.toast.success.message")});
                                 router.push("/auth").then(() => {});
                             } else if (statusCode === "ERROR_INVALID_REGISTER_KEY") {
-                                addToast({type: "warning", title: "Invalid registration key", message: "The registration key you provided is invalid."});
+                                addToast({type: "warning", title: t("pages.auth.register.toast.invalid.title"), message: t("pages.user.list.toast.invalid.message")});
                             } else {
-                                addToast({type: "error", title: "Failed to create an account", message: "An unknown error occurred while creating your account."});
+                                addToast({type: "error", title: t("pages.auth.register.toast.error.title"), message: t("pages.user.list.toast.error.message")});
                             }
                             updateStatus("Register");
                             setSubmitting(false);

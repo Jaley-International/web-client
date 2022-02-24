@@ -62,6 +62,20 @@
                     "password": "Password",
                     "confirm-password": "Confirm password",
                     "confirm-password-hint": "Must match the password you entered above."
+                },
+                "toast": {
+                    "success": {
+                        "title": "Account created",
+                        "message": "Please check your emails to finalize your registration."
+                    },
+                    "invalid": {
+                        "title": "Invalid registration key",
+                        "message": "The registration key you provided is invalid."
+                    },
+                    "error": {
+                        "title": "Failed to create an account",
+                        "message": "An unknown error occurred while creating your account."
+                    }
                 }
             }
         },
