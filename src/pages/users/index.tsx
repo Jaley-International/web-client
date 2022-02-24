@@ -18,11 +18,15 @@ import Badge from "../../components/Badge";
 import {capitalize} from "../../util/util";
 import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
+import {GetStaticProps} from "next";
+import {useTranslations} from "use-intl";
 
 function UserList(): JSX.Element {
     const {publicRuntimeConfig} = getConfig();
 
     const addToast = useContext(ToastContext);
+
+    const t = useTranslations();
 
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
     const [modalUserTarget, setModalUserTarget] = useState<User | null>(null);
@@ -49,30 +53,30 @@ function UserList(): JSX.Element {
                 <Header title="User management">
                     <Link href="/users/new" passHref>
                         <Button size="small" type="regular" colour="green">
-                            <span><FontAwesomeIcon icon={faPlus}/>&nbsp;&nbsp;New user</span>
+                            <span><FontAwesomeIcon icon={faPlus}/>&nbsp;&nbsp;{t("pages.users.new-user")}</span>
                         </Button>
                     </Link>
                 </Header>
 
                 <ContentTransition className="w-full p-8">
-                    <Card title="Users" className="pb-2">
+                    <Card title={t("pages.users.title")} className="pb-2">
                         <table className="w-full">
                             <thead>
                             <tr className="border-b border-grey-200 bg-bg-light text-3xs text-txt-body-lightmuted uppercase">
                                 <th className="w-4/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faUser}/>
-                                    <span>Name</span>
+                                    <span>{t("pages.users.name")}</span>
                                 </th>
                                 <th className="w-3/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faUserFriends}/>
-                                    <span>Group</span>
+                                    <span>{t("pages.users.group")}</span>
                                 </th>
                                 <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faIdCardAlt}/>
-                                    <span>Account type</span>
+                                    <span>{t("pages.users.account-type")}</span>
                                 </th>
                                 <th className="w-1/10 font-semibold text-left px-6 py-4 space-x-3">
-                                    <span>Actions</span>
+                                    <span>{t("pages.users.actions")}</span>
                                 </th>
                             </tr>
                             </thead>
@@ -139,20 +143,20 @@ function UserList(): JSX.Element {
                             await fetchUsers();
                             addToast({
                                 type: "success",
-                                title: "User deleted",
-                                message: "Account successfully deleted"
+                                title: t("pages.users.toast.success.title"),
+                                message: t("pages.users.toast.success.message")
                             });
                         } else if (statusCode === "ERROR_USER_NOT_FOUND") {
                             addToast({
                                 type: "error",
-                                title: "Failed to delete a user",
-                                message: "Account to delete was not found."
+                                title: t("pages.users.toast.not-found.title"),
+                                message: t("pages.users.toast.not-found.message")
                             });
                         } else {
                             addToast({
                                 type: "error",
-                                title: "Failed to delete a user",
-                                message: "An unknown error occurred while deleting an account."
+                                title: t("pages.users.toast.error.title"),
+                                message: t("pages.users.toast.error.message")
                             });
                         }
                     }}
@@ -166,5 +170,13 @@ function UserList(): JSX.Element {
         </div>
     );
 }
+
+export const getStaticProps: GetStaticProps = async ({locale}) => {
+    return {
+        props: {
+            messages: require(`../../locales/${locale}.json`)
+        }
+    }
+};
 
 export default UserList;

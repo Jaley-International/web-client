@@ -12,10 +12,14 @@ import Header from "components/sections/Header";
 import FileListView, {FileListViewRef} from "../../components/sections/FileListView";
 import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
+import {GetStaticProps} from "next";
+import {useTranslations} from "use-intl";
 
 function FilesPage(): JSX.Element {
 
     const addToast = useContext(ToastContext);
+
+    const t = useTranslations();
 
     const fileListRef = useRef<FileListViewRef | null>(null);
 
@@ -35,11 +39,11 @@ function FilesPage(): JSX.Element {
                         </div>
                         <div className="w-96 text-right space-x-4">
                             <Button size="small" type="regular" colour="blue" onClick={() => fileListRef.current?.openUploadPrompt()}>
-                                <span><FontAwesomeIcon icon={faFileUpload}/>&nbsp;&nbsp;Upload file</span>
+                                <span><FontAwesomeIcon icon={faFileUpload}/>&nbsp;&nbsp;{t("pages.files.upload-file")}</span>
                             </Button>
 
                             <Button size="small" type="regular" colour="cyan" onClick={() => fileListRef.current?.openCreateFolderModal()}>
-                                <span><FontAwesomeIcon icon={faFolderPlus}/>&nbsp;&nbsp;Create folder</span>
+                                <span><FontAwesomeIcon icon={faFolderPlus}/>&nbsp;&nbsp;{t("pages.files.create-folder")}</span>
                             </Button>
                         </div>
                     </div>
@@ -53,5 +57,13 @@ function FilesPage(): JSX.Element {
         </div>
     );
 }
+
+export const getStaticProps: GetStaticProps = async ({locale}) => {
+    return {
+        props: {
+            messages: require(`../../locales/${locale}.json`)
+        }
+    }
+};
 
 export default FilesPage;

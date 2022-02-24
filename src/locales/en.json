@@ -50,6 +50,32 @@
                     "confirm-password-hint": "Must match the password you entered above."
                 }
             }
+        },
+        "users": {
+            "new-user": "New user",
+            "title": "Users",
+            "name": "Name",
+            "group": "Group",
+            "account-type": "Account Type",
+            "actions": "Actions",
+            "toast": {
+                "success": {
+                    "title": "User deleted",
+                    "message": "Account successfully deleted"
+                },
+                "not-found": {
+                    "title": "Failed to delete a user",
+                    "message": "Account to delete was not found."
+                },
+                "error": {
+                    "title": "Failed to delete a user",
+                    "message": "An unknown error occurred while deleting an account."
+                }
+            }
+        },
+        "files": {
+            "upload-file": "Upload file",
+            "create-folder": "Create folder"
         }
     }
 }
