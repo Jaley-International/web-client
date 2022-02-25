@@ -10,7 +10,29 @@
         },
         "button": {
             "view-edit": "View/Edit",
+            "save": "Save changes",
+            "preview": "Preview",
+            "download": "Download",
+            "share": "Shae",
+            "manage-permission": "Manage permission",
+            "lock-file": "Lock file",
+            "overwrite": "Overwrite",
             "delete": "Delete"
+        },
+        "user": {
+            "name": "Name",
+            "first-name": "First name",
+            "last-name": "Last name",
+            "email": "Email address",
+            "group": "Group",
+            "job": "Job title",
+            "account-type": "Account type"
+        },
+        "file": {
+            "name": "File name",
+            "upload-date": "Upload date",
+            "last-modified": "Last modified",
+            "shared-with": "Shared with"
         }
     },
     "navbar": {
@@ -121,20 +143,28 @@
                     }
                 }
             },
-            "table": {
-                "name": "Name",
-                "group": "Group",
-                "account-type": "Account Type"
+            "details": {
+                "title": "User details",
+                "back": "Back to user list",
+                "member-since": "Member since 01/01/1970",
+                "last-active": "Last active 2 hours ago",
+                "files-table-title": "Files and folders owned",
+                "edit-title": "Edit account informations",
+                "suspend": {
+                    "title": "Suspend account",
+                    "description": "By suspending this account, the user will no longer be able to log in. Their files will still be available by those it has been shared with and all administrators.",
+                    "button": "Suspend account"
+                },
+                "delete": {
+                    "title": "Delete account",
+                    "description": "By deleting this account, all the user's data will be lost. Their files and folders will be transferred to you. This process is definitive and cannot be reversed.",
+                    "button": "Delete account"
+                }
             }
         },
         "file": {
             "upload-file": "Upload file",
-            "create-folder": "Create folder",
-            "table": {
-                "name": "File name",
-                "last-modified": "Last modified",
-                "shared-with": "Shared with"
-            }
+            "create-folder": "Create folder"
         }
     }
 }

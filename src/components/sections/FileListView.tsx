@@ -33,6 +33,7 @@ import CreateFolderModal from "../containers/modals/CreateFolderModal";
 import ShareLinkModal from "../containers/modals/ShareLinkModal";
 import Card from "components/containers/Card";
 import {nodeToDescription, nodeToIcon} from "../../util/node";
+import {useTranslations} from "use-intl";
 
 interface Props {
     addToast: (toast: ToastProps) => void;
@@ -47,6 +48,9 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
 
     // Configuration import for API URL
     const {publicRuntimeConfig} = getConfig();
+
+    // Strings import for multi language support
+    const t = useTranslations();
 
     // Modal display statuses
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
@@ -150,18 +154,18 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                         <tr className="border-b border-grey-200 bg-bg-light text-3xs text-txt-body-lightmuted uppercase">
                             <th className="w-5/10 font-semibold text-left px-6 py-4 space-x-3">
                                 <FontAwesomeIcon icon={faFile}/>
-                                <span>File name</span>
+                                <span>{t("generic.file.name")}</span>
                             </th>
                             <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
                                 <FontAwesomeIcon icon={faCalendar}/>
-                                <span>Last modified</span>
+                                <span>{t("generic.file.last-modified")}</span>
                             </th>
                             <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
                                 <FontAwesomeIcon icon={faUserFriends}/>
-                                <span>Shared with</span>
+                                <span>{t("generic.file.shared-with")}</span>
                             </th>
                             <th className="w-1/10 font-semibold text-left px-6 py-4 space-x-3">
-                                <span>Actions</span>
+                                <span>{t("generic.table.actions")}</span>
                             </th>
                         </tr>
                         </thead>
@@ -249,10 +253,10 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                     </OptionsButton>
                                                     :
                                                     <OptionsButton>
-                                                        <ContextMenuItem name="Preview" icon={faEye} action={() => {
+                                                        <ContextMenuItem name={t("generic.button.preview")} icon={faEye} action={() => {
                                                             props.addToast({type: "info", title: "Work in progress feature", message: "File preview is currently a work-in-progress/planned feature."});
                                                         }}/>
-                                                        <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={async () => {
+                                                        <ContextMenuItem name={t("generic.button.download")} icon={faCloudDownloadAlt} action={async () => {
                                                             const status = await downloadFile(node);
                                                             if (status === "ERROR_FETCH")
                                                                 props.addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
@@ -261,7 +265,7 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                             else if (status !== "SUCCESS")
                                                                 props.addToast({type: "error", title: "Failed to download", message: "An unexpected error occurred while downloading the file."});
                                                         }}/>
-                                                        <ContextMenuItem name="Share" icon={faShareAlt} action={async () => {
+                                                        <ContextMenuItem name={t("generic.button.share")} icon={faShareAlt} action={async () => {
 
                                                             const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/links`, {});
                                                             if (response.status !== "SUCCESS")
@@ -279,17 +283,17 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                             setModalNodeTarget(node);
                                                             setShowShareLinkModal(true);
                                                         }}/>
-                                                        <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => {
+                                                        <ContextMenuItem name={t("generic.button.manage-permission")} icon={faUsersCog} action={() => {
                                                             props.addToast({type: "info", title: "Work in progress feature", message: "Permission system is currently a work-in-progress/planned feature."});
                                                         }}/>
-                                                        <ContextMenuItem name="Lock file" icon={faLock} action={() => {
+                                                        <ContextMenuItem name={t("generic.button.lock-file")} icon={faLock} action={() => {
                                                             props.addToast({type: "info", title: "Work in progress feature", message: "Node locking is currently a work-in-progress/planned feature."});
                                                         }}/>
-                                                        <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
+                                                        <ContextMenuItem name={t("generic.button.overwrite")} icon={faFileImport} action={() => {
                                                             setModalNodeTarget(node);
                                                             setShowOverwriteModal(true);
                                                         }}/>
-                                                        <ContextMenuItem name="Delete" icon={faTimesCircle} action={() => {
+                                                        <ContextMenuItem name={t("generic.button.delete")} icon={faTimesCircle} action={() => {
                                                             setModalNodeTarget(node);
                                                             setShowDeleteModal(true);
                                                         }}/>
