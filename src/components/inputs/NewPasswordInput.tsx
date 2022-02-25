@@ -1,6 +1,7 @@
 import React, {ChangeEventHandler, LegacyRef, useState} from "react";
 import {randomString} from "../../util/string";
 import zxcvbn from "zxcvbn";
+import {useTranslations} from "use-intl";
 
 interface Props {
     label: string;
@@ -16,16 +17,18 @@ interface PasswordStrength {
     hint: string;
 }
 
-const passwordMeter = (password: string): PasswordStrength => {
-    const result = zxcvbn(password);
-    let hint = "Must be at least 12 characters long. Should contain numbers, upper and lower case letters.";
-    if (result.feedback.warning)
-        hint = (result.feedback.warning);
-    return {level: password.length === 0 ? 0 : (result.score === 0) ? 1 : result.score, hint: hint};
-};
-
 const NewPasswordInput = React.forwardRef((props: Props, ref: LegacyRef<HTMLInputElement> | undefined) => {
     const id = randomString(8);
+
+    const t = useTranslations();
+
+    const passwordMeter = (password: string): PasswordStrength => {
+        const result = zxcvbn(password);
+        let hint = t("components.password-strength-input.requirement");
+        if (result.feedback.warning)
+            hint = (result.feedback.warning);
+        return {level: password.length === 0 ? 0 : (result.score === 0) ? 1 : result.score, hint: hint};
+    };
 
     const [passwordStrength, setPasswordStrength] = useState(passwordMeter(""));
 
@@ -37,7 +40,7 @@ const NewPasswordInput = React.forwardRef((props: Props, ref: LegacyRef<HTMLInpu
         if (result.level === 4)
             e.target.setCustomValidity("");
         else
-            e.target.setCustomValidity("Password is too weak.");
+            e.target.setCustomValidity(t("components.password-strength-input.too-weak"));
     }
 
     const bars = (level: number): JSX.Element[] => {

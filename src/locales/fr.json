@@ -21,6 +21,12 @@
         "admin-panel": "Admin panel",
         "logout": "Logout"
     },
+    "components": {
+        "password-strength-input": {
+            "requirement": "Must be at least 12 characters long. Should contain numbers, upper and lower case letters.",
+            "too-weak": "Password is too weak."
+        }
+    },
     "pages": {
         "404": {
             "title": "404 Error",
@@ -29,24 +35,30 @@
         },
         "auth": {
             "login": {
-                "description": "Connectez-vous et commencez à stocker et partager vos fichiers de manière sécurisée.",
-                "title": "Bonjour \uD83D\uDC4B",
-                "sub-description": "Veuillez saisir vos identifiants.",
-                "redirecting": "Redirection...",
-                "login": "Connexion",
-                "register-link": "Première connexion ? <link>S'enregistrer</link>",
+                "description": "Sign in and start storing and sharing your files securely.",
+                "title": "Welcome back \uD83D\uDC4B",
+                "sub-description": "Please enter your credentials.",
+                "redirecting": "Redirecting...",
+                "login": "Login",
+                "register-link": "First time connecting? <link>Register</link>",
                 "form": {
-                    "username": "Nom d'utilisateur",
-                    "password": "Mot de passe"
+                    "username": "Username",
+                    "password": "Password",
+                    "button": {
+                        "req-salt": "Requesting salt...",
+                        "processing-password": "Processing password...",
+                        "req-keys": "Requesting keys...",
+                        "decrypting-keys": "Decrypting keys..."
+                    }
                 },
                 "toast": {
                     "success": {
-                        "title": "Bienvenue !",
-                        "message": "Connecté avec succès."
+                        "title": "Welcome!",
+                        "message": "Successfully authenticated."
                     },
                     "error":{
-                        "title": "Identifiants invalides",
-                        "message": "Vérifiez vos identifiants et réessayez."
+                        "title": "Invalid credentials",
+                        "message": "Please check your username and password then try again."
                     }
                 }
             },
@@ -55,14 +67,23 @@
                 "title": "Create your account",
                 "sub-description": "All fields are required.",
                 "agreement": "By creating an account you agree to the <terms>Terms and Conditions</terms>, and the <privacy>Privacy Policy</privacy>",
-                "register": "Register",
                 "login-link": "Already registered? <link>Sign in</link>",
                 "form": {
                     "registration-key": "Registration key",
                     "registration-key-hint": "Code received by email to register your account.",
                     "password": "Password",
                     "confirm-password": "Confirm password",
-                    "confirm-password-hint": "Must match the password you entered above."
+                    "confirm-password-hint": "Must match the password you entered above.",
+                    "button": {
+                        "register": "Register",
+                        "gen-master-key": "Generating Master Key...",
+                        "gen-client-random-value": "Generating Client Random Value...",
+                        "gen-rsa": "Generating RSA key pair...",
+                        "computing-salt": "Computing Salt...",
+                        "processing-password": "Processing password...",
+                        "encrypting-keys": "Encrypting keys...",
+                        "submitting": "Submitting..."
+                    }
                 },
                 "toast": {
                     "success": {

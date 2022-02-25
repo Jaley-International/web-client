@@ -6,7 +6,7 @@ import {Heading2, Heading3} from "../../components/text/Headings";
 import TextInput from "../../components/inputs/TextInput";
 import Button from "../../components/buttons/Button";
 import Checkbox from "../../components/inputs/Checkbox";
-import {register} from "../../helper/processes";
+import {register, RegisterStep} from "../../helper/processes";
 import NewPasswordInput from "../../components/inputs/NewPasswordInput";
 import Link from "next/link";
 import {useRouter} from "next/router";
@@ -85,7 +85,23 @@ function RegisterPage(): JSX.Element {
                                     submitRef.current.innerText = message;
                             }
 
-                            const statusCode = await register(registerKeyRef.current?.value as string, passwordRef.current?.value as string, updateStatus);
+                            const statusCode = await register(registerKeyRef.current?.value as string, passwordRef.current?.value as string, (step: RegisterStep) => {
+                                if (step === RegisterStep.GEN_MASTER_KEY)
+                                    updateStatus(t("pages.auth.register.form.button.gen-master-key"));
+                                else if (step === RegisterStep.GEN_CLIENT_RANDOM_VALUE)
+                                    updateStatus(t("pages.auth.register.form.button.gen-client-random-value"));
+                                else if (step === RegisterStep.GEN_RSA)
+                                    updateStatus(t("pages.auth.register.form.button.gen-rsa"));
+                                else if (step === RegisterStep.COMPUTING_SALT)
+                                    updateStatus(t("pages.auth.register.form.button.computing-salt"));
+                                else if (step === RegisterStep.PROCESSING_PASSWORD)
+                                    updateStatus(t("pages.auth.register.form.button.processing-password"));
+                                else if (step === RegisterStep.ENCRYPTING_KEYS)
+                                    updateStatus(t("pages.auth.register.form.button.encrypting-keys"));
+                                else if (step === RegisterStep.SUBMITTING)
+                                    updateStatus(t("pages.auth.register.form.button.submitting"));
+                            });
+
                             if (statusCode === "SUCCESS") {
                                 addToast({type: "success", title: t("pages.auth.register.toast.success.title"), message: t("pages.user.list.toast.success.message")});
                                 router.push("/auth").then(() => {});
@@ -113,7 +129,7 @@ function RegisterPage(): JSX.Element {
                             </span>
                         </Checkbox>
                         <Button ref={submitRef} size="large" type="regular" colour="blue" className={`w-full${submitting ? " animate-pulse" : ""}`} disabled={submitting}>
-                            {t("pages.auth.register.register")}
+                            {t("pages.auth.register.form.button.register")}
                         </Button>
                         <br />
                         <p className="text-center text-txt-body-muted text-2xs">

@@ -6,7 +6,7 @@ import {Heading2, Heading3} from "../../components/text/Headings";
 import TextInput from "../../components/inputs/TextInput";
 import Button from "../../components/buttons/Button";
 import Link from 'next/link';
-import {authenticate} from "../../helper/processes";
+import {authenticate, AuthenticationStep, RegisterStep} from "../../helper/processes";
 import {useRouter} from "next/router";
 import {removeCookies} from "cookies-next";
 import ToastContext from "../../contexts/ToastContext";
@@ -93,7 +93,17 @@ function LoginPage(): JSX.Element {
                             const password = passwordRef.current?.value as string;
 
                             // Authentication request
-                            const success = await authenticate(username, password, updateStatus);
+                            const success = await authenticate(username, password, (step: AuthenticationStep) => {
+                                if (step === AuthenticationStep.REQ_SALT)
+                                    updateStatus(t("pages.auth.login.form.button.req-salt"));
+                                else if (step === AuthenticationStep.PROCESSING_PASSWORD)
+                                    updateStatus(t("pages.auth.login.form.button.processing-password"));
+                                else if (step === AuthenticationStep.REQ_KEYS)
+                                    updateStatus(t("pages.auth.login.form.button.req-keys"));
+                                else if (step === AuthenticationStep.DECRYPTING_KEYS)
+                                    updateStatus(t("pages.auth.login.form.button.decrypting-keys"));
+                            });
+
                             if (success) {
                                 updateStatus(t("pages.auth.login.redirecting"));
                                 addToast({type: "success", title: t("pages.auth.login.toast.success.title"), message: t("pages.auth.login.toast.success.message")});

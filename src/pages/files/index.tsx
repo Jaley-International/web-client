@@ -39,11 +39,11 @@ function FilesPage(): JSX.Element {
                         </div>
                         <div className="w-96 text-right space-x-4">
                             <Button size="small" type="regular" colour="blue" onClick={() => fileListRef.current?.openUploadPrompt()}>
-                                <span><FontAwesomeIcon icon={faFileUpload}/>&nbsp;&nbsp;{t("pages.files.upload-file")}</span>
+                                <span><FontAwesomeIcon icon={faFileUpload}/>&nbsp;&nbsp;{t("pages.file.upload-file")}</span>
                             </Button>
 
                             <Button size="small" type="regular" colour="cyan" onClick={() => fileListRef.current?.openCreateFolderModal()}>
-                                <span><FontAwesomeIcon icon={faFolderPlus}/>&nbsp;&nbsp;{t("pages.files.create-folder")}</span>
+                                <span><FontAwesomeIcon icon={faFolderPlus}/>&nbsp;&nbsp;{t("pages.file.create-folder")}</span>
                             </Button>
                         </div>
                     </div>
