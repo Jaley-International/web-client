@@ -19,7 +19,7 @@
     "cssnano": "^5.0.17",
     "dotenv": "^16.0.0",
     "framer-motion": "^6.2.7",
-    "next": "12.0.9",
+    "next": "12.0.10",
     "node-forge": "^1.2.1",
     "postcss": "^8.4.6",
     "react": "17.0.2",
