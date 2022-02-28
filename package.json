@@ -15,7 +15,7 @@
     "@fortawesome/react-fontawesome": "^0.1.17",
     "autoprefixer": "^10.4.2",
     "axios": "^0.25.0",
-    "cookies-next": "^2.0.3",
+    "cookies-next": "^2.0.4",
     "cssnano": "^5.0.17",
     "dotenv": "^16.0.0",
     "framer-motion": "^6.2.7",
