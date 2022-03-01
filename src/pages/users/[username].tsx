@@ -291,11 +291,23 @@ function UserPage(): JSX.Element {
                                         const status = await updateAccount(user, firstname, lastname, email, group, job, accessLevel as UserAccessLevel);
 
                                         if (status === "SUCCESS")
-                                            addToast({type: "success", title: "User updated", message: "Successfully updated user."});
+                                            addToast({
+                                                type: "success",
+                                                title: t("pages.user.details.toast.success.title"),
+                                                message: t("pages.user.details.toast.success.message")
+                                            });
                                         else if (status == "ERROR_EMAIL_ALREADY_USED")
-                                            addToast({type: "warning", title: "Email already in use", message: "Failed to update account : Email already in use."});
+                                            addToast({
+                                                type: "warning",
+                                                title: t("pages.user.details.toast.email-already-used.title"),
+                                                message: t("pages.user.details.toast.email-already-used.message")
+                                            });
                                         else
-                                            addToast({type: "error", title: "Fail to update user", message: "An unknown error occurred while updating the account."});
+                                            addToast({
+                                                type: "error",
+                                                title: t("pages.user.details.toast.error.title"),
+                                                message: t("pages.user.details.toast.error.message")
+                                            });
 
                                         await fetchUser(user.username);
                                     }}>
@@ -322,9 +334,9 @@ function UserPage(): JSX.Element {
                                             <AutocompleteTextInput ref={jobRef} defaultValue={user.job} containerClassName="lg:w-1/3 lg:px-2" type="text" label={t("generic.user.job")} required={true} suggestions={suggestions[1]} />
 
                                             <AutocompleteTextInput ref={accessLevelRef}  defaultValue={capitalize(user.accessLevel)} containerClassName="lg:w-1/3 lg:pl-4" type="text" label={t("generic.user.account-type")} required={true} suggestions={[
-                                                "Guest",
-                                                "User",
-                                                "Administrator"
+                                                t("generic.user.level.guest"),
+                                                t("generic.user.level.user"),
+                                                t("generic.user.level.administrator")
                                             ]} validator={(str: string) => {
                                                 return ["GUEST", "USER", "ADMINISTRATOR"].includes(str.toUpperCase());
                                             }} />
@@ -352,7 +364,7 @@ function UserPage(): JSX.Element {
                                             </div>
                                             <div className="w-96 text-center my-auto h-full">
                                                 <Button size="medium" type="regular" colour="orange" onClick={() => {
-                                                    addToast({type: "info", title: "Work in progress feature", message: "User suspension is currently a work-in-progress/planned feature."});
+                                                    addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                 }}>{t("pages.user.details.suspend.button")}</Button>
                                             </div>
                                         </div>
@@ -366,7 +378,7 @@ function UserPage(): JSX.Element {
                                             </div>
                                             <div className="w-96 text-center my-auto h-full">
                                                 <Button size="medium" type="regular" colour="red" onClick={() => {
-                                                    addToast({type: "info", title: "Work in progress feature", message: "User deletion is currently a work-in-progress/planned feature."});
+                                                    addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                 }}>{t("pages.user.details.delete.button")}</Button>
                                             </div>
                                         </div>

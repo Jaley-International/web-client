@@ -186,9 +186,9 @@ function NewUser(): JSX.Element {
                             <AutocompleteTextInput ref={jobRef} containerClassName="lg:w-1/3 lg:px-2" type="text" label={t("generic.user.job")} required={true} suggestions={suggestions[1]} onChange={updatePreview} />
 
                             <AutocompleteTextInput ref={accessLevelRef} containerClassName="lg:w-1/3 lg:pl-4" type="text" label={t("generic.user.account-type")} required={true} suggestions={[
-                                "Guest",
-                                "User",
-                                "Administrator"
+                                t("generic.user.level.guest"),
+                                t("generic.user.level.user"),
+                                t("generic.user.level.administrator")
                             ]} onChange={updatePreview} validator={(str: string) => {
                                 return ["GUEST", "USER", "ADMINISTRATOR"].includes(str.toUpperCase());
                             }} />

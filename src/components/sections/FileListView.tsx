@@ -75,12 +75,12 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
     const fetchFilesystem = async () => {
         const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system`, {});
         if (response.status !== "SUCCESS") {
-            props.addToast({type: "error", title: "File system load error", message: "Could not fetch your file system."});
+            props.addToast({type: "error", title: t("pages.file.list.toast.fetch.load.title"), message: t("pages.file.list.toast.fetch.load.message")});
             return;
         }
         const decrypted = decryptFileSystem(response.data.filesystem as EncryptedNode);
         if (!decrypted) {
-            props.addToast({type: "error", title: "File system decryption error", message: "Could not decrypt your file system."});
+            props.addToast({type: "error", title: t("pages.file.list.toast.fetch.decrypt.title"), message: t("pages.file.list.toast.fetch.decrypt.message")});
             return;
         }
         setFilesystem(decrypted);
@@ -103,10 +103,18 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
             if (file) {
                 uploadFile(file, filesystem.id, "abc").then(async success => {
                     if (success) {
-                        props.addToast({type: "success", title: "File uploaded", message: `Your file ${file.name} has been uploaded successfully.`});
+                        props.addToast({
+                            type: "success",
+                            title: t("pages.file.list.toast.upload.success.title"),
+                            message: t.rich("pages.file.list.toast.upload.success.message", {name: file.name}).toString()
+                        });
                         await fetchFilesystem();
                     } else {
-                        props.addToast({type: "error", title: "File upload error", message: `Your file ${file.name} could not be uploaded. (File too big.)`});
+                        props.addToast({
+                            type: "error",
+                            title: t("pages.file.list.toast.upload.error.title"),
+                            message: t.rich("pages.file.list.toast.upload.error.message", {name: file.name}).toString()
+                        });
                     }
                 });
             }
@@ -318,7 +326,11 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                 }} submitCallback={async () => {
                     const response = await request("DELETE", `${publicRuntimeConfig.apiUrl}/file-system/${modalNodeTarget.id}`, {});
                     if (response.status === "SUCCESS")
-                        props.addToast({type: "success", title: t("pages.file.list.toast.delete.success.title"), message: t("pages.file.list.toast.delete.success.message")});
+                        props.addToast({
+                            type: "success",
+                            title: t.rich("pages.file.list.toast.delete.success.title", {type: t(`generic.node.${modalNodeTarget?.type.toLowerCase()}`)}).toString(),
+                            message: t.rich("pages.file.list.toast.delete.success.message", {type: t(`generic.node.${modalNodeTarget?.type.toLowerCase()}`)}).toString()
+                        });
                     else
                         props.addToast({type: "error", title: t("pages.file.list.toast.delete.error.title"), message: t("pages.file.list.toast.delete.error.message")});
                     await fetchFilesystem();
@@ -341,11 +353,11 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
 
                     if (success) {
                         const message = t.rich("pages.file.list.toast.create.success.message", {name: name}).toString();
-                        props.addToast({type: "success", title: "Folder created", message: message});
+                        props.addToast({type: "success", title: t("pages.file.list.toast.create.success.title"), message: message});
                     }
                     else {
                         const message = t.rich("pages.file.list.toast.create.error.message", {name: name}).toString();
-                        props.addToast({type: "error", title: "Error when creating folder", message: message});
+                        props.addToast({type: "error", title: t("pages.file.list.toast.create.error.title"), message: message});
                     }
 
                     await fetchFilesystem();

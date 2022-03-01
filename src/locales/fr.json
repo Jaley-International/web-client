@@ -221,6 +221,20 @@
                     "title": "Delete account",
                     "description": "By deleting this account, all the user's data will be lost. Their files and folders will be transferred to you. This process is definitive and cannot be reversed.",
                     "button": "Delete account"
+                },
+                "toast": {
+                    "success": {
+                        "title": "User updated",
+                        "message": "Successfully updated user."
+                    },
+                    "email-already-used": {
+                        "title": "Email already in use",
+                        "message": "Failed to update account : Email already in use."
+                    },
+                    "error": {
+                        "title": "Fail to update user",
+                        "message": "An unknown error occurred while updating the account."
+                    }
                 }
             }
         },
@@ -229,6 +243,26 @@
             "create-folder": "Create folder",
             "list": {
                 "toast": {
+                    "fetch": {
+                        "load": {
+                            "title": "File system load error",
+                            "message": "Could not fetch your file system."
+                        },
+                        "decrypt": {
+                            "title": "File system decryption error",
+                            "message": "Could not decrypt your file system."
+                        }
+                    },
+                    "upload": {
+                        "success": {
+                            "title": "File uploaded",
+                            "message": "Your file {name} has been uploaded successfully."
+                        },
+                        "error": {
+                            "title": "File upload error",
+                            "message": "Your file {name} could not be uploaded. (File too big.)"
+                        }
+                    },
                     "download": {
                         "fail": {
                             "title": "Failed to download",
@@ -245,18 +279,18 @@
                     },
                     "delete": {
                         "success": {
-                            "title": "File deleted",
-                            "message": "File deleted successfully."
+                            "title": "{type} deleted",
+                            "message": "{type} deleted successfully."
                         },
                         "error": {
-                            "title": "Could not delete file",
-                            "message": "An unknown error occurred while deleting the file."
+                            "title": "Could not delete {type}",
+                            "message": "An unknown error occurred while deleting the {type}."
                         }
                     },
                     "create": {
                         "success": {
                             "title": "Folder created",
-                            "message": ""
+                            "message": "Successfully created folder {name}."
                         },
                         "error": {
                             "title": "Error when creating folder",
