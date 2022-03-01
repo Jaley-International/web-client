@@ -20,6 +20,7 @@
             "delete": "Delete"
         },
         "user": {
+            "title": "Users",
             "name": "Name",
             "first-name": "First name",
             "last-name": "Last name",
@@ -29,10 +30,16 @@
             "account-type": "Account type"
         },
         "file": {
+            "title": "Files",
             "name": "File name",
             "upload-date": "Upload date",
             "last-modified": "Last modified",
             "shared-with": "Shared with"
+        },
+        "level": {
+            "administrator": "Administrator",
+            "user": "User",
+            "guest": "Guest"
         }
     },
     "navbar": {
@@ -121,13 +128,41 @@
                         "message": "An unknown error occurred while creating your account."
                     }
                 }
+            },
+            "pre-register": {
+                "title": "User pre-registration",
+                "button": {
+                    "go-back": "Discard and go back",
+                    "create-user": "Create user"
+                },
+                "toast": {
+                    "success": {
+                        "title": "Account created",
+                        "message": "User account created successfully."
+                    },
+                    "username-already-used": {
+                        "title": "Username already in use",
+                        "message": "Failed to create an account : Username already in use."
+                    },
+                    "email-already-used": {
+                        "title": "Email already in use",
+                        "message": "Failed to create an account : Email already in use."
+                    },
+                    "invalid-access-level": {
+                        "title": "Insufficient permissions",
+                        "message": "Administrator privileges are required to create an account."
+                    },
+                    "error": {
+                        "title": "Failed to create an account",
+                        "message": "An unknown error occurred while creating your account."
+                    }
+                }
             }
         },
         "user": {
             "list": {
                 "title": "User management",
                 "new-user": "New user",
-                "sub-title": "Users",
                 "toast": {
                     "success": {
                         "title": "User deleted",

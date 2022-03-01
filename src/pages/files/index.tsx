@@ -27,7 +27,7 @@ function FilesPage(): JSX.Element {
         <div className="flex bg-bg-light">
             <Navbar/>
             <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
-                <Header title="Files">
+                <Header title={t("generic.file.title")}>
                     <div className="flex">
                         <div className="w-full">
                             <Breadcrumb items={[

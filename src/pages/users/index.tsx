@@ -59,7 +59,7 @@ function UserList(): JSX.Element {
                 </Header>
 
                 <ContentTransition className="w-full p-8">
-                    <Card title={t("pages.user.list.sub-title")} className="pb-2">
+                    <Card title={t("generic.user.title")} className="pb-2">
                         <table className="w-full">
                             <thead>
                             <tr className="border-b border-grey-200 bg-bg-light text-3xs text-txt-body-lightmuted uppercase">
