@@ -8,16 +8,23 @@
         "table": {
             "actions": "Actions"
         },
+        "toast": {
+            "wip": {
+                "title": "Work in progress feature",
+                "message": "wip"
+            }
+        },
         "button": {
             "view-edit": "View/Edit",
             "save": "Save changes",
             "preview": "Preview",
             "download": "Download",
-            "share": "Shae",
+            "share": "Share",
             "manage-permission": "Manage permission",
             "lock-file": "Lock file",
             "overwrite": "Overwrite",
-            "delete": "Delete"
+            "delete": "Delete",
+            "cancel": "Cancel"
         },
         "user": {
             "title": "Users",
@@ -27,7 +34,12 @@
             "email": "Email address",
             "group": "Group",
             "job": "Job title",
-            "account-type": "Account type"
+            "account-type": "Account type",
+            "level": {
+                "administrator": "Administrator",
+                "user": "User",
+                "guest": "Guest"
+            }
         },
         "file": {
             "title": "Files",
@@ -36,11 +48,11 @@
             "last-modified": "Last modified",
             "shared-with": "Shared with"
         },
-        "level": {
-            "administrator": "Administrator",
-            "user": "User",
-            "guest": "Guest"
-        }
+        "node": {
+            "file": "File",
+            "folder": "Folder"
+        },
+        "irreversible": "This process cannot be reversed."
     },
     "navbar": {
         "files": "Files",
@@ -54,6 +66,21 @@
         "password-strength-input": {
             "requirement": "Must be at least 12 characters long. Should contain numbers, upper and lower case letters.",
             "too-weak": "Password is too weak."
+        }
+    },
+    "modal": {
+        "node": {
+            "delete": {
+                "title": "{type} deletion confirmation",
+                "description": "Are you sure you want to delete <bold>{name}</bold>",
+                "submit": "Confirm deletion"
+            },
+            "overwrite": {
+                "title": "File overwriting",
+                "description": "You are about to overwrite <bold>{name}</bold>",
+                "drag-n-drop": "Drag and drop your file here or",
+                "submit": "Upload a file"
+            }
         }
     },
     "pages": {
@@ -199,7 +226,45 @@
         },
         "file": {
             "upload-file": "Upload file",
-            "create-folder": "Create folder"
+            "create-folder": "Create folder",
+            "list": {
+                "toast": {
+                    "download": {
+                        "fail": {
+                            "title": "Failed to download",
+                            "message": "An error occurred while fetching the file."
+                        },
+                        "decrypt": {
+                            "title": "Failed to decrypt",
+                            "message": "An error occurred while decrypting the file."
+                        },
+                        "error": {
+                            "title": "Failed to download",
+                            "message": "An unexpected error occurred while downloading the file."
+                        }
+                    },
+                    "delete": {
+                        "success": {
+                            "title": "File deleted",
+                            "message": "File deleted successfully."
+                        },
+                        "error": {
+                            "title": "Could not delete file",
+                            "message": "An unknown error occurred while deleting the file."
+                        }
+                    },
+                    "create": {
+                        "success": {
+                            "title": "Folder created",
+                            "message": ""
+                        },
+                        "error": {
+                            "title": "Error when creating folder",
+                            "message": "Could not create folder {name}."
+                        }
+                    }
+                }
+            }
         }
     }
 }

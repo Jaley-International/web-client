@@ -34,6 +34,7 @@ import ShareLinkModal from "../containers/modals/ShareLinkModal";
 import Card from "components/containers/Card";
 import {nodeToDescription, nodeToIcon} from "../../util/node";
 import {useTranslations} from "use-intl";
+import Link from "next/link";
 
 interface Props {
     addToast: (toast: ToastProps) => void;
@@ -187,7 +188,7 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                             e.preventDefault();
                                             if (dragNodeOrigin && dragNodeDest) {
                                                 // TODO Node drop in folder
-                                                props.addToast({type: "info", title: "Work in progress feature", message: "Folder moving is currently a work-in-progress/planned feature."});
+                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                 setDragNodeDest(null);
                                             }
                                         }}
@@ -235,16 +236,16 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                 {node.type === "FOLDER" ?
                                                     <OptionsButton>
                                                         <ContextMenuItem name="Rename" icon={faPencilAlt} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "Folder renaming is currently a work-in-progress/planned feature."});
+                                                            props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                         }}/>
                                                         <ContextMenuItem name="Share" icon={faShareAlt} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "Folder sharing is currently a work-in-progress/planned feature."});
+                                                            props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                         }}/>
                                                         <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "Permission system is currently a work-in-progress/planned feature."});
+                                                            props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                         }}/>
                                                         <ContextMenuItem name="Lock folder" icon={faLock} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "Node locking is currently a work-in-progress/planned feature."});
+                                                            props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                         }}/>
                                                         <ContextMenuItem name="Delete" icon={faTimesCircle} action={() => {
                                                             setModalNodeTarget(node);
@@ -254,16 +255,16 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                     :
                                                     <OptionsButton>
                                                         <ContextMenuItem name={t("generic.button.preview")} icon={faEye} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "File preview is currently a work-in-progress/planned feature."});
+                                                            props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                         }}/>
                                                         <ContextMenuItem name={t("generic.button.download")} icon={faCloudDownloadAlt} action={async () => {
                                                             const status = await downloadFile(node);
                                                             if (status === "ERROR_FETCH")
-                                                                props.addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
+                                                                props.addToast({type: "error", title: t("pages.file.list.toast.download.fail.title"), message: t("pages.file.list.toast.download.fail.message")});
                                                             else if (status === "ERROR_DECRYPT")
-                                                                props.addToast({type: "error", title: "Failed to decrypt", message: "An error occurred while decrypting the file."});
+                                                                props.addToast({type: "error", title: t("pages.file.list.toast.download.decrypt.title"), message: t("pages.file.list.toast.download.decrypt.message")});
                                                             else if (status !== "SUCCESS")
-                                                                props.addToast({type: "error", title: "Failed to download", message: "An unexpected error occurred while downloading the file."});
+                                                                props.addToast({type: "error", title: t("pages.file.list.toast.download.error.title"), message: t("pages.file.list.toast.download.error.message")});
                                                         }}/>
                                                         <ContextMenuItem name={t("generic.button.share")} icon={faShareAlt} action={async () => {
 
@@ -284,10 +285,10 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                             setShowShareLinkModal(true);
                                                         }}/>
                                                         <ContextMenuItem name={t("generic.button.manage-permission")} icon={faUsersCog} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "Permission system is currently a work-in-progress/planned feature."});
+                                                            props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                         }}/>
                                                         <ContextMenuItem name={t("generic.button.lock-file")} icon={faLock} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "Node locking is currently a work-in-progress/planned feature."});
+                                                            props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                         }}/>
                                                         <ContextMenuItem name={t("generic.button.overwrite")} icon={faFileImport} action={() => {
                                                             setModalNodeTarget(node);
@@ -317,9 +318,9 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                 }} submitCallback={async () => {
                     const response = await request("DELETE", `${publicRuntimeConfig.apiUrl}/file-system/${modalNodeTarget.id}`, {});
                     if (response.status === "SUCCESS")
-                        props.addToast({type: "success", title: "File deleted", message: "File deleted successfully."});
+                        props.addToast({type: "success", title: t("pages.file.list.toast.delete.success.title"), message: t("pages.file.list.toast.delete.success.message")});
                     else
-                        props.addToast({type: "error", title: "Could not delete file", message: "An unknown error occurred while deleting the file."});
+                        props.addToast({type: "error", title: t("pages.file.list.toast.delete.error.title"), message: t("pages.file.list.toast.delete.error.message")});
                     await fetchFilesystem();
                 }}/>
             }
@@ -330,17 +331,25 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                 }} submitCallback={(file) => {
                     if (!file || !filesystem) return;
                     // TODO Overwrite file
-                    props.addToast({type: "info", title: "Work in progress feature", message: "File overwrite is currently a work-in-progress/planned feature."});
+                    props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                 }}/>
             }
             {showCreateFolderModal &&
                 <CreateFolderModal closeCallback={() => setShowCreateFolderModal(false)} submitCallback={async (name: string) => {
+
                     const success = filesystem && await createFolder(name, filesystem.id, "abc");
-                    if (success)
-                        props.addToast({type: "success", title: "Folder created", message: `Folder ${name} created successfully.`});
-                    else
-                        props.addToast({type: "error", title: "Error when creating folder", message: `Could not create folder ${name}.`});
+
+                    if (success) {
+                        const message = t.rich("pages.file.list.toast.create.success.message", {name: name}).toString();
+                        props.addToast({type: "success", title: "Folder created", message: message});
+                    }
+                    else {
+                        const message = t.rich("pages.file.list.toast.create.error.message", {name: name}).toString();
+                        props.addToast({type: "error", title: "Error when creating folder", message: message});
+                    }
+
                     await fetchFilesystem();
+
                 }} />
             }
             {showShareLinkModal && modalNodeTarget && modalNodeTarget.shareLink &&
