@@ -3,203 +3,203 @@
         "app": {
             "name": "Private Encrypted Cloud",
             "abbr": "PEC",
-            "moto": "Keep control over your data."
+            "moto": "Guarder le controle de vos données"
         },
         "table": {
             "actions": "Actions"
         },
         "button": {
-            "view-edit": "View/Edit",
-            "save": "Save changes",
-            "preview": "Preview",
-            "download": "Download",
-            "share": "Shae",
-            "manage-permission": "Manage permission",
-            "lock-file": "Lock file",
-            "overwrite": "Overwrite",
-            "delete": "Delete"
+            "view-edit": "Voir/Editer",
+            "save": "Enregistrer les changements",
+            "preview": "Aperçu",
+            "download": "Télécharger",
+            "share": "Partager",
+            "manage-permission": "Modifier les permissions",
+            "lock-file": "Verrouiller un fichier",
+            "overwrite": "Ecraser",
+            "delete": "Effacer"
         },
         "user": {
-            "title": "Users",
-            "name": "Name",
-            "first-name": "First name",
-            "last-name": "Last name",
-            "email": "Email address",
-            "group": "Group",
-            "job": "Job title",
-            "account-type": "Account type"
+            "title": "Utilisateurs",
+            "name": "Nom",
+            "first-name": "Prénom",
+            "last-name": "Nom de famille",
+            "email": "Adresse mail",
+            "group": "Groupe",
+            "job": "Emploi",
+            "account-type": "Type de compte"
         },
         "file": {
-            "title": "Files",
-            "name": "File name",
-            "upload-date": "Upload date",
-            "last-modified": "Last modified",
-            "shared-with": "Shared with"
+            "name": "Nom du fichier",
+            "upload-date": "Date de télérvesement",
+            "last-modified": "Dernière modification",
+            "shared-with": "Partager avec"
         },
         "level": {
-            "administrator": "Administrator",
-            "user": "User",
-            "guest": "Guest"
+            "administrator": "Administrateur",
+            "user": "Utilisateur",
+            "guest": "Inviter"
         }
     },
     "navbar": {
-        "files": "Files",
+        "files": "Fichiers",
         "notifications": "Notifications",
-        "my-account": "My account",
-        "activity-log": "Activity log",
-        "admin-panel": "Admin panel",
-        "logout": "Logout"
+        "my-account": "Mon compte",
+        "activity-log": "Journal d'activité",
+        "admin-panel": "Panneau administrateur",
+        "logout": "Déconnexion"
     },
     "components": {
         "password-strength-input": {
-            "requirement": "Must be at least 12 characters long. Should contain numbers, upper and lower case letters.",
-            "too-weak": "Password is too weak."
+            "requirement": "Doit faire au minimum 12 characters, avec des chiffres, minuscules et majuscules.",
+            "too-weak": "Mot de passe trop faible"
         }
     },
     "pages": {
         "404": {
-            "title": "404 Error",
-            "description": "The page/resource you requested does not exist or has been moved.",
-            "back-button": "Back"
+            "title": "Erreur 404",
+            "description": "La page que vous rechercher n'existe pas.",
+            "back-button": "Retour"
         },
         "auth": {
             "login": {
-                "description": "Sign in and start storing and sharing your files securely.",
-                "title": "Welcome back \uD83D\uDC4B",
-                "sub-description": "Please enter your credentials.",
-                "redirecting": "Redirecting...",
-                "login": "Login",
-                "register-link": "First time connecting? <link>Register</link>",
+                "description": "Connectez-vous et commencez à stocker et partager vos fichiers en toute sécurité.",
+                "title": "Bon retour \uD83D\uDC4B",
+                "sub-description": "Veuillez entrer vos identifiant et mot de passe.",
+                "redirecting": "Redirection...",
+                "login": "Connection",
+                "register-link": "Première connexion? <link>Inscrivez-vous</link>",
                 "form": {
-                    "username": "Username",
-                    "password": "Password",
+                    "username": "Identifiant",
+                    "password": "Mot de passe",
                     "button": {
-                        "req-salt": "Requesting salt...",
-                        "processing-password": "Processing password...",
-                        "req-keys": "Requesting keys...",
-                        "decrypting-keys": "Decrypting keys..."
+                        "req-salt": "Récupération du sel...",
+                        "processing-password": "Traitement du mot de passe...",
+                        "req-keys": "Récupération des clés...",
+                        "decrypting-keys": "Décryption des clés..."
                     }
                 },
                 "toast": {
                     "success": {
-                        "title": "Welcome!",
-                        "message": "Successfully authenticated."
+                        "title": "Bienvenue!",
+                        "message": "Athentification Réussie."
                     },
                     "error":{
-                        "title": "Invalid credentials",
-                        "message": "Please check your username and password then try again."
+                        "title": "Identifiants invalides",
+                        "message": "Vérifiez votre identifiant et votre mot de passe et rééssayer."
                     }
                 }
             },
             "register": {
-                "description": "Create your account and start storing and sharing your files securely.",
-                "title": "Create your account",
-                "sub-description": "All fields are required.",
-                "agreement": "By creating an account you agree to the <terms>Terms and Conditions</terms>, and the <privacy>Privacy Policy</privacy>",
-                "login-link": "Already registered? <link>Sign in</link>",
+                "description": "Créer votre compte et commencer à stocker et partager vos fichiers.",
+                "title": "Créer votre compte",
+                "sub-description": "Tous les champs sont requis",
+                "agreement": "En créant votre compte, vous acceptez nos <terms>Thermes and Conditions</terms>, et notre <privacy>Politique de confidentialité</privacy>",
+                "login-link": "Déja inscrit? <link>Connectez-vous</link>",
                 "form": {
-                    "registration-key": "Registration key",
-                    "registration-key-hint": "Code received by email to register your account.",
-                    "password": "Password",
-                    "confirm-password": "Confirm password",
-                    "confirm-password-hint": "Must match the password you entered above.",
+                    "registration-key": "Clé d'inscription",
+                    "registration-key-hint": "Code reçu par mail pour créer votre compte.",
+                    "password": "Mot de passe",
+                    "confirm-password": "Confirmer votre mot de passe",
+                    "confirm-password-hint": "Vos mots de passes doivent être identiques.",
                     "button": {
-                        "register": "Register",
-                        "gen-master-key": "Generating Master Key...",
-                        "gen-client-random-value": "Generating Client Random Value...",
-                        "gen-rsa": "Generating RSA key pair...",
-                        "computing-salt": "Computing Salt...",
-                        "processing-password": "Processing password...",
-                        "encrypting-keys": "Encrypting keys...",
-                        "submitting": "Submitting..."
+                        "register": "Enregistrement",
+                        "gen-master-key": "Génération de la clé primaire...",
+                        "gen-client-random-value": "Génération de la valeur aléatoir du client.",
+                        "gen-rsa": "Génération de la paire de clé RSA...",
+                        "computing-salt": "Calcul du sel...",
+                        "processing-password": "Traitement du mot de passe...",
+                        "encrypting-keys": "Encryption des clés...",
+                        "submitting": "Envoi..."
                     }
                 },
                 "toast": {
                     "success": {
-                        "title": "Account created",
-                        "message": "Please check your emails to finalize your registration."
+                        "title": "Compte créé avec succès",
+                        "message": "Veuillez vérifier vos emails pour finir votre inscription."
                     },
                     "invalid": {
-                        "title": "Invalid registration key",
-                        "message": "The registration key you provided is invalid."
+                        "title": "Clé d'inscription invalide",
+                        "message": "La clé d'inscription que vous avez fournit est invalide."
                     },
                     "error": {
-                        "title": "Failed to create an account",
-                        "message": "An unknown error occurred while creating your account."
+                        "title": "Création de compte échoue",
+                        "message": "Une erreur inconnue est apparue lors de la création de votre compte."
                     }
                 }
             },
             "pre-register": {
-                "title": "User pre-registration",
+                "title": "Pre-inscription utilisateur",
                 "button": {
-                    "go-back": "Discard and go back",
-                    "create-user": "Create user"
+                    "go-back": "Abandonner et revenir en arrière",
+                    "create-user": "Créer un Utilisateur"
                 },
                 "toast": {
                     "success": {
-                        "title": "Account created",
-                        "message": "User account created successfully."
+                        "title": "Compte créé",
+                        "message": "Compte utilisateur créé ave succès."
                     },
                     "username-already-used": {
-                        "title": "Username already in use",
-                        "message": "Failed to create an account : Username already in use."
+                        "title": "Identifiant déja utilisé",
+                        "message": "Echec de la création de compte : Identifiant déja utilisé."
                     },
                     "email-already-used": {
-                        "title": "Email already in use",
-                        "message": "Failed to create an account : Email already in use."
+                        "title": "Email déja utilisé",
+                        "message": "Echec de la création de compte : Email déja utilisé."
                     },
                     "invalid-access-level": {
-                        "title": "Insufficient permissions",
-                        "message": "Administrator privileges are required to create an account."
+                        "title": "Permissions insuffisantes",
+                        "message": "Les privilèges administrateur sont nécéssaires pour creer un nouveau comptee."
                     },
                     "error": {
-                        "title": "Failed to create an account",
-                        "message": "An unknown error occurred while creating your account."
+                        "title": "Echec de la création de compte",
+                        "message": "Une erreur inconnue est apparue lors de la création de votre compte."
                     }
                 }
             }
         },
         "user": {
             "list": {
-                "title": "User management",
-                "new-user": "New user",
+                "title": "Gestion des utilisateurs",
+                "new-user": "Nouvel utilisateur",
+
                 "toast": {
                     "success": {
-                        "title": "User deleted",
-                        "message": "Account successfully deleted"
+                        "title": "utilisateur supprimer",
+                        "message": "Compte supprimer avec succès"
                     },
                     "not-found": {
-                        "title": "Failed to delete a user",
-                        "message": "Account to delete was not found."
+                        "title": "Impossible de trouver l'utilisateur",
+                        "message": "le compte à supprimer n'a pas été trouver."
                     },
                     "error": {
-                        "title": "Failed to delete a user",
-                        "message": "An unknown error occurred while deleting an account."
+                        "title": "Echec de la suppression de compte",
+                        "message": "Une erreur inconnue est apparue lors de la suppression de votre compte."
                     }
                 }
             },
             "details": {
-                "title": "User details",
-                "back": "Back to user list",
-                "member-since": "Member since 01/01/1970",
-                "last-active": "Last active 2 hours ago",
-                "files-table-title": "Files and folders owned",
-                "edit-title": "Edit account informations",
+                "title": "Détails utilisateurs",
+                "back": "revenir à la liste des utilisateurss",
+                "member-since": "Membre depuis le 01/01/1970",
+                "last-active": "Dernière activité il y a 1 minute",
+                "files-table-title": "Dossiers et fichiers posséder",
+                "edit-title": "Editer les informations de compte",
                 "suspend": {
-                    "title": "Suspend account",
-                    "description": "By suspending this account, the user will no longer be able to log in. Their files will still be available by those it has been shared with and all administrators.",
-                    "button": "Suspend account"
+                    "title": "Compte suspendu",
+                    "description": "En suspendant ce compte, l'utilisateur ne pourra plus se connecter. Ses fichiers seront toujours accessible pour ceux avec qui ils étaient partager ainsi qu'aux administrateurs",
+                    "button": "Supendre le compte"
                 },
                 "delete": {
-                    "title": "Delete account",
-                    "description": "By deleting this account, all the user's data will be lost. Their files and folders will be transferred to you. This process is definitive and cannot be reversed.",
-                    "button": "Delete account"
+                    "title": "Supprimer un Compte",
+                    "description": "En supprimant ce compte, toute les données liés a cet utlisateurs seront supprimer. Leurs fichiers et dossiers vous seront transferer. Cette procédure est définitive et irreversible.",
+                    "button": "Supprimer le compte"
                 }
             }
         },
         "file": {
-            "upload-file": "Upload file",
-            "create-folder": "Create folder"
+            "upload-file": "Téléverser un fichier",
+            "create-folder": "Créé un dossier"
         }
     }
 }
