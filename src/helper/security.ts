@@ -2,10 +2,6 @@ import forge, {Hex} from "node-forge";
 import assert from "assert";
 
 
-// TODO : Change instance ID to be unique for each instance
-export const INSTANCE_ID = "PEC-4Kua7tTa5XAb";
-
-
 /**
  * Generate a 2048-bits RSA key pair
  * @return {Promise<forge.pki.KeyPair>}

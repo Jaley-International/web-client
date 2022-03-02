@@ -48,7 +48,7 @@ function Toast(props: ToastProps): JSX.Element {
                 <div className="p-4">
                     <div className="flex items-start">
                         <div className="flex-shrink-0 animate-pulse">
-                            <FontAwesomeIcon icon={style.icon} className={`h-6 w-6 text-${style.colour}`} aria-hidden="true" />
+                            <FontAwesomeIcon icon={style.icon} className={`text-${style.colour}`} aria-hidden="true" />
                         </div>
                         <div className="ml-4 flex-1">
                             <p className="text-sm font-medium text-txt-heading cursor-pointer" onClick={() => setExpanded(!expanded)}>
@@ -61,11 +61,11 @@ function Toast(props: ToastProps): JSX.Element {
                         <div className="ml-4 flex-shrink-0 flex space-x-3">
                             <button className="bg-white rounded-md inline-flex text-grey-500 transition-colors hover:text-grey-600 focus:outline-none" onClick={() => setExpanded(!expanded)}>
                                 <span className="sr-only">{expanded ? "Retract" : "Expand"}</span>
-                                <FontAwesomeIcon icon={expanded ? faChevronUp : faChevronDown} className="h-5 w-5" aria-hidden="true" />
+                                <FontAwesomeIcon icon={expanded ? faChevronUp : faChevronDown} aria-hidden="true" />
                             </button>
                             <button className="bg-white rounded-md inline-flex text-grey-500 transition-colors hover:text-grey-600 focus:outline-none" onClick={props.onClose}>
                                 <span className="sr-only">Close</span>
-                                <FontAwesomeIcon icon={faTimes} className="h-5 w-5" aria-hidden="true" />
+                                <FontAwesomeIcon icon={faTimes} aria-hidden="true" />
                             </button>
                         </div>
                     </div>

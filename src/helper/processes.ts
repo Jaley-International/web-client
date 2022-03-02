@@ -8,7 +8,6 @@ import {
     encrypt,
     encryptBuffer,
     generateRSAKeyPair,
-    INSTANCE_ID,
     pbkdf2,
     rsaPrivateDecrypt,
     sha256,
@@ -95,7 +94,7 @@ export async function register(
 
     // Generate Salt
     updateStatus("Computing Salt...");
-    const salt = sha256(addPadding(registerKey + INSTANCE_ID + clientRandomValue, 128));
+    const salt = sha256(addPadding(registerKey + publicRuntimeConfig.instanceId + clientRandomValue, 128));
 
     // PPF
     updateStatus("Processing password...");
