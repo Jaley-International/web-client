@@ -28,13 +28,6 @@ export interface EncryptedNode {
     children: EncryptedNode[];
 }
 
-export interface ShareLink {
-    shareId: string;
-    iv: Hex;
-    encryptedNodeKey: Hex;
-    encryptedShareKey: Hex;
-}
-
 export interface MetaData {
     name: string;
     type?: string;
@@ -59,6 +52,13 @@ export interface Node {
 export interface Session {
     id?: string;
     exp?: number;
+}
+
+export interface ShareLink {
+    shareId: string;
+    iv: Hex;
+    encryptedNodeKey: Hex;
+    encryptedShareKey: Hex;
 }
 
 /**
@@ -190,26 +190,21 @@ export async function authenticate(
 
 
 /**
- * File upload client-side process
- * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
+ * File content upload to server.
  *
- * @param {File}        file                File to upload.
- * @param {number}      containingFolderID  ID of the containing folder.
- * @param {Hex}         parentFolderKey     Parent folder's key.
- * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
+ * @param {File}    file        File to upload.
+ * @param {Hex}     nodeKey     Node key.
+ * @param {string}  iv          Initialisation vector.
  */
-export async function uploadFile(
-    file: File, containingFolderID: number,
-    parentFolderKey: Hex
-): Promise<boolean> {
+export async function uploadFileContent(
+    file: File,
+    nodeKey: Hex,
+    iv: string
+): Promise<[string, string] | [null, null]> {
+
+    console.log(nodeKey, iv);
 
     const {publicRuntimeConfig} = getConfig();
-
-    // Generate Node Key (256 bits)
-    const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
-
-    // Generate initialization vector (128 bits)
-    const iv = forge.random.getBytesSync(16);
 
     // Reading file
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -228,10 +223,41 @@ export async function uploadFile(
         "POST",
         `${publicRuntimeConfig.apiUrl}/file-system/content`,
         formData,
-        {"Content-Type": "multipart/form-data; "});
+        {"Content-Type": "multipart/form-data;"});
+
     if (contentResponse.status !== "SUCCESS")
-        return false;
-    const ref = contentResponse.data.ref;
+        return [null, null];
+
+    return [contentResponse.data.ref, tag];
+}
+
+
+/**
+ * File node creation client-side process
+ * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
+ *
+ * @param {File}        file                File to upload.
+ * @param {number}      containingFolderID  ID of the containing folder.
+ * @param {Hex}         parentFolderKey     Parent folder's key.
+ * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
+ */
+export async function uploadFile(
+    file: File,
+    containingFolderID: number,
+    parentFolderKey: Hex
+): Promise<boolean> {
+
+    const {publicRuntimeConfig} = getConfig();
+
+    // Generate Node Key (256 bits)
+    const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
+
+    // Generate initialization vector (128 bits)
+    const iv = forge.random.getBytesSync(16);
+
+    // server request to upload file content
+    const [ref, tag] = await uploadFileContent(file, nodeKey, iv);
+    if (!ref) return false;
 
     // Getting and encrypting file meta data
     const metaData = {
@@ -261,6 +287,39 @@ export async function uploadFile(
     });
 
     return fileResponse.status === "SUCCESS";
+}
+
+
+export async function overwriteFile(
+    file: File,
+    nodeId: number,
+    nodeKey: Hex,
+    iv: string
+): Promise<boolean> {
+
+    const {publicRuntimeConfig} = getConfig();
+
+    // server request to upload file content
+    const [ref, tag] = await uploadFileContent(file, nodeKey, forge.util.hexToBytes(iv));
+    if (!ref) return false;
+
+    // Getting and encrypting file meta data
+    const metaData = {
+        name: file.name,
+        type: file.type,
+        lastModified: file.lastModified,
+        size: file.size
+    }
+    const encryptedMetadata = encrypt("AES-CTR", nodeKey, forge.util.hexToBytes(iv), JSON.stringify(metaData));
+
+    // sending node ref update request
+    const overwriteResponse = await request("PATCH", `${publicRuntimeConfig.apiUrl}/file-system/${nodeId}/ref`, {
+        newEncryptedMetadata: encryptedMetadata,
+        newRef: ref,
+        newTag: tag
+    });
+
+    return overwriteResponse.status === "SUCCESS";
 }
 
 

@@ -20,7 +20,7 @@ import {
     createNodeShareLink,
     decryptFileSystem,
     downloadFile, EncryptedNode,
-    Node,
+    Node, overwriteFile,
     uploadFile
 } from "../../helper/processes";
 import {request} from "../../helper/communication";
@@ -323,10 +323,22 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                 <OverwriteFileModal node={modalNodeTarget} closeCallback={() => {
                     setShowOverwriteModal(false);
                     setModalNodeTarget(null);
-                }} submitCallback={(file) => {
+                }} submitCallback={async (file) => {
                     if (!file || !filesystem) return;
-                    // TODO Overwrite file
-                    props.addToast({type: "info", title: "Work in progress feature", message: "File overwrite is currently a work-in-progress/planned feature."});
+                    const success = await overwriteFile(file, modalNodeTarget?.id, modalNodeTarget?.nodeKey, modalNodeTarget?.iv);
+                    if (success)
+                        props.addToast({
+                            type: "success",
+                            title: "File overwritten",
+                            message: `File successfully overwritten.`
+                        });
+                    else
+                        props.addToast({
+                            type: "error",
+                            title: "Error when overwriting file",
+                            message: `Could not overwrite file.`
+                        });
+                    await fetchFilesystem();
                 }}/>
             }
             {showCreateFolderModal &&
