@@ -5,12 +5,13 @@ import Button from "../../components/buttons/Button";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowLeft, faUser} from "@fortawesome/free-solid-svg-icons";
 import TextInput from "../../components/inputs/TextInput";
-import React, {useContext, useRef} from "react";
-import Select from "../../components/inputs/Select";
-import {request} from "../../util/communication";
+import React, {useContext, useEffect, useRef, useState} from "react";
+import {request} from "../../helper/communication";
 import getConfig from "next/config";
 import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
+import AutocompleteTextInput from "../../components/inputs/AutocompleteTextInput";
+import {getGroupsJobsSuggestions} from "../../util/user";
 
 function NewUser(): JSX.Element {
 
@@ -26,9 +27,9 @@ function NewUser(): JSX.Element {
     const lastnameRef = useRef<HTMLInputElement>(null);
     const usernameRef = useRef<HTMLInputElement>(null);
     const emailRef = useRef<HTMLInputElement>(null);
-    const groupRef = useRef<HTMLSelectElement>(null);
-    const jobRef = useRef<HTMLSelectElement>(null);
-    const accessLevelRef = useRef<HTMLSelectElement>(null);
+    const groupRef = useRef<HTMLInputElement>(null);
+    const jobRef = useRef<HTMLInputElement>(null);
+    const accessLevelRef = useRef<HTMLInputElement>(null);
 
     const updatePreview = (() => {
         const firstname = (firstnameRef.current as HTMLInputElement).value;
@@ -36,8 +37,8 @@ function NewUser(): JSX.Element {
             (firstname.length > 0 ? firstname[0].toUpperCase() + firstname.substring(1) : firstname) + " " +
             (lastnameRef.current as HTMLInputElement).value.toUpperCase();
 
-        const job = (jobRef.current as HTMLSelectElement).value !== "" ? (jobRef.current as HTMLSelectElement).value : "Unknown";
-        const group = (groupRef.current as HTMLSelectElement).value !== "" ? (groupRef.current as HTMLSelectElement).value : "Unknown";
+        const job = (jobRef.current as HTMLInputElement).value !== "" ? (jobRef.current as HTMLInputElement).value : "Unknown";
+        const group = (groupRef.current as HTMLInputElement).value !== "" ? (groupRef.current as HTMLInputElement).value : "Unknown";
         (previewJobGroup.current as HTMLParagraphElement).innerText = [job, group].join(", ");
 
         (previewEmail.current as HTMLParagraphElement).innerText = (emailRef.current as HTMLInputElement).value;
@@ -51,6 +52,18 @@ function NewUser(): JSX.Element {
     }
 
 
+    const [loadedSuggestions, setLoadedSuggestions] = useState<boolean>(false);
+    const [suggestions, setSuggestions] = useState<string[][]>([[],[]]);
+
+    const fetchSuggestions = async () => {
+        setSuggestions(await getGroupsJobsSuggestions());
+        setLoadedSuggestions(true);
+    }
+    useEffect(() => {
+        if (!loadedSuggestions)
+            fetchSuggestions().then(_ => {});
+    });
+
     return (
         <div className="flex bg-bg-light">
             <Navbar/>
@@ -63,7 +76,7 @@ function NewUser(): JSX.Element {
                     </Link>
                 </Header>
 
-                <ContentTransition className="w-full p-8">
+                <ContentTransition className="w-full p-8 pb-40">
 
                     <div className="mb-10">
                         <div className="flex space-x-4">
@@ -86,9 +99,9 @@ function NewUser(): JSX.Element {
                         const lastname = (lastnameRef.current as HTMLInputElement).value;
                         const username = (usernameRef.current as HTMLInputElement).value;
                         const email = (emailRef.current as HTMLInputElement).value;
-                        const group = (groupRef.current as HTMLSelectElement).value;
-                        const job = (jobRef.current as HTMLSelectElement).value;
-                        const accessLevel = (accessLevelRef.current as HTMLSelectElement).value;
+                        const group = (groupRef.current as HTMLInputElement).value;
+                        const job = (jobRef.current as HTMLInputElement).value;
+                        const accessLevel = (accessLevelRef.current as HTMLInputElement).value.toUpperCase();
 
                         const createUserData = {
                             firstName: firstname,
@@ -164,27 +177,18 @@ function NewUser(): JSX.Element {
                                        onChange={updatePreview}/>
                         </div>
                         <div className="lg:flex">
-                            <Select ref={groupRef} className="lg:w-1/3 lg:pr-4" label="Group" required={true}
-                                    onChange={updatePreview}>
-                                <option>Clients</option>
-                                <option>Debt recovery department</option>
-                                <option>Human resources</option>
-                                <option>Legal department</option>
-                            </Select>
-                            <Select ref={jobRef} className="lg:w-1/3 lg:px-2" label="Job title" required={true}
-                                    onChange={updatePreview}>
-                                <option>CEO</option>
-                                <option>Debt Collection Officer</option>
-                                <option>HR director</option>
-                                <option>Individuals Litigation Collection Officer</option>
-                                <option>Legal expert / Lawyer</option>
-                            </Select>
-                            <Select ref={accessLevelRef} className="lg:w-1/3 lg:pl-4" label="Access level"
-                                    required={true}>
-                                <option value="GUEST">1 - Guest</option>
-                                <option value="USER">2 - User</option>
-                                <option value="ADMINISTRATOR">3 - Administrator</option>
-                            </Select>
+                            <AutocompleteTextInput ref={groupRef} containerClassName="lg:w-1/3 lg:pr-4" type="text" label="Group" required={true} suggestions={suggestions[0]} onChange={updatePreview} />
+
+                            <AutocompleteTextInput ref={jobRef} containerClassName="lg:w-1/3 lg:px-2" type="text" label="Job title" required={true} suggestions={suggestions[1]} onChange={updatePreview} />
+
+                            <AutocompleteTextInput ref={accessLevelRef} containerClassName="lg:w-1/3 lg:pl-4" type="text" label="Access level" required={true} suggestions={[
+                                "Guest",
+                                "User",
+                                "Administrator"
+                            ]} onChange={updatePreview} validator={(str: string) => {
+                                return ["GUEST", "USER", "ADMINISTRATOR"].includes(str.toUpperCase());
+                            }} />
+
                         </div>
 
                         <br/>

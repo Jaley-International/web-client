@@ -7,7 +7,7 @@ import {Heading3} from "../../text/Headings";
 import Link from "next/link";
 import {useState} from "react";
 import TransferList from "../../transfers/TransferList";
-import {terminateSession} from "../../../util/processes";
+import {terminateSession} from "../../../helper/processes";
 import {useRouter} from "next/router";
 
 function Navbar(): JSX.Element {

@@ -1,4 +1,4 @@
-import {Node} from "../../../util/processes";
+import {Node} from "../../../helper/processes";
 import ModalHeader from "./subcomponents/ModalHeader";
 import Button from "../../buttons/Button";
 import {useRef, useState} from "react";

@@ -18,7 +18,7 @@ function OptionsButton(props: Props): JSX.Element {
     const btnRef = useRef<HTMLButtonElement>(null);
 
     const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
-    const [contextMenuCoords, setContextMenuCoords] = useState<Coords>({x: 0, y: 0})
+    const [contextMenuCoords, setContextMenuCoords] = useState<Coords>({x: 0, y: 0});
 
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {

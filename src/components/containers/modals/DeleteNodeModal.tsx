@@ -1,7 +1,7 @@
-import {Node} from "../../../util/processes";
+import {Node} from "../../../helper/processes";
 import ModalHeader from "./subcomponents/ModalHeader";
 import Button from "../../buttons/Button";
-import {capitalize} from "../../../util/util";
+import {capitalize} from "../../../util/string";
 
 interface Props {
     node: Node;

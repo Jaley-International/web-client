@@ -6,7 +6,7 @@ import {Heading2, Heading3} from "../../components/text/Headings";
 import TextInput from "../../components/inputs/TextInput";
 import Button from "../../components/buttons/Button";
 import Checkbox from "../../components/inputs/Checkbox";
-import {register} from "../../util/processes";
+import {register} from "../../helper/processes";
 import NewPasswordInput from "../../components/inputs/NewPasswordInput";
 import Link from "next/link";
 import {useRouter} from "next/router";
