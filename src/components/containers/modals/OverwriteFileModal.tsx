@@ -34,6 +34,7 @@ function OverwriteFileModal(props: Props): JSX.Element {
                              onDrop={(e) => {
                                  e.preventDefault();
                                  setIsDragging(false);
+                                 props.closeCallback();
                                  props.submitCallback(e.dataTransfer.files[0]);
                              }}
                         >
@@ -41,8 +42,10 @@ function OverwriteFileModal(props: Props): JSX.Element {
                                 <span>Drag and drop your file here or</span>
                             </p>
                             <input ref={fileInputRef} type="file" className="hidden" onChange={_ => {
-                                if (fileInputRef.current && fileInputRef.current.files)
+                                if (fileInputRef.current && fileInputRef.current.files) {
+                                    props.closeCallback();
                                     props.submitCallback(fileInputRef.current.files.item(0));
+                                }
                             }} />
                             <Button size="medium" type="soft" colour="blue" onClick={() => {
                                 if (fileInputRef.current !== null)
