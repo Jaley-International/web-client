@@ -201,7 +201,14 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                 </div>
                                                 <div className="grid content-center leading-4">
                                                     <span className="text-txt-heading font-semibold text-2xs">
-                                                        {node.metaData.name}
+                                                        {node.type === "FOLDER" ?
+                                                            <a href="#" onClick={() => {
+                                                                // TODO Folder navigation
+                                                                props.addToast({type: "info", title: "Work in progress feature", message: "Folder navigation is currently a work-in-progress/planned feature."});
+                                                            }}>{node.metaData.name}</a>
+                                                            :
+                                                            node.metaData.name
+                                                        }
                                                     </span>
                                                     <span className="text-txt-body-muted font-light text-4xs">
                                                         {nodeToDescription(node)}

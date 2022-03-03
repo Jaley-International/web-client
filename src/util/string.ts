@@ -30,7 +30,7 @@ export function capitalize(str: string): string {
  * Transform a number of bytes to a more readable format with unit.
  * E.g. 42371 => "42 MB"
  */
-export function formatBytes(bytes: number, decimals: number = 0) {
+export function formatBytes(bytes: number, decimals: number = 0): string {
     if (bytes === 0) return "0 byte";
 
     const k = 1024;

@@ -45,7 +45,8 @@ function UserPage(): JSX.Element {
                 profilePicture: null,
                 job: rawUser.job || "Unknown",
                 group: rawUser.group || "Unknown",
-                accessLevel: rawUser.accessLevel
+                accessLevel: rawUser.accessLevel,
+                createdAt: rawUser.createdAt
             });
         } else {
             setUser(null);
@@ -64,7 +65,7 @@ function UserPage(): JSX.Element {
     const emailRef = useRef<HTMLInputElement>(null);
     const groupRef = useRef<HTMLInputElement>(null);
     const jobRef = useRef<HTMLInputElement>(null);
-    const accessLevelRef = useRef<HTMLInputElement>(null);
+    const accessLevelRef = useRef<HTMLSelectElement>(null);
 
 
     const [loadedSuggestions, setLoadedSuggestions] = useState<boolean>(false);
@@ -283,7 +284,7 @@ function UserPage(): JSX.Element {
                                         const email = (emailRef.current as HTMLInputElement).value;
                                         const group = (groupRef.current as HTMLInputElement).value;
                                         const job = (jobRef.current as HTMLInputElement).value;
-                                        const accessLevel = (accessLevelRef.current as HTMLInputElement).value.toUpperCase();
+                                        const accessLevel = (accessLevelRef.current as HTMLSelectElement).value.toUpperCase();
 
                                         const status = await updateAccount(user, firstname, lastname, email, group, job, accessLevel as UserAccessLevel);
 
@@ -318,13 +319,11 @@ function UserPage(): JSX.Element {
 
                                             <AutocompleteTextInput ref={jobRef} defaultValue={user.job} containerClassName="lg:w-1/3 lg:px-2" type="text" label="Job title" required={true} suggestions={suggestions[1]} />
 
-                                            <AutocompleteTextInput ref={accessLevelRef}  defaultValue={capitalize(user.accessLevel)} containerClassName="lg:w-1/3 lg:pl-4" type="text" label="Access level" required={true} suggestions={[
-                                                "Guest",
-                                                "User",
-                                                "Administrator"
-                                            ]} validator={(str: string) => {
-                                                return ["GUEST", "USER", "ADMINISTRATOR"].includes(str.toUpperCase());
-                                            }} />
+                                            <Select ref={accessLevelRef} defaultValue={user.accessLevel} className="lg:w-1/3 lg:pl-4" label="Access level" required={true}>
+                                                <option value="GUEST">Guest</option>
+                                                <option value="USER">User</option>
+                                                <option value="ADMINISTRATOR">Administrator</option>
+                                            </Select>
                                         </div>
 
                                         <br/>
@@ -338,8 +337,8 @@ function UserPage(): JSX.Element {
                                     </form>
                                 </Card>
 
-                                {/* Delete user */}
-                                <div className="flex space-x-6">
+                                {/* Delete / suspend user */}
+                                <div className="lg:flex lg:space-x-6">
                                     <Card className="text-orange-light w-1/2" title="Suspend account" separator={false}>
                                         <div className="flex text-txt-body px-6 pb-6 pt-2">
                                             <div className="w-full">

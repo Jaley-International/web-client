@@ -45,7 +45,6 @@ const AutocompleteTextInput = React.forwardRef((props: Props, ref: Ref<HTMLInput
                        onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
                        onKeyDown={(e: KeyboardEvent) => {
                            if (e.code === "Ender" || e.code === "Tab" && showSuggestions) {
-                               e.preventDefault();
                                setInput(filteredSuggestions[activeSuggestionIndex]);
                                setShowSuggestions(false);
                            } else if (e.code === "ArrowUp") {

@@ -9,4 +9,5 @@ export default interface User {
     job: string;
     group: string;
     accessLevel: UserAccessLevel;
+    createdAt: number;
 }

@@ -202,8 +202,6 @@ export async function uploadFileContent(
     iv: string
 ): Promise<[string, string] | [null, null]> {
 
-    console.log(nodeKey, iv);
-
     const {publicRuntimeConfig} = getConfig();
 
     // Reading file
