@@ -68,7 +68,7 @@ const NewPasswordInput = React.forwardRef((props: Props, ref: LegacyRef<HTMLInpu
             props.onChange(e);
         const result = passwordMeter(e.target.value);
         setPasswordStrength(result);
-        if (result.level === 4)
+        if (result.level === 5)
             e.target.setCustomValidity("");
         else
             e.target.setCustomValidity("Password requirements are not met.");
