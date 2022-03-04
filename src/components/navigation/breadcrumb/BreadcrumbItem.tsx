@@ -6,6 +6,7 @@ export interface BreadcrumbItemProps {
     title?: string;
     icon?: IconProp
     href?: string;
+    action?: () => void;
 }
 
 function BreadcrumbItem(props: BreadcrumbItemProps): JSX.Element {
@@ -13,14 +14,14 @@ function BreadcrumbItem(props: BreadcrumbItemProps): JSX.Element {
         <>
             {props.href
                     ?   <Link href={props.href} passHref={true}>
-                            <a className="text-blue-light font-semibold space-x-2">
+                            <a className="text-blue-light font-semibold space-x-2" onClick={props.action}>
                                 {props.icon &&
                                     <FontAwesomeIcon icon={props.icon} />
                                 }
                                 {props.title && props.title}
                             </a>
                         </Link>
-                    : <span className="text-grey-800 font-semibold">
+                    : <span className={`${props.action ? "text-blue-light cursor-pointer" : "text-grey-800"} font-semibold`} onClick={props.action}>
                         {props.icon &&
                             <FontAwesomeIcon icon={props.icon} />
                         }

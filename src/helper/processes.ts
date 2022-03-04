@@ -70,11 +70,7 @@ export interface ShareLink {
  * @param {function}    updateStatus    Function to update the registration status.
  * @return {string}                     Status code returned by API.
  */
-export async function register(
-    registerKey: string,
-    password: string,
-    updateStatus: (message: string) => void
-): Promise<string> {
+export async function register(registerKey: string, password: string, updateStatus: (message: string) => void): Promise<string> {
 
     const {publicRuntimeConfig} = getConfig();
 
@@ -132,12 +128,7 @@ export async function register(
  * @param {function}    updateStatus    Function to update the authentication status.
  * @return {boolean}                    True if authentication is successful, false otherwise
  */
-export async function authenticate(
-    username: string,
-    password: string,
-    updateStatus: (message: string) => void
-): Promise<boolean> {
-
+export async function authenticate(username: string, password: string, updateStatus: (message: string) => void): Promise<boolean> {
     const {publicRuntimeConfig} = getConfig();
 
     // Salt request
@@ -192,16 +183,12 @@ export async function authenticate(
 /**
  * File content upload to server.
  *
- * @param {File}    file        File to upload.
- * @param {Hex}     nodeKey     Node key.
- * @param {string}  iv          Initialisation vector.
+ * @param {File}        file                File to upload.
+ * @param {Hex}         nodeKey             Node key.
+ * @param {string}      iv                  Initialisation vector.
+ * @return {string[]}                       Array with file ref and tag.
  */
-export async function uploadFileContent(
-    file: File,
-    nodeKey: Hex,
-    iv: string
-): Promise<[string, string] | [null, null]> {
-
+async function uploadFileContent(file: File, nodeKey: Hex, iv: string): Promise<[string, string] | [null, null]> {
     const {publicRuntimeConfig} = getConfig();
 
     // Reading file
@@ -237,14 +224,9 @@ export async function uploadFileContent(
  * @param {File}        file                File to upload.
  * @param {number}      containingFolderID  ID of the containing folder.
  * @param {Hex}         parentFolderKey     Parent folder's key.
- * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
+ * @return {boolean}                        True if upload is successful, false otherwise
  */
-export async function uploadFile(
-    file: File,
-    containingFolderID: number,
-    parentFolderKey: Hex
-): Promise<boolean> {
-
+export async function uploadFile(file: File, containingFolderID: number, parentFolderKey?: Hex): Promise<boolean> {
     const {publicRuntimeConfig} = getConfig();
 
     // Generate Node Key (256 bits)
@@ -270,8 +252,7 @@ export async function uploadFile(
     const encryptedNodeKey = encrypt("AES-CTR", localStorage.masterKey, iv, nodeKey);
 
     // Compute Parent Encrypted Key
-    //const parentEncryptedKey = encrypt("AES-CTR", parentFolderKey, nodeKey, iv);
-    const parentEncryptedKey = "abc";
+    const parentEncryptedKey = parentFolderKey ? encrypt("AES-CTR", parentFolderKey, nodeKey, iv) : "";
 
     // Submitting file data to the API
     const fileResponse = await request("POST", `${publicRuntimeConfig.apiUrl}/file-system/file`, {
@@ -288,13 +269,16 @@ export async function uploadFile(
 }
 
 
-export async function overwriteFile(
-    file: File,
-    nodeId: number,
-    nodeKey: Hex,
-    iv: string
-): Promise<boolean> {
-
+/**
+ * File overwrite (content and meta-data replacement)
+ *
+ * @param {File}        file                File to upload.
+ * @param {number}      nodeId              Node to overwrite.
+ * @param {Hex}         nodeKey             Node key.
+ * @param {string}      iv                  Initialisation vector.
+ * @return {boolean}                        True if upload is successful, false otherwise
+ */
+export async function overwriteFile(file: File, nodeId: number, nodeKey: Hex, iv: string): Promise<boolean> {
     const {publicRuntimeConfig} = getConfig();
 
     // server request to upload file content
@@ -370,12 +354,7 @@ export async function downloadFile(node: Node): Promise<string> {
  * @param {Hex}         parentFolderKey     Parent folder's key.
  * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
  */
-export async function createFolder(
-    name: string,
-    containingFolderID: number,
-    parentFolderKey: Hex,
-): Promise<boolean> {
-
+export async function createFolder(name: string, containingFolderID: number, parentFolderKey: Hex): Promise<boolean> {
     const {publicRuntimeConfig} = getConfig();
 
     // Generate Node Key (256 bits)
@@ -405,11 +384,25 @@ export async function createFolder(
 }
 
 
+export async function moveNode(node: Node, destination: Node): Promise<boolean> {
+    const {publicRuntimeConfig} = getConfig();
+
+    const parentEncryptedKey = destination.nodeKey ? encrypt("AES-CTR", destination.nodeKey, node.nodeKey, node.iv) : "";
+
+    const response = await request("PATCH", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/parent`, {
+        newParentId: destination.id,
+        newParentEncryptedKey: parentEncryptedKey
+    })
+
+    return response.status === "SUCCESS";
+}
+
+
 /**
  * Node sharing by link process
  * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
  *
- * @param {Node}            node            Node to share.
+ * @param {Node}        node                Node to share.
  * @return {string | null}                  Share Link path, or null if request failed
  */
 export async function createNodeShareLink(node: Node): Promise<ShareLink | null> {
@@ -448,52 +441,65 @@ export async function createNodeShareLink(node: Node): Promise<ShareLink | null>
 /**
  * Decrypts the file system
  *
- * @param {EncryptedNode}   filesystem      File system to decrypted
- * @return {Node | null}                    Decrypted file system
+ * @param {EncryptedNode}   encryptedNode   Root of the node subtree to decrypt.
+ * @param {number}          maxDepth        Decryption depth limit.
+ * @return {Node | null}                    Decrypted subtree
  */
-export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
+export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number = 0): Node | null {
 
-    const decryptNode = (encryptedNode: EncryptedNode, masterKey: Hex): Node => {
+    // Fetch Master Key
+    const masterKey = localStorage.getItem("masterKey");
+    if (!masterKey)
+        return null;
+
+    // Max depth reached
+    if (maxDepth < 0)
+        return null;
+
+    let node: Node | null;
+
+    // Decrypt current node
+    if (encryptedNode.id === 1) {
+        node = {
+            id: encryptedNode.id,
+            children: [],
+            iv: encryptedNode.iv,
+            tag: encryptedNode.tag,
+            nodeKey: "",
+            parentKey: "",
+            metaData: {name: "root"},
+            ref: encryptedNode.ref,
+            type: encryptedNode.type
+        };
+    } else {
         const iv = forge.util.hexToBytes(encryptedNode.iv);
         const nodeKey = decrypt("AES-CTR", masterKey, iv, encryptedNode.encryptedNodeKey);
-        return {
+        node = {
             id: encryptedNode.id,
             children: [],
             iv: encryptedNode.iv,
             tag: encryptedNode.tag,
             nodeKey: nodeKey,
-            parentKey: "", //decrypt("AES-CTR", nodeKey, iv, encryptedNode.parentEncryptedKey),
+            parentKey: decrypt("AES-CTR", nodeKey, encryptedNode.iv, encryptedNode.parentEncryptedKey),
             metaData: JSON.parse(decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedMetadata)),
             ref: encryptedNode.ref,
             type: encryptedNode.type
         }
     }
 
-    // TODO decrypt multiple depth
-
-    let decryptedFilesystem: Node = {
-        id: filesystem.id,
-        iv: "",
-        tag: "",
-        nodeKey: "",
-        metaData: {name: "root"},
-        type: "FOLDER",
-        ref: "",
-        parentKey: "",
-        children: []
-    };
-
-    for (const encryptedChild of filesystem.children) {
+    // Decrypt children
+    for (const encryptedChild of encryptedNode.children) {
+        // TODO Check node ownership
         try {
-            // TODO Check node ownership
-            decryptedFilesystem.children.push(decryptNode(
-                encryptedChild, localStorage.getItem("masterKey") || ""
-            ));
+            const child = decryptFileSystem(encryptedChild, maxDepth - 1);
+            if (child)
+                node.children.push(child);
         } catch (_) {
             console.warn(`Could not decrypt node ${encryptedChild.id}. Not owner ?`);
         }
     }
-    return decryptedFilesystem;
+
+    return node;
 }
 
 
@@ -567,23 +573,16 @@ export async function deleteAccount(username: string) {
 /**
  * Updates a user account.
  *
- * @param {User}                user
- * @param {string}              firstName
- * @param {string}              lastName
- * @param {string}              email
- * @param {string}              group
- * @param {string}              job
- * @param {UserAccessLevel}     accessLevel
+ * @param {User}                user            User to update.
+ * @param {string}              firstName       (Optional) New user first name.
+ * @param {string}              lastName        (Optional) New user last name.
+ * @param {string}              email           (Optional) New user email address.
+ * @param {string}              group           (Optional) New user group.
+ * @param {string}              job             (Optional) New user job title.
+ * @param {UserAccessLevel}     accessLevel     (Optional) New user access level.
+ * @return {string}                             User creation return status.
  */
-export async function updateAccount(
-    user: User,
-    firstName?: string,
-    lastName?: string,
-    email?: string,
-    group?: string,
-    job?: string,
-    accessLevel?: UserAccessLevel
-): Promise<string> {
+export async function updateAccount(user: User, firstName?: string, lastName?: string, email?: string, group?: string, job?: string, accessLevel?: UserAccessLevel): Promise<string> {
     const {publicRuntimeConfig} = getConfig();
 
     const response = await request("PATCH", `${publicRuntimeConfig.apiUrl}/users/${user.username}`, {

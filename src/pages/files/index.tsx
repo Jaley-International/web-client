@@ -19,6 +19,7 @@ function FilesPage(): JSX.Element {
 
     const fileListRef = useRef<FileListViewRef | null>(null);
 
+
     return (
         <div className="flex bg-bg-light">
             <Navbar/>
@@ -27,7 +28,7 @@ function FilesPage(): JSX.Element {
                     <div className="flex">
                         <div className="w-full">
                             <Breadcrumb items={[
-                                {icon: faServer, href: "/"},
+                                {icon: faServer, action: () => fileListRef.current?.changerFolder(1)},
                                 {title: "Cases", href: "/"},
                                 {title: "Case #42 Mr. Dupont", href: "/"},
                                 {title: "Bills and invoices"},
