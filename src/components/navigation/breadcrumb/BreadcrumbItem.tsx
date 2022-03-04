@@ -21,7 +21,7 @@ function BreadcrumbItem(props: BreadcrumbItemProps): JSX.Element {
                                 {props.title && props.title}
                             </a>
                         </Link>
-                    : <span className={`${props.action ? "text-blue-light cursor-pointer" : "text-grey-800"} font-semibold`} onClick={props.action}>
+                    : <span className={`${props.action ? "text-blue-light cursor-pointer" : "cursor-default text-grey-800"} font-semibold`} onClick={props.action}>
                         {props.icon &&
                             <FontAwesomeIcon icon={props.icon} />
                         }

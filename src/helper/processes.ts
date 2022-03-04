@@ -488,14 +488,16 @@ export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number
     }
 
     // Decrypt children
-    for (const encryptedChild of encryptedNode.children) {
-        // TODO Check node ownership
-        try {
-            const child = decryptFileSystem(encryptedChild, maxDepth - 1);
-            if (child)
-                node.children.push(child);
-        } catch (_) {
-            console.warn(`Could not decrypt node ${encryptedChild.id}. Not owner ?`);
+    if (maxDepth > 0) {
+        for (const encryptedChild of encryptedNode.children) {
+            // TODO Check node ownership
+            try {
+                const child = decryptFileSystem(encryptedChild, maxDepth - 1);
+                if (child)
+                    node.children.push(child);
+            } catch (_) {
+                console.warn(`Could not decrypt node ${encryptedChild.id}. Not owner ?`);
+            }
         }
     }
 

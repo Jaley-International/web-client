@@ -41,6 +41,7 @@ import Button from "../buttons/Button";
 
 interface Props {
     addToast: (toast: ToastProps) => void;
+    onFolderChange?: (folderId: number) => void;
 }
 
 export interface FileListViewRef {
@@ -106,6 +107,8 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
             return;
         }
         setFilesystem(decrypted);
+        if (props.onFolderChange)
+            props.onFolderChange(decrypted.id);
         setLoaded(true);
     };
 
@@ -150,7 +153,35 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
         changerFolder
     }));
 
-    if (loaded && filesystem) {
+    if (loaded && !filesystem) {
+        return (
+            <div className="w-full">
+                <Card className="w-1/2 my-4 md:my-20 lg:my-48 mx-auto">
+                    <div className="md:flex p-4">
+                        <div className="p-12 flex justify-center items-center bg-red-soft rounded-xl text-center">
+                            <span className="text-3xl text-red">
+                                <FontAwesomeIcon icon={faExclamationTriangle} />
+                            </span>
+                        </div>
+                        <div className="w-full p-10">
+                            <Heading2>Folder not found</Heading2>
+                            <span className="text-txt-body">The folder you requested does not exists.</span>
+                        </div>
+                        <div className="p-12">
+                            <div className="w-full h-full flex justify-center">
+                                <Button className="mx-auto my-auto w-32" size="medium" type="regular" colour="dark" onClick={() => {
+                                    changerFolder(1);
+                                }}>
+                                    <span><FontAwesomeIcon icon={faChevronCircleLeft} />&nbsp;&nbsp;Back</span>
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+            </div>
+        );
+
+    } else {
 
         return (
             <>
@@ -409,35 +440,6 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                 }
             </>
         );
-    } else if (loaded) {
-        return (
-            <div className="w-full">
-                <Card className="w-1/2 my-4 md:my-20 lg:my-48 mx-auto">
-                    <div className="md:flex p-4">
-                        <div className="p-12 flex justify-center items-center bg-red-soft rounded-xl text-center">
-                            <span className="text-3xl text-red">
-                                <FontAwesomeIcon icon={faExclamationTriangle} />
-                            </span>
-                        </div>
-                        <div className="w-full p-10">
-                            <Heading2>Folder not found</Heading2>
-                            <span className="text-txt-body">The folder you requested does not exists.</span>
-                        </div>
-                        <div className="p-12">
-                            <div className="w-full h-full flex justify-center">
-                                <Button className="mx-auto my-auto w-32" size="medium" type="regular" colour="dark" onClick={() => {
-                                    changerFolder(1);
-                                }}>
-                                    <span><FontAwesomeIcon icon={faChevronCircleLeft} />&nbsp;&nbsp;Back</span>
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </Card>
-            </div>
-        );
-    } else {
-        return <></>
     }
 });
 
