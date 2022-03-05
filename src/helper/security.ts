@@ -43,7 +43,7 @@ export async function pbkdf2(password: string, salt: string): Promise<Hex> {
         name: "PBKDF2",
         hash: "SHA-512",
         salt: Buffer.from(salt),
-        iterations: 1000000
+        iterations: 500000
     }, key, 512);
     const derived = Buffer.from(derivedBits);
 
