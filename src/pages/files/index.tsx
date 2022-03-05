@@ -25,7 +25,7 @@ function FilesPage(): JSX.Element {
     const fileListRef = useRef<FileListViewRef | null>(null);
 
     const [folderId, setFolderId] = useState<number>(1);
-    const [breadcrumbItems, setbreadcrumbItems] = useState<BreadcrumbItemProps[]>([]);
+    const [breadcrumbItems, setBreadcrumbItems] = useState<BreadcrumbItemProps[]>([]);
 
     // Breadcrumb update
     useEffect(() => {
@@ -53,7 +53,7 @@ function FilesPage(): JSX.Element {
                     newBreadcrumbItems.push({title: node.metaData.name, action: () => fileListRef.current?.changerFolder(node.id)});
                 }
             });
-            setbreadcrumbItems(newBreadcrumbItems);
+            setBreadcrumbItems(newBreadcrumbItems);
         });
     }, [folderId]);
 

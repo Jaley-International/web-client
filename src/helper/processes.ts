@@ -142,7 +142,9 @@ export async function authenticate(username: string, password: string, updateSta
 
     // PPF
     updateStatus("Processing password...");
+    console.time("pbkdf2");
     const derivedKey = await pbkdf2(password, salt);
+    console.timeEnd("pbkdf2");
     const derivedEncryptionKey = derivedKey.substring(0, 64);
     const derivedAuthenticationKey = derivedKey.substring(64);
 
