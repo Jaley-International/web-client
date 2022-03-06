@@ -1,0 +1,332 @@
+{
+    "generic": {
+        "app": {
+            "name": "Private Encrypted Cloud",
+            "abbr": "PEC",
+            "moto": "Keep control over your data."
+        },
+        "table": {
+            "actions": "Actions"
+        },
+        "toast": {
+            "wip": {
+                "title": "Feature unavailable",
+                "message": "This feature is under development."
+            }
+        },
+        "action": {
+            "view-edit": "View/Edit",
+            "save": "Save changes",
+            "preview": "Preview",
+            "download": "Download",
+            "share": "Share",
+            "manage-permissions": "Manage permission",
+            "lock-file": "Lock file",
+            "lock-folder": "Lock folder",
+            "overwrite": "Overwrite",
+            "rename": "Rename",
+            "delete": "Delete",
+            "cancel": "Cancel",
+            "close": "Close"
+        },
+        "user": {
+            "title": "Users",
+            "name": "Name",
+            "first-name": "First name",
+            "last-name": "Last name",
+            "username": "Username",
+            "email": "Email address",
+            "group": "Group",
+            "job": "Job title",
+            "account-type": "Account type",
+            "level": {
+                "administrator": "Administrator",
+                "user": "User",
+                "guest": "Guest"
+            }
+        },
+        "file": {
+            "title": "Files",
+            "name": "File name",
+            "upload-date": "Upload date",
+            "last-modified": "Last modified",
+            "shared-with": "Shared with"
+        },
+        "node": {
+            "file": "File",
+            "folder": "Folder"
+        },
+        "irreversible": "This process cannot be reversed."
+    },
+    "navbar": {
+        "files": "Files",
+        "notifications": "Notifications",
+        "my-account": "My account",
+        "activity-log": "Activity log",
+        "admin-panel": "Admin panel",
+        "logout": "Logout"
+    },
+    "components": {
+        "password-strength-input": {
+            "requirement": "Password requirements are not met.",
+            "too-short": "Password is too weak.",
+            "too-guessable": "Password is too guessable.",
+            "too-weak": "Password is too weak.",
+            "missing-lowercase": "Should contain at least one lowercase letter.",
+            "missing-uppercase": "Should contain at least one uppercase letter.",
+            "missing-digit": "Should contain at least one digit.",
+            "missing-special": "Should contain at least one special characters."
+        }
+    },
+    "modal": {
+        "node": {
+            "delete": {
+                "title": "{type} deletion confirmation",
+                "description": "Are you sure you want to delete <bold>{name}</bold>",
+                "submit": "Confirm deletion"
+            },
+            "overwrite": {
+                "title": "File overwriting",
+                "description": "You are about to overwrite <bold>{name}</bold>",
+                "drag-n-drop": "Drag and drop your file here or",
+                "submit": "Upload a file"
+            },
+            "create-folder": {
+                "title": "Create folder",
+                "folder-name": "Folder name",
+                "submit": "Create folder"
+            },
+            "link-share": {
+                "title": "Share by link",
+                "link": "Private share link"
+            }
+        }
+    },
+    "pages": {
+        "404": {
+            "title": "404 Error",
+            "description": "The page/resource you requested does not exist or has been moved.",
+            "back-button": "Back"
+        },
+        "auth": {
+            "login": {
+                "description": "Sign in and start storing and sharing your files securely.",
+                "title": "Welcome back \uD83D\uDC4B",
+                "sub-description": "Please enter your credentials.",
+                "redirecting": "Redirecting...",
+                "login": "Login",
+                "register-link": "First time connecting? <link>Register</link>",
+                "form": {
+                    "username": "Username",
+                    "password": "Password",
+                    "button": {
+                        "req-salt": "Requesting salt...",
+                        "processing-password": "Processing password...",
+                        "req-keys": "Requesting keys...",
+                        "decrypting-keys": "Decrypting keys..."
+                    }
+                },
+                "toast": {
+                    "success": {
+                        "title": "Welcome!",
+                        "message": "Successfully authenticated."
+                    },
+                    "error":{
+                        "title": "Invalid credentials",
+                        "message": "Please check your username and password then try again."
+                    }
+                }
+            },
+            "register": {
+                "description": "Create your account and start storing and sharing your files securely.",
+                "title": "Create your account",
+                "sub-description": "All fields are required.",
+                "agreement": "By creating an account you agree to the <terms>Terms and Conditions</terms>, and the <privacy>Privacy Policy</privacy>",
+                "login-link": "Already registered? <link>Sign in</link>",
+                "form": {
+                    "registration-key": "Registration key",
+                    "registration-key-hint": "Code received by email to register your account.",
+                    "password": "Password",
+                    "confirm-password": "Confirm password",
+                    "confirm-password-hint": "Must match the password you entered above.",
+                    "button": {
+                        "register": "Register",
+                        "gen-master-key": "Generating Master Key...",
+                        "gen-client-random-value": "Generating Client Random Value...",
+                        "gen-rsa": "Generating RSA key pair...",
+                        "computing-salt": "Computing Salt...",
+                        "processing-password": "Processing password...",
+                        "encrypting-keys": "Encrypting keys...",
+                        "submitting": "Submitting..."
+                    }
+                },
+                "toast": {
+                    "success": {
+                        "title": "Account created",
+                        "message": "Please check your emails to finalize your registration."
+                    },
+                    "invalid": {
+                        "title": "Invalid registration key",
+                        "message": "The registration key you provided is invalid."
+                    },
+                    "error": {
+                        "title": "Failed to create an account",
+                        "message": "An unknown error occurred while creating your account."
+                    }
+                }
+            },
+            "pre-register": {
+                "title": "User pre-registration",
+                "button": {
+                    "go-back": "Discard and go back",
+                    "create-user": "Create user"
+                },
+                "toast": {
+                    "success": {
+                        "title": "Account created",
+                        "message": "User account created successfully."
+                    },
+                    "username-already-used": {
+                        "title": "Username already in use",
+                        "message": "Failed to create an account : Username already in use."
+                    },
+                    "email-already-used": {
+                        "title": "Email already in use",
+                        "message": "Failed to create an account : Email already in use."
+                    },
+                    "invalid-access-level": {
+                        "title": "Insufficient permissions",
+                        "message": "Administrator privileges are required to create an account."
+                    },
+                    "error": {
+                        "title": "Failed to create an account",
+                        "message": "An unknown error occurred while creating your account."
+                    }
+                }
+            }
+        },
+        "user": {
+            "list": {
+                "title": "User management",
+                "new-user": "New user",
+                "toast": {
+                    "success": {
+                        "title": "User deleted",
+                        "message": "Account successfully deleted"
+                    },
+                    "not-found": {
+                        "title": "Failed to delete a user",
+                        "message": "Account to delete was not found."
+                    },
+                    "error": {
+                        "title": "Failed to delete a user",
+                        "message": "An unknown error occurred while deleting an account."
+                    }
+                }
+            },
+            "details": {
+                "title": "User details",
+                "back": "Back to user list",
+                "member-since": "Member since 01/01/1970",
+                "last-active": "Last active 2 hours ago",
+                "files-table-title": "Files and folders owned",
+                "edit-title": "Edit account informations",
+                "suspend": {
+                    "title": "Suspend account",
+                    "description": "By suspending this account, the user will no longer be able to log in. Their files will still be available by those it has been shared with and all administrators.",
+                    "button": "Suspend account"
+                },
+                "delete": {
+                    "title": "Delete account",
+                    "description": "By deleting this account, all the user's data will be lost. Their files and folders will be transferred to you. This process is definitive and cannot be reversed.",
+                    "button": "Delete account"
+                },
+                "toast": {
+                    "success": {
+                        "title": "User updated",
+                        "message": "Successfully updated user."
+                    },
+                    "email-already-used": {
+                        "title": "Email already in use",
+                        "message": "Failed to update account : Email already in use."
+                    },
+                    "error": {
+                        "title": "Fail to update user",
+                        "message": "An unknown error occurred while updating the account."
+                    }
+                }
+            }
+        },
+        "file": {
+            "upload-file": "Upload file",
+            "create-folder": "Create folder",
+            "list": {
+                "toast": {
+                    "fetch": {
+                        "decrypt-error": {
+                            "title": "File system decryption error",
+                            "message": "Could not decrypt your file system."
+                        }
+                    },
+                    "upload": {
+                        "success": {
+                            "title": "File uploaded",
+                            "message": "File {name} has been uploaded successfully."
+                        },
+                        "error": {
+                            "title": "File upload error",
+                            "message": "File {name} could not be uploaded."
+                        }
+                    },
+                    "download": {
+                        "fail": {
+                            "title": "Failed to download",
+                            "message": "An error occurred while fetching the file."
+                        },
+                        "decrypt": {
+                            "title": "Failed to decrypt",
+                            "message": "An error occurred while decrypting the file."
+                        },
+                        "error": {
+                            "title": "Failed to download",
+                            "message": "An unexpected error occurred while downloading the file."
+                        }
+                    },
+                    "delete": {
+                        "success": {
+                            "title": "{type} deleted",
+                            "message": "{type} deleted successfully."
+                        },
+                        "error": {
+                            "title": "Could not delete {type}",
+                            "message": "An unknown error occurred while deleting the {type}."
+                        }
+                    },
+                    "create-folder": {
+                        "success": {
+                            "title": "Folder created",
+                            "message": "Successfully created folder {name}."
+                        },
+                        "error": {
+                            "title": "Error when creating folder",
+                            "message": "Could not create folder {name}."
+                        }
+                    },
+                    "overwrite": {
+                        "success": {
+                            "title": "File overwritten",
+                            "message": "File {name} overwritten successfully."
+                        },
+                        "error": {
+                            "title": "Erreur lors de la modification du fichier.",
+                            "message": "Une erreur est survenue lors de la modification du fichier {name}."
+                        }
+                    }
+                }
+            }
+        },
+        "link-share": {
+            "warning": "The attachements on this page are confidential and are solely intended for the authorised recipients.<br></br>If you were given access to this attachement by error, please close the page and immediately and notify the sender by e-mail.<br></br>Any use other than its intended purpose, dissemination or disclosure, either whole or partial, is prohibited except if formal approval is granted."
+        }
+    }
+}

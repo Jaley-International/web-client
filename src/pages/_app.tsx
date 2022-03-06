@@ -4,6 +4,7 @@ import App from "next/app";
 import ExtendSessionModal from "../components/containers/modals/ExtendSessionModal";
 import ToastProvider from "../components/toast/ToastProvider";
 import {AnimatePresence} from "framer-motion";
+import {NextIntlProvider} from "next-intl";
 
 class MyApp extends App {
     render() {
@@ -31,14 +32,16 @@ class MyApp extends App {
                     <meta property="twitter:image" content="/banner.png" />
                 </Head>
                 <main>
-                    <ToastProvider>
-                        <>
-                            <AnimatePresence>
-                                <Component {...pageProps} />
-                            </AnimatePresence>
-                            <ExtendSessionModal />
-                        </>
-                    </ToastProvider>
+                    <NextIntlProvider messages={pageProps.messages}>
+                        <ToastProvider>
+                            <>
+                                <AnimatePresence>
+                                    <Component {...pageProps} />
+                                </AnimatePresence>
+                                <ExtendSessionModal />
+                            </>
+                        </ToastProvider>
+                    </NextIntlProvider>
                 </main>
             </>
         );

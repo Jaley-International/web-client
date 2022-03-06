@@ -11,18 +11,22 @@ import DeleteUserModal from "../../components/containers/modals/DeleteUserModal"
 import User, {UserAccessLevel} from "../../model/User";
 import OptionsButton from "../../components/buttons/OptionsButton";
 import ContextMenuItem from "../../components/containers/contextmenu/ContextMenuItem";
-import {request} from "../../util/communication";
-import {deleteAccount} from "../../util/processes";
+import {request} from "../../helper/communication";
+import {deleteAccount} from "../../helper/processes";
 import getConfig from "next/config";
 import Badge from "../../components/Badge";
-import {capitalize} from "../../util/util";
+import {capitalize} from "../../util/string";
 import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
+import {GetStaticProps} from "next";
+import {useTranslations} from "use-intl";
 
 function UserList(): JSX.Element {
     const {publicRuntimeConfig} = getConfig();
 
     const addToast = useContext(ToastContext);
+
+    const t = useTranslations();
 
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
     const [modalUserTarget, setModalUserTarget] = useState<User | null>(null);
@@ -46,39 +50,42 @@ function UserList(): JSX.Element {
         <div className="flex bg-bg-light">
             <Navbar/>
             <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
-                <Header title="User management">
+                <Header title={t("pages.user.list.title")}>
                     <Link href="/users/new" passHref>
                         <Button size="small" type="regular" colour="green">
-                            <span><FontAwesomeIcon icon={faPlus}/>&nbsp;&nbsp;New user</span>
+                            <span><FontAwesomeIcon icon={faPlus}/>&nbsp;&nbsp;{t("pages.user.list.new-user")}</span>
                         </Button>
                     </Link>
                 </Header>
 
                 <ContentTransition className="w-full p-8">
-                    <Card title="Users" className="pb-2">
+                    <Card title={t("generic.user.title")} className="pb-2">
                         <table className="w-full">
                             <thead>
                             <tr className="border-b border-grey-200 bg-bg-light text-3xs text-txt-body-lightmuted uppercase">
                                 <th className="w-4/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faUser}/>
-                                    <span>Name</span>
+                                    <span>{t("generic.user.name")}</span>
                                 </th>
                                 <th className="w-3/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faUserFriends}/>
-                                    <span>Group</span>
+                                    <span>{t("generic.user.group")}</span>
                                 </th>
                                 <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
                                     <FontAwesomeIcon icon={faIdCardAlt}/>
-                                    <span>Account type</span>
+                                    <span>{t("generic.user.account-type")}</span>
                                 </th>
                                 <th className="w-1/10 font-semibold text-left px-6 py-4 space-x-3">
-                                    <span>Actions</span>
+                                    <span>{t("generic.table.actions")}</span>
                                 </th>
                             </tr>
                             </thead>
                             <tbody className="overflow-y-scroll h-4/6">
 
-                            {users.map((user: User) => {
+                            {users
+                                .sort((a, b) => a.group > b.group ? 1 : (b.group < a.group ? -1 : 0))
+                                .sort((a, b) => a.accessLevel > b.accessLevel ? 1 : (b.accessLevel < a.accessLevel ? -1 : 0))
+                                .map((user: User) => {
                                 return (
                                     <tr className="border-b border-grey-200" key={user.username}>
                                         <td className="py-2 px-4">
@@ -110,9 +117,9 @@ function UserList(): JSX.Element {
                                         <td className="py-2 px-4">
                                             <div className="w-full">
                                                 <OptionsButton>
-                                                    <ContextMenuItem name="View/Edit" icon={faEye}
+                                                    <ContextMenuItem name={t("generic.action.view-edit")} icon={faEye}
                                                                      href={`/users/${user.username}`}/>
-                                                    <ContextMenuItem name="Delete" icon={faTimesCircle}
+                                                    <ContextMenuItem name={t("generic.action.delete")} icon={faTimesCircle}
                                                                      action={() => {
                                                                          setModalUserTarget(user);
                                                                          setShowDeleteModal(true);
@@ -139,20 +146,20 @@ function UserList(): JSX.Element {
                             await fetchUsers();
                             addToast({
                                 type: "success",
-                                title: "User deleted",
-                                message: "Account successfully deleted"
+                                title: t("pages.user.list.toast.success.title"),
+                                message: t("pages.user.list.toast.success.message")
                             });
                         } else if (statusCode === "ERROR_USER_NOT_FOUND") {
                             addToast({
                                 type: "error",
-                                title: "Failed to delete a user",
-                                message: "Account to delete was not found."
+                                title: t("pages.user.list.toast.not-found.title"),
+                                message: t("pages.user.list.toast.not-found.message")
                             });
                         } else {
                             addToast({
                                 type: "error",
-                                title: "Failed to delete a user",
-                                message: "An unknown error occurred while deleting an account."
+                                title: t("pages.user.list.toast.error.title"),
+                                message: t("pages.user.list.toast.error.message")
                             });
                         }
                     }}
@@ -166,5 +173,13 @@ function UserList(): JSX.Element {
         </div>
     );
 }
+
+export const getStaticProps: GetStaticProps = async ({locale}) => {
+    return {
+        props: {
+            messages: require(`../../locales/${locale}.json`)
+        }
+    }
+};
 
 export default UserList;

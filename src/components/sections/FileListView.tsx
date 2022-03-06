@@ -3,13 +3,11 @@ import {
     faCalendar,
     faEye,
     faFile,
-    faFileAlt,
-    faFileAudio,
-    faFileImage, faFilePdf, faFileVideo,
     faTimesCircle
 } from "@fortawesome/free-regular-svg-icons";
 import {
-    faCloudDownloadAlt, faFileImport, faFolder,
+    faChevronCircleLeft,
+    faCloudDownloadAlt, faExclamationTriangle, faFileImport,
     faGripLinesVertical, faLock,
     faPencilAlt,
     faShareAlt,
@@ -22,35 +20,53 @@ import {
     createFolder,
     createNodeShareLink,
     decryptFileSystem,
-    downloadFile, EncryptedNode,
-    Node,
+    downloadFile, EncryptedNode, moveNode,
+    Node, overwriteFile,
     uploadFile
-} from "../../util/processes";
-import {request} from "../../util/communication";
+} from "../../helper/processes";
+import {request} from "../../helper/communication";
 import React, {forwardRef, Ref, useEffect, useImperativeHandle, useRef, useState} from "react";
 import {ToastProps} from "../toast/Toast";
 import getConfig from "next/config";
-import {IconProp} from "@fortawesome/fontawesome-svg-core";
-import {capitalize, formatBytes} from "../../util/util";
 import DeleteNodeModal from "../containers/modals/DeleteNodeModal";
 import OverwriteFileModal from "../containers/modals/OverwriteFileModal";
 import CreateFolderModal from "../containers/modals/CreateFolderModal";
 import ShareLinkModal from "../containers/modals/ShareLinkModal";
 import Card from "components/containers/Card";
+import {nodeToDescription, nodeToIcon} from "../../util/node";
+import {useRouter} from "next/router";
+import {capitalize} from "../../util/string";
+import {Heading2} from "../text/Headings";
+import Button from "../buttons/Button";
+import {useTranslations} from "use-intl";
+import Link from "next/link";
 
 interface Props {
     addToast: (toast: ToastProps) => void;
+    onFolderChange?: (folderId: number) => void;
 }
 
 export interface FileListViewRef {
     openUploadPrompt: () => void;
     openCreateFolderModal: () => void;
+    changerFolder: (newFolderId: number) => void;
 }
 
 const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
 
     // Configuration import for API URL
     const {publicRuntimeConfig} = getConfig();
+
+    // Strings import for multi language support
+    const t = useTranslations();
+
+    // Get current folder
+    const router = useRouter();
+    const params = router.asPath.split("#");
+    let currentFolder = 1;
+    if (params.length === 2 && typeof +params[1] === "number" && !isNaN(+params[1]))
+        currentFolder = +params[1];
+    const [currentFolderId, setCurrentFolderId] = useState<number>(currentFolder);
 
     // Modal display statuses
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
@@ -71,18 +87,33 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
     const [filesystem, setFilesystem] = useState<Node | null>(null);
     const [loaded, setLoaded] = useState<boolean>(false);
 
+    const changerFolder = (newFolderId: number) => {
+        setCurrentFolderId(newFolderId);
+        setLoaded(false);
+        if (newFolderId !== 1)
+            router.replace("#", `#${newFolderId}`).then(_ => {});
+        else
+            router.replace("").then(_ => {});
+    };
+
     const fetchFilesystem = async () => {
-        const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system`, {});
+        const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${currentFolderId}`, {});
         if (response.status !== "SUCCESS") {
-            props.addToast({type: "error", title: "File system load error", message: "Could not fetch your file system."});
+            setLoaded(true);
             return;
         }
-        const decrypted = decryptFileSystem(response.data.filesystem as EncryptedNode);
+        const decrypted = decryptFileSystem(response.data.filesystem as EncryptedNode, 2);
         if (!decrypted) {
-            props.addToast({type: "error", title: "File system decryption error", message: "Could not decrypt your file system."});
+            props.addToast({type: "error", title: t("pages.file.list.toast.fetch.decrypt-error.title"), message: t("pages.file.list.toast.fetch.decrypt-error.message")});
+            return;
+        }
+        if (decrypted.type !== "FOLDER") {
+            setLoaded(true);
             return;
         }
         setFilesystem(decrypted);
+        if (props.onFolderChange)
+            props.onFolderChange(decrypted.id);
         setLoaded(true);
     };
 
@@ -90,33 +121,6 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
         if (!loaded)
             fetchFilesystem().then(_ => {});
     });
-
-
-    // Util function for node display
-    const nodeToIcon = (node: Node): IconProp => {
-        if (node.type === "FOLDER") return faFolder;
-        if (!node.metaData.type) return faFile;
-
-        const [type, subtype] = node.metaData.type.split(/\//);
-        if (!type || !subtype) return faFile;
-
-        if (type === "text") return faFileAlt;
-        if (type === "image") return faFileImage;
-        if (type === "audio") return faFileAudio;
-        if (type === "video") return faFileVideo;
-        if (subtype === "pdf") return faFilePdf;
-        return faFile;
-    };
-    const nodeToDescription = (node: Node): string => {
-        if (node.type === "FOLDER") {
-            if (node.children.length === 0) return "Empty folder";
-            return `Folder, ${node.children.length} item${node.children.length >= 2 ? "s" : ""}`;
-        } else {
-            const subtype = node.metaData.type?.split(/\//).pop();
-            const size = ", " + formatBytes(node.metaData.size || 0);
-            return `${capitalize(subtype || "")} file${node.metaData.size ? size : ""}`
-        }
-    }
 
 
     // File upload
@@ -127,12 +131,20 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
             const file = files.item(i);
 
             if (file) {
-                uploadFile(file, filesystem.id, "abc").then(async success => {
+                uploadFile(file, filesystem.id).then(async success => {
                     if (success) {
-                        props.addToast({type: "success", title: "File uploaded", message: `Your file ${file.name} has been uploaded successfully.`});
+                        props.addToast({
+                            type: "success",
+                            title: t("pages.file.list.toast.upload.success.title"),
+                            message: t.rich("pages.file.list.toast.upload.success.message", {name: file.name}).toString()
+                        });
                         await fetchFilesystem();
                     } else {
-                        props.addToast({type: "error", title: "File upload error", message: `Your file ${file.name} could not be uploaded. (File too big.)`});
+                        props.addToast({
+                            type: "error",
+                            title: t("pages.file.list.toast.upload.error.title"),
+                            message: t.rich("pages.file.list.toast.upload.error.message", {name: file.name}).toString()
+                        });
                     }
                 });
             }
@@ -150,231 +162,304 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
         },
         openCreateFolderModal() {
             setShowCreateFolderModal(true);
-        }
+        },
+        changerFolder
     }));
 
-    return (
-        <>
-            <input ref={fileInputRef} type="file" className="hidden" multiple={true} onChange={() => {
-                if (fileInputRef.current)
-                    processUpload(fileInputRef.current.files);
-            }}/>
-
-            <div className={`w-full ${isUploadDragging ? "p-8 border-4 border-blue border-dashed" : "p-9"}`}
-                 onDragOver={(e) => {
-                     e.preventDefault();
-                     if (!dragNodeOrigin)
-                         setIsUploadDragging(true);
-                 }}
-                 onDragLeave={() => setIsUploadDragging(false)}
-                 onDrop={(e) => {
-                     e.preventDefault();
-                     if (isUploadDragging) {
-                         setIsUploadDragging(false);
-                         processUpload(e.dataTransfer.files);
-                     }
-                 }}
-            >
-                <Card title="Files" className="pb-2">
-                    <table className="w-full">
-                        <thead>
-                        <tr className="border-b border-grey-200 bg-bg-light text-3xs text-txt-body-lightmuted uppercase">
-                            <th className="w-5/10 font-semibold text-left px-6 py-4 space-x-3">
-                                <FontAwesomeIcon icon={faFile}/>
-                                <span>File name</span>
-                            </th>
-                            <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
-                                <FontAwesomeIcon icon={faCalendar}/>
-                                <span>Last modified</span>
-                            </th>
-                            <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
-                                <FontAwesomeIcon icon={faUserFriends}/>
-                                <span>Shared with</span>
-                            </th>
-                            <th className="w-1/10 font-semibold text-left px-6 py-4 space-x-3">
-                                <span>Actions</span>
-                            </th>
-                        </tr>
-                        </thead>
-                        <tbody className="overflow-y-scroll h-4/6">
-
-                        {filesystem && filesystem.children
-                            .sort((a, b) => a.metaData.name.toLowerCase() > b.metaData.name.toLowerCase() ? 1 : -1)
-                            .sort((a, b) => a.type === "FOLDER" ? (b.type === "FOLDER" ? 0 : -1) : (b.type === "FOLDER" ? 1 : 0))
-                            .map(node => {
-                                return (
-                                    <tr className={`${dragNodeDest === node ? "border-2 border-blue border-dashed" : "m-0.5 border-b border-grey-200"}`} key={node.id}
-                                        onDragOver={(e) => {
-                                            e.preventDefault();
-                                            if (dragNodeOrigin && node.type === "FOLDER" && dragNodeOrigin !== node)
-                                                setDragNodeDest(node);
-                                        }}
-                                        onDragLeave={() => setDragNodeDest(null)}
-                                        onDrop={(e) => {
-                                            e.preventDefault();
-                                            if (dragNodeOrigin && dragNodeDest) {
-                                                // TODO Node drop in folder
-                                                props.addToast({type: "info", title: "Work in progress feature", message: "Folder moving is currently a work-in-progress/planned feature."});
-                                                setDragNodeDest(null);
-                                            }
-                                        }}
-                                    >
-                                        <td className="py-2 px-4" draggable={true}
-                                            onDragStart={() => setDragNodeOrigin(node)}
-                                            onDragEnd={() => setDragNodeOrigin(null)}
-                                        >
-                                            <div className="flex space-x-3">
-                                                <div className="grid my-auto cursor-grab font-light">
-                                                    <FontAwesomeIcon icon={faGripLinesVertical} className="text-grey-300" />
-                                                </div>
-                                                <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
-                                                    <FontAwesomeIcon className="m-auto text-silver-dark" icon={nodeToIcon(node)} />
-                                                </div>
-                                                <div className="grid content-center leading-4">
-                                                    <span className="text-txt-heading font-semibold text-2xs">
-                                                        {node.metaData.name}
-                                                    </span>
-                                                    <span className="text-txt-body-muted font-light text-4xs">
-                                                        {nodeToDescription(node)}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="py-2 px-4">
-                                            <span className="text-txt-body text-xs">
-                                                {node.metaData.lastModified &&
-                                                    new Date(node.metaData.lastModified).toUTCString()
-                                                }
-                                            </span>
-                                        </td>
-                                        <td className="py-2 px-4">
-                                            <div className="flex">
-                                                <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                                <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                                <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                                <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                                <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                                <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
-                                            </div>
-                                        </td>
-                                        <td className="py-2 px-4">
-                                            <div className="w-full">
-                                                {node.type === "FOLDER" ?
-                                                    <OptionsButton>
-                                                        <ContextMenuItem name="Rename" icon={faPencilAlt} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "Folder renaming is currently a work-in-progress/planned feature."});
-                                                        }}/>
-                                                        <ContextMenuItem name="Share" icon={faShareAlt} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "Folder sharing is currently a work-in-progress/planned feature."});
-                                                        }}/>
-                                                        <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "Permission system is currently a work-in-progress/planned feature."});
-                                                        }}/>
-                                                        <ContextMenuItem name="Lock folder" icon={faLock} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "Node locking is currently a work-in-progress/planned feature."});
-                                                        }}/>
-                                                        <ContextMenuItem name="Delete" icon={faTimesCircle} action={() => {
-                                                            setModalNodeTarget(node);
-                                                            setShowDeleteModal(true);
-                                                        }}/>
-                                                    </OptionsButton>
-                                                    :
-                                                    <OptionsButton>
-                                                        <ContextMenuItem name="Preview" icon={faEye} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "File preview is currently a work-in-progress/planned feature."});
-                                                        }}/>
-                                                        <ContextMenuItem name="Download" icon={faCloudDownloadAlt} action={async () => {
-                                                            const status = await downloadFile(node);
-                                                            if (status === "ERROR_FETCH")
-                                                                props.addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
-                                                            else if (status === "ERROR_DECRYPT")
-                                                                props.addToast({type: "error", title: "Failed to decrypt", message: "An error occurred while decrypting the file."});
-                                                            else if (status !== "SUCCESS")
-                                                                props.addToast({type: "error", title: "Failed to download", message: "An unexpected error occurred while downloading the file."});
-                                                        }}/>
-                                                        <ContextMenuItem name="Share" icon={faShareAlt} action={async () => {
-
-                                                            const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/links`, {});
-                                                            if (response.status !== "SUCCESS")
-                                                                return;
-
-                                                            if (response.data.links.length === 0) {
-                                                                const shareLink = await createNodeShareLink(node);
-                                                                if (shareLink)
-                                                                    node.shareLink = shareLink;
-                                                            } else {
-                                                                node.shareLink = response.data.links[0];
-                                                            }
-
-
-                                                            setModalNodeTarget(node);
-                                                            setShowShareLinkModal(true);
-                                                        }}/>
-                                                        <ContextMenuItem name="Manage permissions" icon={faUsersCog} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "Permission system is currently a work-in-progress/planned feature."});
-                                                        }}/>
-                                                        <ContextMenuItem name="Lock file" icon={faLock} action={() => {
-                                                            props.addToast({type: "info", title: "Work in progress feature", message: "Node locking is currently a work-in-progress/planned feature."});
-                                                        }}/>
-                                                        <ContextMenuItem name="Overwrite" icon={faFileImport} action={() => {
-                                                            setModalNodeTarget(node);
-                                                            setShowOverwriteModal(true);
-                                                        }}/>
-                                                        <ContextMenuItem name="Delete" icon={faTimesCircle} action={() => {
-                                                            setModalNodeTarget(node);
-                                                            setShowDeleteModal(true);
-                                                        }}/>
-                                                    </OptionsButton>
-                                                }
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-
-                        </tbody>
-                    </table>
+    if (loaded && !filesystem) {
+        return (
+            <div className="w-full">
+                <Card className="w-1/2 my-4 md:my-20 lg:my-48 mx-auto">
+                    <div className="md:flex p-4">
+                        <div className="p-12 flex justify-center items-center bg-red-soft rounded-xl text-center">
+                            <span className="text-3xl text-red">
+                                <FontAwesomeIcon icon={faExclamationTriangle} />
+                            </span>
+                        </div>
+                        <div className="w-full p-10">
+                            <Heading2>Folder not found</Heading2>
+                            <span className="text-txt-body">The folder you requested does not exists.</span>
+                        </div>
+                        <div className="p-12">
+                            <div className="w-full h-full flex justify-center">
+                                <Button className="mx-auto my-auto w-32" size="medium" type="regular" colour="dark" onClick={() => {
+                                    changerFolder(1);
+                                }}>
+                                    <span><FontAwesomeIcon icon={faChevronCircleLeft} />&nbsp;&nbsp;Back</span>
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
                 </Card>
             </div>
+        );
 
-            {showDeleteModal && modalNodeTarget &&
-                <DeleteNodeModal node={modalNodeTarget} closeCallback={() => {
-                    setShowDeleteModal(false);
-                    setModalNodeTarget(null);
-                }} submitCallback={async () => {
-                    const response = await request("DELETE", `${publicRuntimeConfig.apiUrl}/file-system/${modalNodeTarget.id}`, {});
-                    if (response.status === "SUCCESS")
-                        props.addToast({type: "success", title: "File deleted", message: "File deleted successfully."});
-                    else
-                        props.addToast({type: "error", title: "Could not delete file", message: "An unknown error occurred while deleting the file."});
-                    await fetchFilesystem();
+    } else {
+
+        return (
+            <>
+                <input ref={fileInputRef} type="file" className="hidden" multiple={true} onChange={() => {
+                    if (fileInputRef.current)
+                        processUpload(fileInputRef.current.files);
                 }}/>
-            }
-            {showOverwriteModal && modalNodeTarget &&
-                <OverwriteFileModal node={modalNodeTarget} closeCallback={() => {
-                    setShowOverwriteModal(false);
-                    setModalNodeTarget(null);
-                }} submitCallback={(file) => {
-                    if (!file || !filesystem) return;
-                    // TODO Overwrite file
-                    props.addToast({type: "info", title: "Work in progress feature", message: "File overwrite is currently a work-in-progress/planned feature."});
-                }}/>
-            }
-            {showCreateFolderModal &&
-                <CreateFolderModal closeCallback={() => setShowCreateFolderModal(false)} submitCallback={async (name: string) => {
-                    const success = filesystem && await createFolder(name, filesystem.id, "abc");
-                    if (success)
-                        props.addToast({type: "success", title: "Folder created", message: `Folder ${name} created successfully.`});
-                    else
-                        props.addToast({type: "error", title: "Error when creating folder", message: `Could not create folder ${name}.`});
-                    await fetchFilesystem();
-                }} />
-            }
-            {showShareLinkModal && modalNodeTarget && modalNodeTarget.shareLink &&
-                <ShareLinkModal closeCallback={() => setShowShareLinkModal(false)} sharelink={modalNodeTarget.shareLink} />
-            }
-        </>
-    );
+
+                <div className={`w-full ${isUploadDragging ? "p-8 border-4 border-blue border-dashed" : "p-9"}`}
+                     onDragOver={(e) => {
+                         e.preventDefault();
+                         if (!dragNodeOrigin)
+                             setIsUploadDragging(true);
+                     }}
+                     onDragLeave={() => setIsUploadDragging(false)}
+                     onDrop={(e) => {
+                         e.preventDefault();
+                         if (isUploadDragging) {
+                             setIsUploadDragging(false);
+                             processUpload(e.dataTransfer.files);
+                         }
+                     }}
+                >
+                    <Card title="Files" className="pb-2">
+                        <table className="w-full">
+                            <thead>
+                            <tr className="border-b border-grey-200 bg-bg-light text-3xs text-txt-body-lightmuted uppercase">
+                                <th className="w-5/10 font-semibold text-left px-6 py-4 space-x-3">
+                                    <FontAwesomeIcon icon={faFile}/>
+                                    <span>{t("generic.file.name")}</span>
+                                </th>
+                                <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
+                                    <FontAwesomeIcon icon={faCalendar}/>
+                                    <span>{t("generic.file.last-modified")}</span>
+                                </th>
+                                <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
+                                    <FontAwesomeIcon icon={faUserFriends}/>
+                                    <span>{t("generic.file.shared-with")}</span>
+                                </th>
+                                <th className="w-1/10 font-semibold text-left px-6 py-4 space-x-3">
+                                    <span>{t("generic.table.actions")}</span>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody className="overflow-y-scroll h-4/6">
+
+                            {filesystem && filesystem.children
+                                .sort((a, b) => a.metaData.name.toLowerCase() > b.metaData.name.toLowerCase() ? 1 : -1)
+                                .sort((a, b) => a.type === "FOLDER" ? (b.type === "FOLDER" ? 0 : -1) : (b.type === "FOLDER" ? 1 : 0))
+                                .map(node => {
+                                    return (
+                                        <tr className={`${dragNodeDest === node ? "border-2 border-blue border-dashed" : "m-0.5 border-b border-grey-200"}`} key={node.id}
+                                            onDragOver={(e) => {
+                                                e.preventDefault();
+                                                if (dragNodeOrigin && node.type === "FOLDER" && dragNodeOrigin !== node)
+                                                    setDragNodeDest(node);
+                                            }}
+                                            onDragLeave={() => setDragNodeDest(null)}
+                                            onDrop={async (e) => {
+                                                e.preventDefault();
+                                                if (dragNodeOrigin && dragNodeDest) {
+                                                    const status = await moveNode(dragNodeOrigin, dragNodeDest);
+                                                    if (status)
+                                                        props.addToast({
+                                                            type: "success",
+                                                            title: `${capitalize(dragNodeOrigin.type)} moved`,
+                                                            message: `${capitalize(capitalize(dragNodeOrigin.type))} ${dragNodeOrigin.metaData.name} moved to ${dragNodeDest.metaData.name}.`});
+                                                    else
+                                                        props.addToast({
+                                                            type: "error",
+                                                            title: `Could not move ${capitalize(dragNodeOrigin.type)}`,
+                                                            message: `An unexpected error occurred while moving the ${capitalize(dragNodeOrigin.type)}.`});
+                                                    setDragNodeDest(null);
+                                                    await fetchFilesystem();
+                                                }
+                                            }}
+                                        >
+                                            <td className="py-2 px-4" draggable={true}
+                                                onDragStart={() => setDragNodeOrigin(node)}
+                                                onDragEnd={() => setDragNodeOrigin(null)}
+                                            >
+                                                <div className="flex space-x-3">
+                                                    <div className="grid my-auto cursor-grab font-light">
+                                                        <FontAwesomeIcon icon={faGripLinesVertical} className="text-grey-300" />
+                                                    </div>
+                                                    <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
+                                                        <FontAwesomeIcon className="m-auto text-silver-dark" icon={nodeToIcon(node)} />
+                                                    </div>
+                                                    {node.type === "FOLDER" ?
+                                                        <a href={`#${node.id}`} onClick={() => changerFolder(node.id)}>
+                                                            <div className="grid content-center leading-4">
+                                                                <span className="text-txt-heading font-semibold text-2xs">
+                                                                    {node.metaData.name}
+                                                                </span>
+                                                                <span className="text-txt-body-muted font-light text-4xs">
+                                                                    {nodeToDescription(node)}
+                                                                </span>
+                                                            </div>
+                                                        </a>
+                                                        :
+                                                        <div className="grid content-center leading-4">
+                                                            <span className="text-txt-heading font-semibold text-2xs">
+                                                                {node.metaData.name}
+                                                            </span>
+                                                            <span className="text-txt-body-muted font-light text-4xs">
+                                                                {nodeToDescription(node)}
+                                                            </span>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td className="py-2 px-4">
+                                                <span className="text-txt-body text-xs">
+                                                    {node.metaData.lastModified &&
+                                                        new Date(node.metaData.lastModified).toUTCString()
+                                                    }
+                                                </span>
+                                            </td>
+                                            <td className="py-2 px-4">
+                                                <div className="flex">
+                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
+                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
+                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
+                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
+                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
+                                                    <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
+                                                </div>
+                                            </td>
+                                            <td className="py-2 px-4">
+                                                <div className="w-full">
+                                                    {node.type === "FOLDER" ?
+                                                        <OptionsButton>
+                                                            <ContextMenuItem name={t("generic.action.rename")} icon={faPencilAlt} action={() => {
+                                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
+                                                            }}/>
+                                                            <ContextMenuItem name={t("generic.action.share")} icon={faShareAlt} action={() => {
+                                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
+                                                            }}/>
+                                                            <ContextMenuItem name={t("generic.action.manage-permissions")} icon={faUsersCog} action={() => {
+                                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
+                                                            }}/>
+                                                            <ContextMenuItem name={t("generic.action.lock-file")} icon={faLock} action={() => {
+                                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
+                                                            }}/>
+                                                            <ContextMenuItem name={t("generic.action.delete")} icon={faTimesCircle} action={() => {
+                                                                setModalNodeTarget(node);
+                                                                setShowDeleteModal(true);
+                                                            }}/>
+                                                        </OptionsButton>
+                                                        :
+                                                        <OptionsButton>
+                                                            <ContextMenuItem name={t("generic.action.preview")} icon={faEye} action={() => {
+                                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
+                                                            }}/>
+                                                            <ContextMenuItem name={t("generic.action.download")} icon={faCloudDownloadAlt} action={async () => {
+                                                                const status = await downloadFile(node);
+                                                                if (status === "ERROR_FETCH")
+                                                                    props.addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
+                                                                else if (status === "ERROR_DECRYPT")
+                                                                    props.addToast({type: "error", title: "Failed to decrypt", message: "An error occurred while decrypting the file."});
+                                                                else if (status !== "SUCCESS")
+                                                                    props.addToast({type: "error", title: "Failed to download", message: "An unexpected error occurred while downloading the file."});
+                                                            }}/>
+                                                            <ContextMenuItem name={t("generic.action.share")} icon={faShareAlt} action={async () => {
+
+                                                                const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/links`, {});
+                                                                if (response.status !== "SUCCESS")
+                                                                    return;
+
+                                                                if (response.data.links.length === 0) {
+                                                                    const shareLink = await createNodeShareLink(node);
+                                                                    if (shareLink)
+                                                                        node.shareLink = shareLink;
+                                                                } else {
+                                                                    node.shareLink = response.data.links[0];
+                                                                }
+
+                                                                setModalNodeTarget(node);
+                                                                setShowShareLinkModal(true);
+                                                            }}/>
+                                                            <ContextMenuItem name={t("generic.action.manage-permissions")} icon={faUsersCog} action={() => {
+                                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
+                                                            }}/>
+                                                            <ContextMenuItem name={t("generic.action.lock-file")} icon={faLock} action={() => {
+                                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
+                                                            }}/>
+                                                            <ContextMenuItem name={t("generic.action.overwrite")} icon={faFileImport} action={() => {
+                                                                setModalNodeTarget(node);
+                                                                setShowOverwriteModal(true);
+                                                            }}/>
+                                                            <ContextMenuItem name={t("generic.action.delete")} icon={faTimesCircle} action={() => {
+                                                                setModalNodeTarget(node);
+                                                                setShowDeleteModal(true);
+                                                            }}/>
+                                                        </OptionsButton>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+
+                            </tbody>
+                        </table>
+                    </Card>
+                </div>
+
+                {showDeleteModal && modalNodeTarget &&
+                    <DeleteNodeModal node={modalNodeTarget} closeCallback={() => {
+                        setShowDeleteModal(false);
+                        setModalNodeTarget(null);
+                    }} submitCallback={async () => {
+                        const response = await request("DELETE", `${publicRuntimeConfig.apiUrl}/file-system/${modalNodeTarget.id}`, {});
+                        if (response.status === "SUCCESS")
+                            props.addToast({
+                                type: "success",
+                                title: t.rich("pages.file.list.toast.delete.success.title", {type: t(`generic.node.${modalNodeTarget?.type.toLowerCase()}`)}).toString(),
+                                message: t.rich("pages.file.list.toast.delete.success.message", {type: t(`generic.node.${modalNodeTarget?.type.toLowerCase()}`)}).toString()
+                            });
+                        else
+                            props.addToast({type: "error", title: t("pages.file.list.toast.delete.error.title"), message: t("pages.file.list.toast.delete.error.message")});
+                        await fetchFilesystem();
+                    }}/>
+                }
+                {showOverwriteModal && modalNodeTarget &&
+                    <OverwriteFileModal node={modalNodeTarget} closeCallback={() => {
+                        setShowOverwriteModal(false);
+                        setModalNodeTarget(null);
+                    }} submitCallback={async (file) => {
+                        if (!file || !filesystem) return;
+                        const success = await overwriteFile(file, modalNodeTarget?.id, modalNodeTarget?.nodeKey, modalNodeTarget?.iv);
+                        if (success)
+                            props.addToast({
+                                type: "success",
+                                title: t("pages.file.list.toast.upload.success.title"),
+                                message: t.rich("pages.file.list.toast.upload.success.message", {name: file.name}).toString()
+                            });
+                        else
+                            props.addToast({
+                                type: "error",
+                                title: t("pages.file.list.toast.overwrite.error.title"),
+                                message: t.rich("pages.file.list.toast.overwrite.error.message", {name: file.name}).toString()
+                            });
+                        await fetchFilesystem();
+                    }}/>
+                }
+                {showCreateFolderModal &&
+                    <CreateFolderModal closeCallback={() => setShowCreateFolderModal(false)} submitCallback={async (name: string) => {
+                        const success = filesystem && await createFolder(name, filesystem.id, "abc");
+                        if (success) {
+                            const message = t.rich("pages.file.list.toast.create-folder.success.message", {name: name}).toString();
+                            props.addToast({type: "success", title: t("pages.file.list.toast.create-folder.success.title"), message: message});
+                        } else {
+                            const message = t.rich("pages.file.list.toast.create-folder.error.message", {name: name}).toString();
+                            props.addToast({type: "error", title: t("pages.file.list.toast.create-folder.error.title"), message: message});
+                        }
+                        await fetchFilesystem();
+                    }} />
+                }
+                {showShareLinkModal && modalNodeTarget && modalNodeTarget.shareLink &&
+                    <ShareLinkModal closeCallback={() => setShowShareLinkModal(false)} sharelink={modalNodeTarget.shareLink} />
+                }
+            </>
+        );
+    }
 });
 
 FileListView.displayName = "FileListView";

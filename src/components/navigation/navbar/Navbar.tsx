@@ -7,10 +7,14 @@ import {Heading3} from "../../text/Headings";
 import Link from "next/link";
 import {useState} from "react";
 import TransferList from "../../transfers/TransferList";
-import {terminateSession} from "../../../util/processes";
+import {terminateSession} from "../../../helper/processes";
 import {useRouter} from "next/router";
+import {GetStaticProps} from "next";
+import {useTranslations} from "use-intl";
 
 function Navbar(): JSX.Element {
+
+    const t = useTranslations();
 
     const [showFileTransfers, setShowFileTransfers] = useState(false);
 
@@ -30,23 +34,23 @@ function Navbar(): JSX.Element {
                         <div className="w-9 h-9 mx-auto lg:mx-0 rounded-2lg bg-gradient-to-bl from-blue-gradient-from to-blue-gradient-to text-center text-md text-white py-1">
                             <FontAwesomeIcon icon={faCloud} /> {/* TODO Change icon */}
                         </div>
-                        <Heading3 className="hidden 3xl:flex text-blue my-auto tracking-tighter">Private Encrypted Cloud</Heading3>
-                        <Heading3 className="hidden lg:flex 3xl:hidden text-blue my-auto tracking-tighter">PEC</Heading3>
+                        <Heading3 className="hidden 3xl:flex text-blue my-auto tracking-tighter">{t("generic.app.name")}</Heading3>
+                        <Heading3 className="hidden lg:flex 3xl:hidden text-blue my-auto tracking-tighter">{t("generic.app.abbr")}</Heading3>
                     </div>
                 </Link>
 
-                <NavbarItem name="Files" icon={faFile} activeRoutes={[/^\/files$/]} href="/files" />
-                <NavbarItem name="Notifications" activeRoutes={[]} icon={faBell} badge="12" className="cursor-not-allowed" />
-                <NavbarItem name="My&nbsp;account" activeRoutes={[]} icon={faUserCircle} className="cursor-not-allowed" />
+                <NavbarItem name={t("navbar.files")} icon={faFile} activeRoutes={[/^\/files$/]} href="/files" />
+                <NavbarItem name={t("navbar.notifications")} activeRoutes={[]} icon={faBell} badge="12" className="cursor-not-allowed" />
+                <NavbarItem name={t("navbar.my-account")} activeRoutes={[]} icon={faUserCircle} className="cursor-not-allowed" />
 
                 <div className="w-full py-6">
                     <hr className="mx-auto w-2/3 text-grey-200" />
                 </div>
 
-                <NavbarItem name="Activity&nbsp;log" activeRoutes={[]} icon={faListUl} className="cursor-not-allowed" />
-                <NavbarItem name="Admin&nbsp;panel" activeRoutes={[/^\/users.*$/]} icon={faUserShield} href="/users" />
+                <NavbarItem name={t("navbar.activity-log")} activeRoutes={[]} icon={faListUl} className="cursor-not-allowed" />
+                <NavbarItem name={t("navbar.admin-panel")} activeRoutes={[/^\/users.*$/]} icon={faUserShield} href="/users" />
 
-                <NavbarItem name="Logout" active={false} activeRoutes={[]} icon={faSignOutAlt} className="absolute inset-x-0 bottom-2" action={async () => {
+                <NavbarItem name={t("navbar.logout")} active={false} activeRoutes={[]} icon={faSignOutAlt} className="absolute inset-x-0 bottom-2" action={async () => {
                     await terminateSession();
                     await router.reload();
                 }} />
@@ -59,5 +63,13 @@ function Navbar(): JSX.Element {
         </>
     );
 }
+
+export const getStaticProps: GetStaticProps = async ({locale}) => {
+    return {
+        props: {
+            messages: require(`../../../locales/${locale}.json`)
+        }
+    }
+};
 
 export default Navbar;

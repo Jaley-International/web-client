@@ -8,7 +8,6 @@ import {
     encrypt,
     encryptBuffer,
     generateRSAKeyPair,
-    INSTANCE_ID,
     pbkdf2,
     rsaPrivateDecrypt,
     sha256,
@@ -27,13 +26,6 @@ export interface EncryptedNode {
     ref: string;
     parentEncryptedKey: Hex;
     children: EncryptedNode[];
-}
-
-export interface ShareLink {
-    shareId: string;
-    iv: Hex;
-    encryptedNodeKey: Hex;
-    encryptedShareKey: Hex;
 }
 
 export interface MetaData {
@@ -62,49 +54,69 @@ export interface Session {
     exp?: number;
 }
 
+export interface ShareLink {
+    shareId: string;
+    iv: Hex;
+    encryptedNodeKey: Hex;
+    encryptedShareKey: Hex;
+}
+
+
+export enum RegisterStep {
+    GEN_MASTER_KEY,
+    GEN_CLIENT_RANDOM_VALUE,
+    GEN_RSA,
+    COMPUTING_SALT,
+    PROCESSING_PASSWORD,
+    ENCRYPTING_KEYS,
+    SUBMITTING
+}
+
+export enum AuthenticationStep {
+    REQ_SALT,
+    PROCESSING_PASSWORD,
+    REQ_KEYS,
+    DECRYPTING_KEYS
+}
+
 /**
  * User registration client-side process
  * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
  *
  * @param {string}      registerKey     New account's username.
  * @param {string}      password        New account's password.
- * @param {function}    updateStatus    Function to update the registration status.
+ * @param {function}    update          Callback function to update the registration status.
  * @return {string}                     Status code returned by API.
  */
-export async function register(
-    registerKey: string,
-    password: string,
-    updateStatus: (message: string) => void
-): Promise<string> {
-
+export async function register(registerKey: string, password: string, update: (step: RegisterStep) => void): Promise<string> {
     const {publicRuntimeConfig} = getConfig();
 
     // Generate AES MasterKey (256 bits)
-    updateStatus("Generating Master Key...");
+    update(RegisterStep.GEN_MASTER_KEY);
     const masterKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
 
     // Generate Client Random Value (128 bits)
-    updateStatus("Generating Client Random Value...");
+    update(RegisterStep.GEN_CLIENT_RANDOM_VALUE);
     const clientRandomValue = forge.util.bytesToHex(forge.random.getBytesSync(16));
 
     // Generate RSA key pair
-    updateStatus("Generating RSA key pair...");
+    update(RegisterStep.GEN_RSA);
     const sharingKeys = await generateRSAKeyPair();
     const privateSharingKey = forge.pki.privateKeyToPem(sharingKeys.privateKey);
     const publicSharingKey = forge.pki.publicKeyToPem(sharingKeys.publicKey);
 
     // Generate Salt
-    updateStatus("Computing Salt...");
-    const salt = sha256(addPadding(registerKey + INSTANCE_ID + clientRandomValue, 128));
+    update(RegisterStep.COMPUTING_SALT);
+    const salt = sha256(addPadding(registerKey + publicRuntimeConfig.instanceId + clientRandomValue, 128));
 
     // PPF
-    updateStatus("Processing password...");
+    update(RegisterStep.PROCESSING_PASSWORD);
     const derivedKey = await pbkdf2(password, salt);
     const derivedEncryptionKey = derivedKey.substring(0, 64);
     const derivedAuthenticationKey = derivedKey.substring(64);
 
     // Encrypting data before sending to the API
-    updateStatus("Encrypting keys...");
+    update(RegisterStep.ENCRYPTING_KEYS);
     const encryptedPrivateSharingKey = encrypt("AES-CTR", masterKey, salt, privateSharingKey);
     const encryptedMasterKey = encrypt("AES-CTR", derivedEncryptionKey, salt, masterKey);
     const hashedAuthenticationKey = sha512(derivedAuthenticationKey);
@@ -118,7 +130,7 @@ export async function register(
         rsaPublicSharingKey: publicSharingKey
     };
 
-    updateStatus("Submitting...");
+    update(RegisterStep.SUBMITTING);
     const response = await request("POST", `${publicRuntimeConfig.apiUrl}/users/register`, registerData);
     return response.status;
 }
@@ -130,19 +142,14 @@ export async function register(
  *
  * @param {string}      username        Account's username.
  * @param {string}      password        Account's password.
- * @param {function}    updateStatus    Function to update the authentication status.
+ * @param {function}    update          Callback function to update the authentication status.
  * @return {boolean}                    True if authentication is successful, false otherwise
  */
-export async function authenticate(
-    username: string,
-    password: string,
-    updateStatus: (message: string) => void
-): Promise<boolean> {
-
+export async function authenticate(username: string, password: string, update: (step: AuthenticationStep) => void): Promise<boolean> {
     const {publicRuntimeConfig} = getConfig();
 
     // Salt request
-    updateStatus("Requesting salt...");
+    update(AuthenticationStep.REQ_SALT);
     const saltResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/users/${username}/salt`, {});
 
     if (saltResponse.status !== "SUCCESS")
@@ -151,13 +158,13 @@ export async function authenticate(
     const salt = saltResponse.data.salt;
 
     // PPF
-    updateStatus("Processing password...");
+    update(AuthenticationStep.PROCESSING_PASSWORD);
     const derivedKey = await pbkdf2(password, salt);
     const derivedEncryptionKey = derivedKey.substring(0, 64);
     const derivedAuthenticationKey = derivedKey.substring(64);
 
     // Authenticating (session identifier request with encrypted keys)
-    updateStatus("Requesting keys...");
+    update(AuthenticationStep.REQ_KEYS);
     const authResponse = await request("POST", `${publicRuntimeConfig.apiUrl}/users/login`, {
         username: username,
         derivedAuthenticationKey: derivedAuthenticationKey
@@ -167,7 +174,7 @@ export async function authenticate(
         return false;
 
     // Decrypting keys
-    updateStatus("Decrypting keys...");
+    update(AuthenticationStep.DECRYPTING_KEYS);
     const masterKey = decrypt("AES-CTR", derivedEncryptionKey, salt, authResponse.data.loginDetails.encryptedMasterKey);
     const privateSharingKey = decrypt("AES-CTR", masterKey, salt, authResponse.data.loginDetails.encryptedRsaPrivateSharingKey);
     const sessionIdentifier = rsaPrivateDecrypt(privateSharingKey, authResponse.data.loginDetails.encryptedSessionIdentifier);
@@ -191,26 +198,15 @@ export async function authenticate(
 
 
 /**
- * File upload client-side process
- * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
+ * File content upload to server.
  *
  * @param {File}        file                File to upload.
- * @param {number}      containingFolderID  ID of the containing folder.
- * @param {Hex}         parentFolderKey     Parent folder's key.
- * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
+ * @param {Hex}         nodeKey             Node key.
+ * @param {string}      iv                  Initialisation vector.
+ * @return {string[]}                       Array with file ref and tag.
  */
-export async function uploadFile(
-    file: File, containingFolderID: number,
-    parentFolderKey: Hex
-): Promise<boolean> {
-
+async function uploadFileContent(file: File, nodeKey: Hex, iv: string): Promise<[string, string] | [null, null]> {
     const {publicRuntimeConfig} = getConfig();
-
-    // Generate Node Key (256 bits)
-    const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
-
-    // Generate initialization vector (128 bits)
-    const iv = forge.random.getBytesSync(16);
 
     // Reading file
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -229,10 +225,36 @@ export async function uploadFile(
         "POST",
         `${publicRuntimeConfig.apiUrl}/file-system/content`,
         formData,
-        {"Content-Type": "multipart/form-data; "});
+        {"Content-Type": "multipart/form-data;"});
+
     if (contentResponse.status !== "SUCCESS")
-        return false;
-    const ref = contentResponse.data.ref;
+        return [null, null];
+
+    return [contentResponse.data.ref, tag];
+}
+
+
+/**
+ * File node creation client-side process
+ * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
+ *
+ * @param {File}        file                File to upload.
+ * @param {number}      containingFolderID  ID of the containing folder.
+ * @param {Hex}         parentFolderKey     Parent folder's key.
+ * @return {boolean}                        True if upload is successful, false otherwise
+ */
+export async function uploadFile(file: File, containingFolderID: number, parentFolderKey?: Hex): Promise<boolean> {
+    const {publicRuntimeConfig} = getConfig();
+
+    // Generate Node Key (256 bits)
+    const nodeKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
+
+    // Generate initialization vector (128 bits)
+    const iv = forge.random.getBytesSync(16);
+
+    // server request to upload file content
+    const [ref, tag] = await uploadFileContent(file, nodeKey, iv);
+    if (!ref) return false;
 
     // Getting and encrypting file meta data
     const metaData = {
@@ -247,8 +269,7 @@ export async function uploadFile(
     const encryptedNodeKey = encrypt("AES-CTR", localStorage.masterKey, iv, nodeKey);
 
     // Compute Parent Encrypted Key
-    //const parentEncryptedKey = encrypt("AES-CTR", parentFolderKey, nodeKey, iv);
-    const parentEncryptedKey = "abc";
+    const parentEncryptedKey = parentFolderKey ? encrypt("AES-CTR", parentFolderKey, nodeKey, iv) : "";
 
     // Submitting file data to the API
     const fileResponse = await request("POST", `${publicRuntimeConfig.apiUrl}/file-system/file`, {
@@ -262,6 +283,42 @@ export async function uploadFile(
     });
 
     return fileResponse.status === "SUCCESS";
+}
+
+
+/**
+ * File overwrite (content and meta-data replacement)
+ *
+ * @param {File}        file                File to upload.
+ * @param {number}      nodeId              Node to overwrite.
+ * @param {Hex}         nodeKey             Node key.
+ * @param {string}      iv                  Initialisation vector.
+ * @return {boolean}                        True if upload is successful, false otherwise
+ */
+export async function overwriteFile(file: File, nodeId: number, nodeKey: Hex, iv: string): Promise<boolean> {
+    const {publicRuntimeConfig} = getConfig();
+
+    // server request to upload file content
+    const [ref, tag] = await uploadFileContent(file, nodeKey, forge.util.hexToBytes(iv));
+    if (!ref) return false;
+
+    // Getting and encrypting file meta data
+    const metaData = {
+        name: file.name,
+        type: file.type,
+        lastModified: file.lastModified,
+        size: file.size
+    }
+    const encryptedMetadata = encrypt("AES-CTR", nodeKey, forge.util.hexToBytes(iv), JSON.stringify(metaData));
+
+    // sending node ref update request
+    const overwriteResponse = await request("PATCH", `${publicRuntimeConfig.apiUrl}/file-system/${nodeId}/ref`, {
+        newEncryptedMetadata: encryptedMetadata,
+        newRef: ref,
+        newTag: tag
+    });
+
+    return overwriteResponse.status === "SUCCESS";
 }
 
 
@@ -314,12 +371,7 @@ export async function downloadFile(node: Node): Promise<string> {
  * @param {Hex}         parentFolderKey     Parent folder's key.
  * @return {boolean}                        (Temporary) True if upload is successful, false otherwise
  */
-export async function createFolder(
-    name: string,
-    containingFolderID: number,
-    parentFolderKey: Hex,
-): Promise<boolean> {
-
+export async function createFolder(name: string, containingFolderID: number, parentFolderKey: Hex): Promise<boolean> {
     const {publicRuntimeConfig} = getConfig();
 
     // Generate Node Key (256 bits)
@@ -349,11 +401,25 @@ export async function createFolder(
 }
 
 
+export async function moveNode(node: Node, destination: Node): Promise<boolean> {
+    const {publicRuntimeConfig} = getConfig();
+
+    const parentEncryptedKey = destination.nodeKey ? encrypt("AES-CTR", destination.nodeKey, node.nodeKey, node.iv) : "";
+
+    const response = await request("PATCH", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/parent`, {
+        newParentId: destination.id,
+        newParentEncryptedKey: parentEncryptedKey
+    })
+
+    return response.status === "SUCCESS";
+}
+
+
 /**
  * Node sharing by link process
  * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
  *
- * @param {Node}            node            Node to share.
+ * @param {Node}        node                Node to share.
  * @return {string | null}                  Share Link path, or null if request failed
  */
 export async function createNodeShareLink(node: Node): Promise<ShareLink | null> {
@@ -392,52 +458,67 @@ export async function createNodeShareLink(node: Node): Promise<ShareLink | null>
 /**
  * Decrypts the file system
  *
- * @param {EncryptedNode}   filesystem      File system to decrypted
- * @return {Node | null}                    Decrypted file system
+ * @param {EncryptedNode}   encryptedNode   Root of the node subtree to decrypt.
+ * @param {number}          maxDepth        Decryption depth limit.
+ * @return {Node | null}                    Decrypted subtree
  */
-export function decryptFileSystem(filesystem: EncryptedNode): Node | null {
+export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number = 0): Node | null {
 
-    const decryptNode = (encryptedNode: EncryptedNode, masterKey: Hex): Node => {
+    // Fetch Master Key
+    const masterKey = localStorage.getItem("masterKey");
+    if (!masterKey)
+        return null;
+
+    // Max depth reached
+    if (maxDepth < 0)
+        return null;
+
+    let node: Node | null;
+
+    // Decrypt current node
+    if (encryptedNode.id === 1) {
+        node = {
+            id: encryptedNode.id,
+            children: [],
+            iv: encryptedNode.iv,
+            tag: encryptedNode.tag,
+            nodeKey: "",
+            parentKey: "",
+            metaData: {name: "root"},
+            ref: encryptedNode.ref,
+            type: encryptedNode.type
+        };
+    } else {
         const iv = forge.util.hexToBytes(encryptedNode.iv);
         const nodeKey = decrypt("AES-CTR", masterKey, iv, encryptedNode.encryptedNodeKey);
-        return {
+        node = {
             id: encryptedNode.id,
             children: [],
             iv: encryptedNode.iv,
             tag: encryptedNode.tag,
             nodeKey: nodeKey,
-            parentKey: "", //decrypt("AES-CTR", nodeKey, iv, encryptedNode.parentEncryptedKey),
+            parentKey: decrypt("AES-CTR", nodeKey, encryptedNode.iv, encryptedNode.parentEncryptedKey),
             metaData: JSON.parse(decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedMetadata)),
             ref: encryptedNode.ref,
             type: encryptedNode.type
         }
     }
 
-    // TODO decrypt multiple depth
-
-    let decryptedFilesystem: Node = {
-        id: filesystem.id,
-        iv: "",
-        tag: "",
-        nodeKey: "",
-        metaData: {name: "root"},
-        type: "FOLDER",
-        ref: "",
-        parentKey: "",
-        children: []
-    };
-
-    for (const encryptedChild of filesystem.children) {
-        try {
+    // Decrypt children
+    if (maxDepth > 0) {
+        for (const encryptedChild of encryptedNode.children) {
             // TODO Check node ownership
-            decryptedFilesystem.children.push(decryptNode(
-                encryptedChild, localStorage.getItem("masterKey") || ""
-            ));
-        } catch (_) {
-            console.warn(`Could not decrypt node ${encryptedChild.id}. Not owner ?`);
+            try {
+                const child = decryptFileSystem(encryptedChild, maxDepth - 1);
+                if (child)
+                    node.children.push(child);
+            } catch (_) {
+                console.warn(`Could not decrypt node ${encryptedChild.id}. Not owner ?`);
+            }
         }
     }
-    return decryptedFilesystem;
+
+    return node;
 }
 
 
@@ -511,23 +592,16 @@ export async function deleteAccount(username: string) {
 /**
  * Updates a user account.
  *
- * @param {User}                user
- * @param {string}              firstName
- * @param {string}              lastName
- * @param {string}              email
- * @param {string}              group
- * @param {string}              job
- * @param {UserAccessLevel}     accessLevel
+ * @param {User}                user            User to update.
+ * @param {string}              firstName       (Optional) New user first name.
+ * @param {string}              lastName        (Optional) New user last name.
+ * @param {string}              email           (Optional) New user email address.
+ * @param {string}              group           (Optional) New user group.
+ * @param {string}              job             (Optional) New user job title.
+ * @param {UserAccessLevel}     accessLevel     (Optional) New user access level.
+ * @return {string}                             User creation return status.
  */
-export async function updateAccount(
-    user: User,
-    firstName?: string,
-    lastName?: string,
-    email?: string,
-    group?: string,
-    job?: string,
-    accessLevel?: UserAccessLevel
-): Promise<string> {
+export async function updateAccount(user: User, firstName?: string, lastName?: string, email?: string, group?: string, job?: string, accessLevel?: UserAccessLevel): Promise<string> {
     const {publicRuntimeConfig} = getConfig();
 
     const response = await request("PATCH", `${publicRuntimeConfig.apiUrl}/users/${user.username}`, {

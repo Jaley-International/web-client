@@ -1,6 +1,7 @@
 import React, {ChangeEventHandler, LegacyRef, useState} from "react";
-import {randomString} from "../../util/util";
+import {randomString} from "../../util/string";
 import zxcvbn from "zxcvbn";
+import {useTranslations} from "use-intl";
 
 interface Props {
     label: string;
@@ -12,20 +13,58 @@ interface Props {
 }
 
 interface PasswordStrength {
-    level: 0 | 1 | 2 | 3 | 4;
-    hint: string;
+    level: number;
+    hint: string[];
 }
 
-const passwordMeter = (password: string): PasswordStrength => {
-    const result = zxcvbn(password);
-    let hint = "Must be at least 12 characters long. Should contain numbers, upper and lower case letters.";
-    if (result.feedback.warning)
-        hint = (result.feedback.warning);
-    return {level: password.length === 0 ? 0 : (result.score === 0) ? 1 : result.score, hint: hint};
-};
 
 const NewPasswordInput = React.forwardRef((props: Props, ref: LegacyRef<HTMLInputElement> | undefined) => {
+    const t = useTranslations("components.password-strength-input");
     const id = randomString(8);
+
+
+    const passwordMeter = (password: string): PasswordStrength => {
+
+        if (password.length === 0)
+            return {level: 0, hint: [" "]};
+
+        if (password.length < 8)
+            return {level: 1, hint: [t("too-short")]};
+
+        const evaluation = zxcvbn(password);
+        if (evaluation.feedback.warning)
+            return {level: 1, hint: [t("too-guessable")]};
+
+
+        const hasLowercase = /[a-z]/.test(password);
+        const hasUppercase = /[A-Z]/.test(password);
+        const hasDigit = /[0-9]/.test(password);
+        const hasSpecialChar = /[^a-zA-Z0-9]/.test(password);
+
+        let level = evaluation.score;
+        let hint: string[] = [];
+
+        if (evaluation.score < 4 || password.length < 12)
+            hint.push(t("too-weak"));
+        if ([hasLowercase, hasUppercase, hasDigit, hasSpecialChar].filter(r => r).length < 3) {
+            if (!hasLowercase)
+                hint.push(t("missing-lowercase"));
+            if (!hasUppercase)
+                hint.push(t("missing-uppercase"));
+            if (!hasDigit)
+                hint.push(t("missing-digit"));
+            if (!hasSpecialChar)
+                hint.push(t("missing-special"));
+        } else {
+            level += 1;
+        }
+
+        return {
+            level: level,
+            hint: hint
+        };
+    };
+
 
     const [passwordStrength, setPasswordStrength] = useState(passwordMeter(""));
 
@@ -34,16 +73,16 @@ const NewPasswordInput = React.forwardRef((props: Props, ref: LegacyRef<HTMLInpu
             props.onChange(e);
         const result = passwordMeter(e.target.value);
         setPasswordStrength(result);
-        if (result.level === 4)
+        if (result.level === 5)
             e.target.setCustomValidity("");
         else
-            e.target.setCustomValidity("Password is too weak.");
+            e.target.setCustomValidity(t("requirement"));
     }
 
     const bars = (level: number): JSX.Element[] => {
         let divs: JSX.Element[] = [];
-        for (let i = 1 ; i < 5 ; ++i)
-            divs.push(<div key={i} className={`flex-1 ${i > level ? "bg-grey-300" : (level === 1 ? "bg-red" : (level === 2 ? "bg-orange" : (level === 3 ? "bg-green-light" : "bg-green")))} h-1.5 rounded-full`}> </div>)
+        for (let i = 1 ; i <= 5 ; ++i)
+            divs.push(<div key={i} className={`flex-1 ${i > level ? "bg-grey-300" : (level === 1 ? "bg-red" : (level === 2 ? "bg-orange" : (level === 3 ? "bg-red-gradient-from" : (level === 4 ? "bg-green-light" : "bg-green"))))} h-1.5 rounded-full`}> </div>)
         return divs;
     }
 
@@ -54,7 +93,9 @@ const NewPasswordInput = React.forwardRef((props: Props, ref: LegacyRef<HTMLInpu
             <div className="mt-2 flex space-x-4">
                 {bars(passwordStrength.level)}
             </div>
-            <span className={`${passwordStrength.level && passwordStrength.level < 3 ? "text-red" : "text-txt-body-muted"} text-3xs`}>{passwordStrength.hint}</span>
+            <span className={`${passwordStrength.level && passwordStrength.level < 5 ? "text-red" : "text-txt-body-muted"} text-3xs`}>{passwordStrength.hint.map((hint, i) => {
+                return <span key={i}>{hint}<br /></span>;
+            })}</span>
         </div>
     );
 });

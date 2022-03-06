@@ -1,3 +1,5 @@
+import {Hex} from "node-forge";
+
 /**
  * Generate a random string.
  * WARNING : Not cryptographically secure.
@@ -5,8 +7,6 @@
  * @param {number}      length          Length of the random string to generate.
  * @return {string}                     random string under the format : [a-zA-Z0-9]{length}
  */
-import {Hex} from "node-forge";
-
 export function randomString(length: number): string {
     let result = "";
     const pool = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -30,7 +30,7 @@ export function capitalize(str: string): string {
  * Transform a number of bytes to a more readable format with unit.
  * E.g. 42371 => "42 MB"
  */
-export function formatBytes(bytes: number, decimals: number = 0) {
+export function formatBytes(bytes: number, decimals: number = 0): string {
     if (bytes === 0) return "0 byte";
 
     const k = 1024;

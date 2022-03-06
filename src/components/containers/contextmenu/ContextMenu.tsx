@@ -11,7 +11,7 @@ function ContextMenu(props: Props): JSX.Element {
 
     const divRef = useRef<HTMLDivElement>(null);
     return (
-        <div ref={divRef} className="context z-20 fixed transform -translate-x-full bg-white shadow-card rounded-lg"
+        <div ref={divRef} className="context z-20 fixed transform -translate-x-full bg-white shadow-card rounded-lg w-max"
              style={{top: props.coords.y + "px", left: props.coords.x + "px"}}>
             <>
                 {props.children}

@@ -2,10 +2,6 @@ import forge, {Hex} from "node-forge";
 import assert from "assert";
 
 
-// TODO : Change instance ID to be unique for each instance
-export const INSTANCE_ID = "PEC-4Kua7tTa5XAb";
-
-
 /**
  * Generate a 2048-bits RSA key pair
  * @return {Promise<forge.pki.KeyPair>}
@@ -41,15 +37,17 @@ export function addPadding(str: string, length: number): string {
  * @param {Hex}         salt            Salt.
  * @return {Hex}
  */
-export function pbkdf2(password: string, salt: string): Promise<Hex> {
-    return new Promise((resolve, reject) => {
-        forge.pkcs5.pbkdf2(password, salt, 100000, 64, (err, derivedKey) => {
-            if (err || !derivedKey)
-                reject(err);
-            else
-                resolve(forge.util.bytesToHex(derivedKey));
-        });
-    });
+export async function pbkdf2(password: string, salt: string): Promise<Hex> {
+    const key = await crypto.subtle.importKey("raw", Buffer.from(password), "PBKDF2", false, ["deriveBits"]);
+    const derivedBits = await crypto.subtle.deriveBits({
+        name: "PBKDF2",
+        hash: "SHA-512",
+        salt: Buffer.from(salt),
+        iterations: 500000
+    }, key, 512);
+    const derived = Buffer.from(derivedBits);
+
+    return derived.toString("hex");
 }
 
 

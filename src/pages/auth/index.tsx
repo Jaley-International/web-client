@@ -6,17 +6,20 @@ import {Heading2, Heading3} from "../../components/text/Headings";
 import TextInput from "../../components/inputs/TextInput";
 import Button from "../../components/buttons/Button";
 import Link from 'next/link';
-import {authenticate} from "../../util/processes";
+import {authenticate, AuthenticationStep, RegisterStep} from "../../helper/processes";
 import {useRouter} from "next/router";
 import {removeCookies} from "cookies-next";
 import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
+import {useTranslations} from "use-intl";
+import {GetStaticProps} from "next";
 
 function LoginPage(): JSX.Element {
 
     const router = useRouter();
     const addToast = useContext(ToastContext);
 
+    const t = useTranslations();
 
     const [loaded, setLoaded] = useState<boolean>(false);
     useEffect(() => {
@@ -41,13 +44,13 @@ function LoginPage(): JSX.Element {
                     <div className="w-12 h-12 rounded-2lg bg-gradient-to-bl from-silver-gradient-from to-silver-gradient-to text-center text-2lg text-blue py-1">
                         <FontAwesomeIcon icon={faCloud} /> {/* TODO Change icon */}
                     </div>
-                    <Heading3 className="text-txt-heading-light h-12 py-2">Private Encrypted Cloud</Heading3>
+                    <Heading3 className="text-txt-heading-light h-12 py-2">{t("generic.app.name")}</Heading3>
                 </div>
 
                 <div className="py-52 px-20 xl:px-28 pt-48 bg-blue">
-                    <Display6 className="text-txt-heading-light leading-tight">Keep control over your data.</Display6>
+                    <Display6 className="text-txt-heading-light leading-tight">{t("generic.app.moto")}</Display6>
                     <br />
-                    <span className="text-txt-body-light">Sign in and start storing and sharing your files securely.</span>
+                    <span className="text-txt-body-light">{t("pages.auth.login.description")}</span>
                 </div>
 
                 <div className="curve-divider">
@@ -69,12 +72,12 @@ function LoginPage(): JSX.Element {
                         <div className="w-12 h-12 rounded-2lg bg-gradient-to-bl from-blue-gradient-from to-blue-gradient-to text-center text-2lg text-txt-heading-light py-1">
                             <FontAwesomeIcon icon={faCloud} /> {/* TODO Change icon */}
                         </div>
-                        <Heading3 className="hidden md:flex text-blue h-12 py-2">Private Encrypted Cloud</Heading3>
-                        <Heading3 className="flex md:hidden text-blue h-12 py-2">PEC</Heading3>
+                        <Heading3 className="hidden md:flex text-blue h-12 py-2">{t("generic.app.name")}</Heading3>
+                        <Heading3 className="flex md:hidden text-blue h-12 py-2">{t("generic.app.abbr")}</Heading3>
                     </div>
 
-                    <Heading2>Welcome back 👋</Heading2>
-                    <span className="text-txt-heading">Please enter your credentials.</span>
+                    <Heading2>{t("pages.auth.login.title")}</Heading2>
+                    <span className="text-txt-heading">{t("pages.auth.login.sub-description")}</span>
 
                     <form className="py-10 space-y-7" onSubmit={async (e) => {
                         e.preventDefault();
@@ -90,27 +93,39 @@ function LoginPage(): JSX.Element {
                             const password = passwordRef.current?.value as string;
 
                             // Authentication request
-                            const success = await authenticate(username, password, updateStatus);
+                            const success = await authenticate(username, password, (step: AuthenticationStep) => {
+                                if (step === AuthenticationStep.REQ_SALT)
+                                    updateStatus(t("pages.auth.login.form.button.req-salt"));
+                                else if (step === AuthenticationStep.PROCESSING_PASSWORD)
+                                    updateStatus(t("pages.auth.login.form.button.processing-password"));
+                                else if (step === AuthenticationStep.REQ_KEYS)
+                                    updateStatus(t("pages.auth.login.form.button.req-keys"));
+                                else if (step === AuthenticationStep.DECRYPTING_KEYS)
+                                    updateStatus(t("pages.auth.login.form.button.decrypting-keys"));
+                            });
+
                             if (success) {
-                                updateStatus("Redirecting...");
-                                addToast({type: "success", title: "Welcome!", message: "Successfully authenticated."});
-                                router.reload();
+                                updateStatus(t("pages.auth.login.redirecting"));
+                                addToast({type: "success", title: t("pages.auth.login.toast.success.title"), message: t("pages.auth.login.toast.success.message")});
+                                router.push("/files").then(_ => {});
                             } else {
-                                updateStatus("Login");
+                                updateStatus(t("pages.auth.login.login"));
                                 setSubmitting(false);
-                                addToast({type: "warning", title: "Invalid credentials", message: "Please check your username and password then try again."});
+                                addToast({type: "warning", title: t("pages.auth.login.toast.error.title"), message: t("pages.auth.login.toast.error.message")});
                             }
                             (passwordRef.current as HTMLInputElement).value = "";
                         }
                     }}>
-                        <TextInput ref={usernameRef} type="text" autoComplete="username" label="Username" name="username" autoFocus={true} required={true} disabled={submitting} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
-                        <TextInput ref={passwordRef} type="password" autoComplete="password" label="Password" name="password" required={true} disabled={submitting} />
+                        <TextInput ref={usernameRef} type="text" autoComplete="username" label={t("pages.auth.login.form.username")} name="username" autoFocus={true} required={true} disabled={submitting} minLength={3} maxLength={16} validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)} />
+                        <TextInput ref={passwordRef} type="password" autoComplete="password" label={t("pages.auth.login.form.password")} name="password" required={true} disabled={submitting} />
                         <Button ref={submitRef} size="large" type="regular" colour="blue" disabled={submitting} className={`w-full${submitting ? " animate-pulse" : ""}`}>
-                            Login
+                            {t("pages.auth.login.login")}
                         </Button>
                         <br />
                         <p className="text-center text-txt-body-muted text-2xs">
-                            First time connecting? <Link href="/auth/register"><a className="text-blue">Register</a></Link>
+                            {t.rich("pages.auth.login.register-link", {
+                                link: (children => <Link href="/auth/register"><a className="text-blue">{children}</a></Link>)
+                            })}
                         </p>
                     </form>
                 </div>
@@ -118,5 +133,13 @@ function LoginPage(): JSX.Element {
         </section>
     );
 }
+
+export const getStaticProps: GetStaticProps = async ({locale}) => {
+    return {
+        props: {
+            messages: require(`../../locales/${locale}.json`)
+        }
+    }
+};
 
 export default LoginPage;

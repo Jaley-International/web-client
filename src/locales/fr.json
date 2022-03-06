@@ -1,0 +1,332 @@
+{
+    "generic": {
+        "app": {
+            "name": "Private Encrypted Cloud",
+            "abbr": "PEC",
+            "moto": "Gardez le contrôle de vos données"
+        },
+        "table": {
+            "actions": "Actions"
+        },
+        "toast": {
+            "wip": {
+                "title": "Fonctionnalité Indisponible",
+                "message": "Fonctionnalité en cours de développement ou planifiée"
+            }
+        },
+        "action": {
+            "view-edit": "Afficher/Modifier",
+            "save": "Enregistrer les changements",
+            "preview": "Aperçu",
+            "download": "Télécharger",
+            "share": "Partager",
+            "manage-permissions": "Modifier les permissions",
+            "lock-file": "Verrouiller le fichier",
+            "lock-folder": "Verrouiller le dossier",
+            "overwrite": "Écraser",
+            "rename": "Renommer",
+            "delete": "Supprimer",
+            "cancel": "Annuler",
+            "close": "Fermer"
+        },
+        "user": {
+            "title": "Utilisateurs",
+            "name": "Nom",
+            "first-name": "Prénom",
+            "last-name": "Nom de famille",
+            "username": "Nom d'utilisateur",
+            "email": "Adresse e-mail",
+            "group": "Groupe",
+            "job": "Poste",
+            "account-type": "Type de compte",
+            "level": {
+                "administrator": "Administrateur",
+                "user": "Utilisateur",
+                "guest": "Invité"
+            }
+        },
+        "file": {
+            "title": "Fichiers",
+            "name": "Nom du fichier",
+            "upload-date": "Date de téléversement",
+            "last-modified": "Dernière modification",
+            "shared-with": "Partagé avec"
+        },
+        "node": {
+            "file": "Fichier",
+            "folder": "Dossier"
+        },
+        "irreversible": "Cette action est irréversible."
+    },
+    "navbar": {
+        "files": "Fichiers",
+        "notifications": "Notifications",
+        "my-account": "Mon compte",
+        "activity-log": "Journal d'activité",
+        "admin-panel": "Panneau Administration",
+        "logout": "Déconnexion"
+    },
+    "components": {
+        "password-strength-input": {
+            "requirement": "Les contraintes de mot de passe ne sont pas satisfaites.",
+            "too-short": "Mot de passe trop court.",
+            "too-guessable": "Mot de passe peu sécurisé.",
+            "too-weak": "Mot de passe faible.",
+            "missing-lowercase": "Devrait contenir au moins une lettre minuscule.",
+            "missing-uppercase": "Devrait contenir au moins une lettre majuscule.",
+            "missing-digit": "Devrait contenir au moins un chiffre.",
+            "missing-special": "Devrait contenir au moins un caractère spécial."
+        }
+    },
+    "modal": {
+        "node": {
+            "delete": {
+                "title": "Confirmation de suppression de {type}",
+                "description": "Êtes-vous sur de vouloir supprimer <bold>{name}</bold>",
+                "submit": "Confirmer la suppression"
+            },
+            "overwrite": {
+                "title": "Modification du fichier",
+                "description": "Vous êtes sur le point de remplacer <bold>{name}</bold>",
+                "drag-n-drop": "Glisser-déposer votre fichier ici ou",
+                "submit": "Téléverser votre fichier"
+            },
+            "create-folder": {
+                "title": "Créer un dossier",
+                "folder-name": "Nom du dossier",
+                "submit": "Créer le dossier"
+            },
+            "link-share": {
+                "title": "Partage par lien",
+                "link": "Lien de partage privé"
+            }
+        }
+    },
+    "pages": {
+        "404": {
+            "title": "Erreur 404",
+            "description": "La page/ressource que vous avez demandé n'éxiste pas.",
+            "back-button": "Retour"
+        },
+        "auth": {
+            "login": {
+                "description": "Connectez-vous et commencez à stocker et partager vos fichiers de manière sécurisée",
+                "title": "Bonjour \uD83D\uDC4B",
+                "sub-description": "Veuillez saisir vos identifiants.",
+                "redirecting": "Redirection...",
+                "login": "Connexion",
+                "register-link": "Première connexion? <link>Enregistrez-vous</link>",
+                "form": {
+                    "username": "Identifiant",
+                    "password": "Mot de passe",
+                    "button": {
+                        "req-salt": "Récupération du sel...",
+                        "processing-password": "Traitement du mot de passe...",
+                        "req-keys": "Récupération des clés...",
+                        "decrypting-keys": "Decryption des clés..."
+                    }
+                },
+                "toast": {
+                    "success": {
+                        "title": "Bienvenue !",
+                        "message": "Authentification réussie."
+                    },
+                    "error":{
+                        "title": "Identifiants invalides",
+                        "message": "Vérifiez votre identifiant et votre mot de passe puis réessayer."
+                    }
+                }
+            },
+            "register": {
+                "description": "Créez votre compte et commencez à stocker et partager vos fichiers.",
+                "title": "Créer votre compte",
+                "sub-description": "Tous les champs sont requis",
+                "agreement": "En créant votre compte, vous acceptez nos <terms>Conditions Générales d'Utilisation</terms>, et notre <privacy>Politique de confidentialité</privacy>",
+                "login-link": "Déjà enregistré ? <link>Connectez-vous</link>",
+                "form": {
+                    "registration-key": "Clé d'enregistrement",
+                    "registration-key-hint": "Code reçu par e-mail pour créer votre compte.",
+                    "password": "Mot de passe",
+                    "confirm-password": "Confirmez votre mot de passe",
+                    "confirm-password-hint": "Les mots de passes ne sont pas identiques.",
+                    "button": {
+                        "register": "Enregistrement",
+                        "gen-master-key": "Génération des clé...",
+                        "gen-client-random-value": "Génération de la CRV.",
+                        "gen-rsa": "Génération des clés de partage...",
+                        "computing-salt": "Traitement du sel...",
+                        "processing-password": "Traitement du mot de passe...",
+                        "encrypting-keys": "Encryption des clés...",
+                        "submitting": "Soumission..."
+                    }
+                },
+                "toast": {
+                    "success": {
+                        "title": "Compte créé avec succès",
+                        "message": "Veuillez vérifier vos emails pour finir votre enregistrement."
+                    },
+                    "invalid": {
+                        "title": "Clé d'inscription invalide",
+                        "message": "La clé d'inscription que vous avez fournit est invalide."
+                    },
+                    "error": {
+                        "title": "Échec de la création du compte",
+                        "message": "Une erreur inconnue est survenue lors de la création du compte."
+                    }
+                }
+            },
+            "pre-register": {
+                "title": "Création d'utilisateur",
+                "button": {
+                    "go-back": "Abandonner et revenir en arrière",
+                    "create-user": "Créer l'utilisateur"
+                },
+                "toast": {
+                    "success": {
+                        "title": "Compte créé",
+                        "message": "Compte utilisateur créé ave succès."
+                    },
+                    "username-already-used": {
+                        "title": "Identifiant déjà utilisé",
+                        "message": "Échec de la création du compte : Identifiant déjà utilisé."
+                    },
+                    "email-already-used": {
+                        "title": "Email déjà utilisé",
+                        "message": "Échec de la création du compte : Email déjà utilisé."
+                    },
+                    "invalid-access-level": {
+                        "title": "Permissions insuffisantes",
+                        "message": "Permission d'administrateur requise pour créer un nouveau compte."
+                    },
+                    "error": {
+                        "title": "Échec de la création du compte",
+                        "message": "Une erreur inconnue est survenue lors de la création du compte."
+                    }
+                }
+            }
+        },
+        "user": {
+            "list": {
+                "title": "Gestion des utilisateurs",
+                "new-user": "Nouvel utilisateur",
+                "toast": {
+                    "success": {
+                        "title": "Utilisateur supprimé",
+                        "message": "Compte supprimé avec succès"
+                    },
+                    "not-found": {
+                        "title": "Impossible de trouver l'utilisateur",
+                        "message": "Le compte à supprimer n'éxiste pas;"
+                    },
+                    "error": {
+                        "title": "Échec de la suppression du compte",
+                        "message": "Une erreur inconnue est survenue lors de la suppression du compte."
+                    }
+                }
+            },
+            "details": {
+                "title": "Détails utilisateurs",
+                "back": "Revenir à la liste des utilisateurs",
+                "member-since": "Membre depuis le 01/01/1970",
+                "last-active": "Dernière activité il y a 1 minute",
+                "files-table-title": "Dossiers et fichiers partagés",
+                "edit-title": "Modifier le compte",
+                "suspend": {
+                    "title": "Suspension",
+                    "description": "En suspendant ce compte, l'utilisateur ne pourra plus se connecter. Ses fichiers seront toujours accessibles pour ceux avec qui ils étaient déjà partagés ainsi qu'aux administrateurs.",
+                    "button": "Suspendre le compte"
+                },
+                "delete": {
+                    "title": "Suppression",
+                    "description": "En supprimant ce compte, toutes les données liés a cet utilisateur seront supprimées. Leurs fichiers et dossiers vous seront transférés. Cette procédure est définitive et irreversible.",
+                    "button": "Supprimer le compte"
+                },
+                "toast": {
+                    "success": {
+                        "title": "Utilisateur modifié",
+                        "message": "Utilisateur modifié avec succès"
+                    },
+                    "email-already-used": {
+                        "title": "Adresse e-mail déjà utilisé",
+                        "message": "Échec de la modification : E-mail déjà utilisé."
+                    },
+                    "error": {
+                        "title": "Échec de la mise à jour",
+                        "message": "Une erreur inconnue est survenue lors de la modification du compte."
+                    }
+                }
+            }
+        },
+        "file": {
+            "upload-file": "Téléverser un fichier",
+            "create-folder": "Créer un dossier",
+            "list": {
+                "toast": {
+                    "fetch": {
+                        "decrypt-error": {
+                            "title": "Erreur lors du décryptage des fichiers",
+                            "message": "Le système de fichier n'a pas pu être décrypté."
+                        }
+                    },
+                    "upload": {
+                        "success": {
+                            "title": "Fichier téléversé avec succès",
+                            "message": "Votre fichier {name} a été téléversé avec succès."
+                        },
+                        "error": {
+                            "title": "Erreur lors du téléversement",
+                            "message": "Votre fichier {name} n'a pas pu être téléversé."
+                        }
+                    },
+                    "download": {
+                        "fail": {
+                            "title": "Échec lors du téléchargement",
+                            "message": "Une erreur est survenue lors du téléchargement du fichier."
+                        },
+                        "decrypt": {
+                            "title": "Échec lors du décryptage",
+                            "message": "Une erreur est survenue lors du décryptage du fichier."
+                        },
+                        "error": {
+                            "title": "Échec du Téléchargement",
+                            "message": "Une erreur inconnue est survenue lors du téléchargement du fichier."
+                        }
+                    },
+                    "delete": {
+                        "success": {
+                            "title": "{type} supprimé",
+                            "message": "{type} supprimé avec succès."
+                        },
+                        "error": {
+                            "title": "Erreur lors de la suppression",
+                            "message": "Une erreur est survenue lors de la suppression du {type}."
+                        }
+                    },
+                    "create-folder": {
+                        "success": {
+                            "title": "Dossier créé",
+                            "message": "Dossier {name} créé avec succès."
+                        },
+                        "error": {
+                            "title": "Erreur lors de la création du dossier",
+                            "message": "Impossible de créer le dossier {name}."
+                        }
+                    },
+                    "overwrite": {
+                        "success": {
+                            "title": "Fichier écrasé",
+                            "message": "Fichier {name} écrasé avec succès."
+                        },
+                        "error": {
+                            "title": "Erreur lors de la modification du fichier.",
+                            "message": "Une erreur est survenue lors de la modification du fichier {name}."
+                        }
+                    }
+                }
+            }
+        },
+        "link-share": {
+            "warning": "Cette page ainsi que toutes ses pièces joints sont établis a l'attention exclusive de ses destinataires.<br></br>Si vous avez eu accès à cette page par erreur, merci de la fermer et d'avertir immédiatement l'expéditeur par e-mail.<br></br>Toute utilisation des pièces jointes non conforme à leur destination, toute diffusion ou toute publication, totale ou partielle, est interdite, sauf autorisation expresse."
+        }
+    }
+}
