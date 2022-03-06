@@ -12,7 +12,6 @@ import {faCalendar, faFile, faFileWord} from "@fortawesome/free-regular-svg-icon
 import Badge from "../../components/Badge";
 import User, {UserAccessLevel} from "../../model/User";
 import TextInput from "../../components/inputs/TextInput";
-import Select from "../../components/inputs/Select";
 import {request} from "../../helper/communication";
 import getConfig from "next/config";
 import {capitalize} from "../../util/string";
@@ -21,10 +20,15 @@ import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
 import AutocompleteTextInput from "../../components/inputs/AutocompleteTextInput";
 import {getGroupsJobsSuggestions} from "../../util/user";
+import {GetStaticPaths, GetStaticProps} from "next";
+import {useTranslations} from "use-intl";
+import Select from "../../components/inputs/Select";
 
 function UserPage(): JSX.Element {
 
     const {publicRuntimeConfig} = getConfig();
+
+    const t = useTranslations();
 
     const addToast = useContext(ToastContext);
 
@@ -84,10 +88,10 @@ function UserPage(): JSX.Element {
         <div className="flex bg-bg-light">
             <Navbar/>
             <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
-                <Header title="User details">
+                <Header title={t("pages.user.details.title")}>
                     <Link href="/users" passHref>
                         <Button size="small" type="regular" colour="dark">
-                            <span><FontAwesomeIcon icon={faArrowLeft}/>&nbsp;&nbsp;Back to user list</span>
+                            <span><FontAwesomeIcon icon={faArrowLeft}/>&nbsp;&nbsp;{t("pages.user.details.back")}</span>
                         </Button>
                     </Link>
                 </Header>
@@ -125,28 +129,28 @@ function UserPage(): JSX.Element {
                                             <Badge text={capitalize(user.accessLevel)} size="small"
                                                    colour={user.accessLevel === UserAccessLevel.ADMINISTRATOR ? "orange" : (user.accessLevel === UserAccessLevel.USER ? "green" : "blue")}/>
                                             <br/><br/>
-                                            <span className="text-txt-body">Member since 01/01/1970</span><br/>
-                                            <span className="text-txt-body">Last active 2 hours ago</span>
+                                            <span className="text-txt-body">{t("pages.user.details.member-since")}</span><br/>
+                                            <span className="text-txt-body">{t("pages.user.details.last-active")}</span>
                                         </div>
                                     </div>
                                 </Card>
 
                                 {/* User's files */}
-                                <Card title="Files and folders owned" separator={false}>
+                                <Card title={t("pages.user.details.files-table-title")} separator={false}>
                                     <table className="w-full">
                                         <thead>
                                         <tr className="border-b border-grey-200 bg-bg-light text-3xs text-txt-body-lightmuted uppercase">
                                             <th className="w-5/10 font-semibold text-left px-6 py-4 space-x-3">
                                                 <FontAwesomeIcon icon={faFile}/>
-                                                <span>File name</span>
+                                                <span>{t("generic.file.name")}</span>
                                             </th>
                                             <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
                                                 <FontAwesomeIcon icon={faCalendar}/>
-                                                <span>Upload date</span>
+                                                <span>{t("generic.file.upload-date")}</span>
                                             </th>
                                             <th className="w-2/10 font-semibold text-left px-6 py-4 space-x-3">
                                                 <FontAwesomeIcon icon={faUserFriends}/>
-                                                <span>Shared with</span>
+                                                <span>{t("generic.file.shared-with")}</span>
                                             </th>
                                         </tr>
                                         </thead>
@@ -276,7 +280,7 @@ function UserPage(): JSX.Element {
                                 </Card>
 
                                 {/* Edit user */}
-                                <Card title="Edit account informations" separator={false}>
+                                <Card title={t("pages.user.details.edit-title")} separator={false}>
                                     <form className="space-y-2 m-6 pb-4" onSubmit={async (e) => {
                                         e.preventDefault();
                                         const firstname = (firstnameRef.current as HTMLInputElement).value;
@@ -289,40 +293,52 @@ function UserPage(): JSX.Element {
                                         const status = await updateAccount(user, firstname, lastname, email, group, job, accessLevel as UserAccessLevel);
 
                                         if (status === "SUCCESS")
-                                            addToast({type: "success", title: "User updated", message: "Successfully updated user."});
+                                            addToast({
+                                                type: "success",
+                                                title: t("pages.user.details.toast.success.title"),
+                                                message: t("pages.user.details.toast.success.message")
+                                            });
                                         else if (status == "ERROR_EMAIL_ALREADY_USED")
-                                            addToast({type: "warning", title: "Email already in use", message: "Failed to update account : Email already in use."});
+                                            addToast({
+                                                type: "warning",
+                                                title: t("pages.user.details.toast.email-already-used.title"),
+                                                message: t("pages.user.details.toast.email-already-used.message")
+                                            });
                                         else
-                                            addToast({type: "error", title: "Fail to update user", message: "An unknown error occurred while updating the account."});
+                                            addToast({
+                                                type: "error",
+                                                title: t("pages.user.details.toast.error.title"),
+                                                message: t("pages.user.details.toast.error.message")
+                                            });
 
                                         await fetchUser(user.username);
                                     }}>
 
                                         <div className="lg:flex">
                                             <TextInput ref={firstnameRef} className="lg:w-1/3 lg:pr-4" type="text"
-                                                       autoComplete="given-name" label="First name"
+                                                       autoComplete="given-name" label={t("generic.user.first-name")}
                                                        defaultValue={user.firstName} name="firstname" minLength={1}
                                                        maxLength={32}
                                                        validator={(str: string) => /^[0-9a-zA-Z-]{0,32}$/.test(str)}/>
                                             <TextInput ref={lastnameRef} className="lg:w-1/3 lg:px-2" type="text"
-                                                       autoComplete="family-name" label="Last name"
+                                                       autoComplete="family-name" label={t("generic.user.last-name")}
                                                        defaultValue={user.lastName} name="lastname" minLength={1}
                                                        maxLength={32}
                                                        validator={(str: string) => /^[0-9a-zA-Z-]{0,32}$/.test(str)}/>
                                             <TextInput ref={emailRef} className="lg:w-1/3 lg:pl-4" type="email"
-                                                       autoComplete="email" label="Email address" defaultValue={user.email}
+                                                       autoComplete="email" label={t("generic.user.email")} defaultValue={user.email}
                                                        name="email"
                                                        validator={(str: string) => str.length == 0 || /\S+@\S+\.\S+/.test(str)}/>
                                         </div>
                                         <div className="lg:flex">
-                                            <AutocompleteTextInput ref={groupRef} defaultValue={user.group} containerClassName="lg:w-1/3 lg:pr-4" type="text" label="Group" required={true} suggestions={suggestions[0]} />
+                                            <AutocompleteTextInput ref={groupRef} defaultValue={user.group} containerClassName="lg:w-1/3 lg:pr-4" type="text" label={t("generic.user.group")} required={true} suggestions={suggestions[0]} />
 
-                                            <AutocompleteTextInput ref={jobRef} defaultValue={user.job} containerClassName="lg:w-1/3 lg:px-2" type="text" label="Job title" required={true} suggestions={suggestions[1]} />
+                                            <AutocompleteTextInput ref={jobRef} defaultValue={user.job} containerClassName="lg:w-1/3 lg:px-2" type="text" label={t("generic.user.job")} required={true} suggestions={suggestions[1]} />
 
-                                            <Select ref={accessLevelRef} defaultValue={user.accessLevel} className="lg:w-1/3 lg:pl-4" label="Access level" required={true}>
-                                                <option value="GUEST">Guest</option>
-                                                <option value="USER">User</option>
-                                                <option value="ADMINISTRATOR">Administrator</option>
+                                            <Select ref={accessLevelRef} defaultValue={user.accessLevel} className="lg:w-1/3 lg:pl-4" label={t("generic.user.account-type")} required={true}>
+                                                <option value="GUEST">{t("generic.user.level.guest")}</option>
+                                                <option value="USER">{t("generic.user.level.user")}</option>
+                                                <option value="ADMINISTRATOR">{t("generic.user.level.administrator")}</option>
                                             </Select>
                                         </div>
 
@@ -330,7 +346,7 @@ function UserPage(): JSX.Element {
 
                                         <div className="text-right">
                                             <Button size="medium" type="regular" colour="blue">
-                                                Save changes
+                                                {t("generic.action.save")}
                                             </Button>
                                         </div>
 
@@ -339,33 +355,31 @@ function UserPage(): JSX.Element {
 
                                 {/* Delete / suspend user */}
                                 <div className="lg:flex lg:space-x-6">
-                                    <Card className="text-orange-light w-1/2" title="Suspend account" separator={false}>
+                                    <Card className="text-orange-light w-1/2" title={t("pages.user.details.suspend.title")} separator={false}>
                                         <div className="flex text-txt-body px-6 pb-6 pt-2">
                                             <div className="w-full">
                                                 <span>
-                                                    By suspending this account, the user will no longer be able to log in. Their files will still be available by those it has been shared with and all administrators.
+                                                    {t("pages.user.details.suspend.description")}
                                                 </span>
                                             </div>
                                             <div className="w-96 text-center my-auto h-full">
                                                 <Button size="medium" type="regular" colour="orange" onClick={() => {
-                                                    addToast({type: "info", title: "Work in progress feature", message: "User suspension is currently a work-in-progress/planned feature."});
-                                                }}>Suspend account</Button>
+                                                    addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
+                                                }}>{t("pages.user.details.suspend.button")}</Button>
                                             </div>
                                         </div>
                                     </Card>
-                                    <Card className="text-red w-1/2" title="Delete account" separator={false}>
+                                    <Card className="text-red w-1/2" title={t("pages.user.details.delete.title")} separator={false}>
                                         <div className="flex text-txt-body px-6 pb-6 pt-2">
                                             <div className="w-full">
                                                 <span>
-                                                    By deleting this account, all the user&apos;s data will be lost.<br/>
-                                                    Their files and folders will be transferred to you.<br/>
-                                                    This process is definitive and cannot be reversed.
+                                                    {t("pages.user.details.delete.description")}
                                                 </span>
                                             </div>
                                             <div className="w-96 text-center my-auto h-full">
                                                 <Button size="medium" type="regular" colour="red" onClick={() => {
-                                                    addToast({type: "info", title: "Work in progress feature", message: "User deletion is currently a work-in-progress/planned feature."});
-                                                }}>Delete account</Button>
+                                                    addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
+                                                }}>{t("pages.user.details.delete.button")}</Button>
                                             </div>
                                         </div>
                                     </Card>
@@ -402,5 +416,20 @@ function UserPage(): JSX.Element {
         </div>
     );
 }
+
+export const getStaticPaths: GetStaticPaths = () => {
+    return {
+        paths: [],
+        fallback: true
+    };
+};
+
+export const getStaticProps: GetStaticProps = async ({locale}) => {
+    return {
+        props: {
+            messages: require(`../../locales/${locale}.json`)
+        }
+    }
+};
 
 export default UserPage;

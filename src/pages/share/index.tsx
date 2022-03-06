@@ -15,12 +15,16 @@ import {decrypt} from "../../helper/security";
 import getConfig from "next/config";
 import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
+import {useTranslations} from "use-intl";
+import {GetStaticProps} from "next";
 
 function SharePage(): JSX.Element {
 
     const {publicRuntimeConfig} = getConfig();
 
     const addToast = useContext(ToastContext);
+
+    const t = useTranslations();
 
     const [loaded, setLoaded] = useState<boolean>(false);
     const [node, setNode] = useState<Node | null>(null);
@@ -95,11 +99,11 @@ function SharePage(): JSX.Element {
                                 <Button className="mx-auto my-auto w-32" size="medium" type="regular" colour="blue" onClick={async () => {
                                     const status = await downloadFile(node);
                                     if (status === "ERROR_FETCH")
-                                        addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
+                                        addToast({type: "error", title: t("pages.file.list.toast.download.fail.title"), message: t("pages.file.list.toast.download.fail.message")});
                                     else if (status === "ERROR_DECRYPT")
-                                        addToast({type: "error", title: "Failed to decrypt", message: "An error occurred while decrypting the file."});
+                                        addToast({type: "error", title: t("pages.file.list.toast.download.decrypt.title"), message: t("pages.file.list.toast.download.decrypt.message")});
                                     else if (status !== "SUCCESS")
-                                        addToast({type: "error", title: "Failed to download", message: "An unexpected error occurred while downloading the file."});
+                                        addToast({type: "error", title: t("pages.file.list.toast.download.error.title"), message: t("pages.file.list.toast.download.error.message")});
                                 }}>
                                     <span><FontAwesomeIcon icon={faDownload} />&nbsp;&nbsp;Download</span>
                                 </Button>
@@ -145,5 +149,13 @@ function SharePage(): JSX.Element {
     }
 
 }
+
+export const getStaticProps: GetStaticProps = async ({locale}) => {
+    return {
+        props: {
+            messages: require(`../../locales/${locale}.json`)
+        }
+    }
+};
 
 export default SharePage;

@@ -16,11 +16,15 @@ import {request} from "../../helper/communication";
 import getConfig from "next/config";
 import {decryptFileSystem, EncryptedNode, Node} from "../../helper/processes";
 import {BreadcrumbItemProps} from "../../components/navigation/breadcrumb/BreadcrumbItem";
+import {GetStaticProps} from "next";
+import {useTranslations} from "use-intl";
 
 function FilesPage(): JSX.Element {
 
     const {publicRuntimeConfig} = getConfig();
     const addToast = useContext(ToastContext);
+
+    const t = useTranslations();
 
     const fileListRef = useRef<FileListViewRef | null>(null);
 
@@ -62,18 +66,18 @@ function FilesPage(): JSX.Element {
         <div className="flex bg-bg-light">
             <Navbar/>
             <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
-                <Header title="Files">
+                <Header title={t("generic.file.title")}>
                     <div className="flex">
                         <div className="w-full">
                             <Breadcrumb items={breadcrumbItems}/>
                         </div>
                         <div className="w-96 text-right space-x-4">
                             <Button size="small" type="regular" colour="blue" onClick={() => fileListRef.current?.openUploadPrompt()}>
-                                <span><FontAwesomeIcon icon={faFileUpload}/>&nbsp;&nbsp;Upload file</span>
+                                <span><FontAwesomeIcon icon={faFileUpload}/>&nbsp;&nbsp;{t("pages.file.upload-file")}</span>
                             </Button>
 
                             <Button size="small" type="regular" colour="cyan" onClick={() => fileListRef.current?.openCreateFolderModal()}>
-                                <span><FontAwesomeIcon icon={faFolderPlus}/>&nbsp;&nbsp;Create folder</span>
+                                <span><FontAwesomeIcon icon={faFolderPlus}/>&nbsp;&nbsp;{t("pages.file.create-folder")}</span>
                             </Button>
                         </div>
                     </div>
@@ -89,5 +93,13 @@ function FilesPage(): JSX.Element {
         </div>
     );
 }
+
+export const getStaticProps: GetStaticProps = async ({locale}) => {
+    return {
+        props: {
+            messages: require(`../../locales/${locale}.json`)
+        }
+    }
+};
 
 export default FilesPage;

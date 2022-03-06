@@ -12,12 +12,16 @@ import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
 import AutocompleteTextInput from "../../components/inputs/AutocompleteTextInput";
 import {getGroupsJobsSuggestions} from "../../util/user";
+import {useTranslations} from "use-intl";
+import {GetStaticProps} from "next";
 
 function NewUser(): JSX.Element {
 
     const {publicRuntimeConfig} = getConfig();
 
     const addToast = useContext(ToastContext);
+
+    const t = useTranslations();
 
     const previewName = useRef<HTMLParagraphElement>(null);
     const previewEmail = useRef<HTMLParagraphElement>(null);
@@ -68,10 +72,10 @@ function NewUser(): JSX.Element {
         <div className="flex bg-bg-light">
             <Navbar/>
             <div className="w-10/12 fixed top-0 right-0 overflow-y-auto max-h-screen">
-                <Header title="User pre-registration">
+                <Header title={t("pages.auth.pre-register.title")}>
                     <Link href="/users" passHref>
                         <Button size="small" type="regular" colour="orange">
-                            <span><FontAwesomeIcon icon={faArrowLeft}/>&nbsp;&nbsp;Discard and go back</span>
+                            <span><FontAwesomeIcon icon={faArrowLeft}/>&nbsp;&nbsp;{t("pages.auth.pre-register.button.go-back")}</span>
                         </Button>
                     </Link>
                 </Header>
@@ -117,32 +121,32 @@ function NewUser(): JSX.Element {
                         if (response.status === "SUCCESS") {
                             addToast({
                                 type: "success",
-                                title: "Account created",
-                                message: "User account created successfully."
+                                title: t("pages.auth.pre-register.toast.success.title"),
+                                message: t("pages.auth.pre-register.toast.success.message")
                             });
                         } else if (response.status === "ERROR_USERNAME_ALREADY_USED") {
                             addToast({
                                 type: "warning",
-                                title: "Username already in use",
-                                message: "Failed to create an account : Username already in use."
+                                title: t("pages.auth.pre-register.toast.username-already-used.title"),
+                                message: t("pages.auth.pre-register.toast.success.username-already-used.message"),
                             });
                         } else if (response.status === "ERROR_EMAIL_ALREADY_USED") {
                             addToast({
                                 type: "warning",
-                                title: "Email already in use",
-                                message: "Failed to create an account : Email already in use."
+                                title: t("pages.auth.pre-register.toast.email-already-used.title"),
+                                message: t("pages.auth.pre-register.toast.email-already-used.message")
                             });
                         } else if (response.status === "ERROR_INVALID_ACCESS_LEVEL") {
                             addToast({
                                 type: "error",
-                                title: "Insufficient permissions",
-                                message: "Administrator privileges are required to create an account."
+                                title: t("pages.auth.pre-register.toast.invalid-access-level.title"),
+                                message: t("pages.auth.pre-register.toast.invalid-access-level.message")
                             });
                         } else {
                             addToast({
                                 type: "error",
-                                title: "Failed to create an account",
-                                message: "An unknown error occurred while creating the account."
+                                title: t("pages.auth.pre-register.toast.error.title"),
+                                message: t("pages.auth.pre-register.toast.error.message")
                             });
                         }
                     }}>
@@ -167,24 +171,24 @@ function NewUser(): JSX.Element {
                         </div>
                         <div className="lg:flex">
                             <TextInput ref={usernameRef} className="lg:w-1/2 lg:pr-4" type="text"
-                                       autoComplete="username" label="Username" name="username" required={true}
+                                       autoComplete="username" label={t("generic.user.username")} name="username" required={true}
                                        minLength={3} maxLength={16}
                                        validator={(str: string) => /^[0-9a-zA-Z-]{3,16}$/.test(str)}
                                        onChange={updatePreview}/>
                             <TextInput ref={emailRef} className="lg:w-1/2 lg:pl-4" type="email" autoComplete="email"
-                                       label="Email address" name="email" required={true}
+                                       label={t("generic.user.email")} name="email" required={true}
                                        validator={(str: string) => /\S+@\S+\.\S+/.test(str)}
                                        onChange={updatePreview}/>
                         </div>
                         <div className="lg:flex">
-                            <AutocompleteTextInput ref={groupRef} containerClassName="lg:w-1/3 lg:pr-4" type="text" label="Group" required={true} suggestions={suggestions[0]} onChange={updatePreview} />
+                            <AutocompleteTextInput ref={groupRef} containerClassName="lg:w-1/3 lg:pr-4" type="text" label={t("generic.user.group")} required={true} suggestions={suggestions[0]} onChange={updatePreview} />
 
-                            <AutocompleteTextInput ref={jobRef} containerClassName="lg:w-1/3 lg:px-2" type="text" label="Job title" required={true} suggestions={suggestions[1]} onChange={updatePreview} />
+                            <AutocompleteTextInput ref={jobRef} containerClassName="lg:w-1/3 lg:px-2" type="text" label={t("generic.user.job")} required={true} suggestions={suggestions[1]} onChange={updatePreview} />
 
-                            <AutocompleteTextInput ref={accessLevelRef} containerClassName="lg:w-1/3 lg:pl-4" type="text" label="Access level" required={true} suggestions={[
-                                "Guest",
-                                "User",
-                                "Administrator"
+                            <AutocompleteTextInput ref={accessLevelRef} containerClassName="lg:w-1/3 lg:pl-4" type="text" label={t("generic.user.account-type")} required={true} suggestions={[
+                                t("generic.user.level.guest"),
+                                t("generic.user.level.user"),
+                                t("generic.user.level.administrator")
                             ]} onChange={updatePreview} validator={(str: string) => {
                                 return ["GUEST", "USER", "ADMINISTRATOR"].includes(str.toUpperCase());
                             }} />
@@ -194,7 +198,7 @@ function NewUser(): JSX.Element {
                         <br/>
 
                         <Button size="medium" type="regular" colour="blue" className="w-full">
-                            Create user
+                            {t("pages.auth.pre-register.button.create-user")}
                         </Button>
 
                     </form>
@@ -204,5 +208,13 @@ function NewUser(): JSX.Element {
         </div>
     );
 }
+
+export const getStaticProps: GetStaticProps = async ({locale}) => {
+    return {
+        props: {
+            messages: require(`../../locales/${locale}.json`)
+        }
+    }
+};
 
 export default NewUser;

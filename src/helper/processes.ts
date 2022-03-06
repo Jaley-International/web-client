@@ -61,45 +61,62 @@ export interface ShareLink {
     encryptedShareKey: Hex;
 }
 
+
+export enum RegisterStep {
+    GEN_MASTER_KEY,
+    GEN_CLIENT_RANDOM_VALUE,
+    GEN_RSA,
+    COMPUTING_SALT,
+    PROCESSING_PASSWORD,
+    ENCRYPTING_KEYS,
+    SUBMITTING
+}
+
+export enum AuthenticationStep {
+    REQ_SALT,
+    PROCESSING_PASSWORD,
+    REQ_KEYS,
+    DECRYPTING_KEYS
+}
+
 /**
  * User registration client-side process
  * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
  *
  * @param {string}      registerKey     New account's username.
  * @param {string}      password        New account's password.
- * @param {function}    updateStatus    Function to update the registration status.
+ * @param {function}    update          Callback function to update the registration status.
  * @return {string}                     Status code returned by API.
  */
-export async function register(registerKey: string, password: string, updateStatus: (message: string) => void): Promise<string> {
-
+export async function register(registerKey: string, password: string, update: (step: RegisterStep) => void): Promise<string> {
     const {publicRuntimeConfig} = getConfig();
 
     // Generate AES MasterKey (256 bits)
-    updateStatus("Generating Master Key...");
+    update(RegisterStep.GEN_MASTER_KEY);
     const masterKey = forge.util.bytesToHex(forge.random.getBytesSync(32));
 
     // Generate Client Random Value (128 bits)
-    updateStatus("Generating Client Random Value...");
+    update(RegisterStep.GEN_CLIENT_RANDOM_VALUE);
     const clientRandomValue = forge.util.bytesToHex(forge.random.getBytesSync(16));
 
     // Generate RSA key pair
-    updateStatus("Generating RSA key pair...");
+    update(RegisterStep.GEN_RSA);
     const sharingKeys = await generateRSAKeyPair();
     const privateSharingKey = forge.pki.privateKeyToPem(sharingKeys.privateKey);
     const publicSharingKey = forge.pki.publicKeyToPem(sharingKeys.publicKey);
 
     // Generate Salt
-    updateStatus("Computing Salt...");
+    update(RegisterStep.COMPUTING_SALT);
     const salt = sha256(addPadding(registerKey + publicRuntimeConfig.instanceId + clientRandomValue, 128));
 
     // PPF
-    updateStatus("Processing password...");
+    update(RegisterStep.PROCESSING_PASSWORD);
     const derivedKey = await pbkdf2(password, salt);
     const derivedEncryptionKey = derivedKey.substring(0, 64);
     const derivedAuthenticationKey = derivedKey.substring(64);
 
     // Encrypting data before sending to the API
-    updateStatus("Encrypting keys...");
+    update(RegisterStep.ENCRYPTING_KEYS);
     const encryptedPrivateSharingKey = encrypt("AES-CTR", masterKey, salt, privateSharingKey);
     const encryptedMasterKey = encrypt("AES-CTR", derivedEncryptionKey, salt, masterKey);
     const hashedAuthenticationKey = sha512(derivedAuthenticationKey);
@@ -113,7 +130,7 @@ export async function register(registerKey: string, password: string, updateStat
         rsaPublicSharingKey: publicSharingKey
     };
 
-    updateStatus("Submitting...");
+    update(RegisterStep.SUBMITTING);
     const response = await request("POST", `${publicRuntimeConfig.apiUrl}/users/register`, registerData);
     return response.status;
 }
@@ -125,14 +142,14 @@ export async function register(registerKey: string, password: string, updateStat
  *
  * @param {string}      username        Account's username.
  * @param {string}      password        Account's password.
- * @param {function}    updateStatus    Function to update the authentication status.
+ * @param {function}    update          Callback function to update the authentication status.
  * @return {boolean}                    True if authentication is successful, false otherwise
  */
-export async function authenticate(username: string, password: string, updateStatus: (message: string) => void): Promise<boolean> {
+export async function authenticate(username: string, password: string, update: (step: AuthenticationStep) => void): Promise<boolean> {
     const {publicRuntimeConfig} = getConfig();
 
     // Salt request
-    updateStatus("Requesting salt...");
+    update(AuthenticationStep.REQ_SALT);
     const saltResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/users/${username}/salt`, {});
 
     if (saltResponse.status !== "SUCCESS")
@@ -141,13 +158,13 @@ export async function authenticate(username: string, password: string, updateSta
     const salt = saltResponse.data.salt;
 
     // PPF
-    updateStatus("Processing password...");
+    update(AuthenticationStep.PROCESSING_PASSWORD);
     const derivedKey = await pbkdf2(password, salt);
     const derivedEncryptionKey = derivedKey.substring(0, 64);
     const derivedAuthenticationKey = derivedKey.substring(64);
 
     // Authenticating (session identifier request with encrypted keys)
-    updateStatus("Requesting keys...");
+    update(AuthenticationStep.REQ_KEYS);
     const authResponse = await request("POST", `${publicRuntimeConfig.apiUrl}/users/login`, {
         username: username,
         derivedAuthenticationKey: derivedAuthenticationKey
@@ -157,7 +174,7 @@ export async function authenticate(username: string, password: string, updateSta
         return false;
 
     // Decrypting keys
-    updateStatus("Decrypting keys...");
+    update(AuthenticationStep.DECRYPTING_KEYS);
     const masterKey = decrypt("AES-CTR", derivedEncryptionKey, salt, authResponse.data.loginDetails.encryptedMasterKey);
     const privateSharingKey = decrypt("AES-CTR", masterKey, salt, authResponse.data.loginDetails.encryptedRsaPrivateSharingKey);
     const sessionIdentifier = rsaPrivateDecrypt(privateSharingKey, authResponse.data.loginDetails.encryptedSessionIdentifier);

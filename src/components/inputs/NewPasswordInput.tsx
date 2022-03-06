@@ -1,6 +1,7 @@
 import React, {ChangeEventHandler, LegacyRef, useState} from "react";
 import {randomString} from "../../util/string";
 import zxcvbn from "zxcvbn";
+import {useTranslations} from "use-intl";
 
 interface Props {
     label: string;
@@ -16,50 +17,54 @@ interface PasswordStrength {
     hint: string[];
 }
 
-const passwordMeter = (password: string): PasswordStrength => {
-
-    if (password.length === 0)
-        return {level: 0, hint: [" "]};
-
-    if (password.length < 8)
-        return {level: 1, hint: ["Password too short."]};
-
-    const evaluation = zxcvbn(password);
-    if (evaluation.feedback.warning)
-        return {level: 1, hint: ["Password is too guessable."]};
-
-
-    const hasLowercase = /[a-z]/.test(password);
-    const hasUppercase = /[A-Z]/.test(password);
-    const hasDigit = /[0-9]/.test(password);
-    const hasSpecialChar = /[^a-zA-Z0-9]/.test(password);
-
-    let level = evaluation.score;
-    let hint: string[] = [];
-
-    if (evaluation.score < 4 || password.length < 12)
-        hint.push("Password is too weak.");
-    if ([hasLowercase, hasUppercase, hasDigit, hasSpecialChar].filter(r => r).length < 3) {
-        if (!hasLowercase)
-            hint.push("Should contain at least one lowercase letter.");
-        if (!hasUppercase)
-            hint.push("Should contain at least one uppercase letter.");
-        if (!hasDigit)
-            hint.push("Should contain at least one digit.");
-        if (!hasSpecialChar)
-            hint.push("Should contain at least one special characters.");
-    } else {
-        level += 1;
-    }
-
-    return {
-        level: level,
-        hint: hint
-    };
-};
 
 const NewPasswordInput = React.forwardRef((props: Props, ref: LegacyRef<HTMLInputElement> | undefined) => {
+    const t = useTranslations("components.password-strength-input");
     const id = randomString(8);
+
+
+    const passwordMeter = (password: string): PasswordStrength => {
+
+        if (password.length === 0)
+            return {level: 0, hint: [" "]};
+
+        if (password.length < 8)
+            return {level: 1, hint: [t("too-short")]};
+
+        const evaluation = zxcvbn(password);
+        if (evaluation.feedback.warning)
+            return {level: 1, hint: [t("too-guessable")]};
+
+
+        const hasLowercase = /[a-z]/.test(password);
+        const hasUppercase = /[A-Z]/.test(password);
+        const hasDigit = /[0-9]/.test(password);
+        const hasSpecialChar = /[^a-zA-Z0-9]/.test(password);
+
+        let level = evaluation.score;
+        let hint: string[] = [];
+
+        if (evaluation.score < 4 || password.length < 12)
+            hint.push(t("too-weak"));
+        if ([hasLowercase, hasUppercase, hasDigit, hasSpecialChar].filter(r => r).length < 3) {
+            if (!hasLowercase)
+                hint.push(t("missing-lowercase"));
+            if (!hasUppercase)
+                hint.push(t("missing-uppercase"));
+            if (!hasDigit)
+                hint.push(t("missing-digit"));
+            if (!hasSpecialChar)
+                hint.push(t("missing-special"));
+        } else {
+            level += 1;
+        }
+
+        return {
+            level: level,
+            hint: hint
+        };
+    };
+
 
     const [passwordStrength, setPasswordStrength] = useState(passwordMeter(""));
 
@@ -71,7 +76,7 @@ const NewPasswordInput = React.forwardRef((props: Props, ref: LegacyRef<HTMLInpu
         if (result.level === 5)
             e.target.setCustomValidity("");
         else
-            e.target.setCustomValidity("Password requirements are not met.");
+            e.target.setCustomValidity(t("requirement"));
     }
 
     const bars = (level: number): JSX.Element[] => {
