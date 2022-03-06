@@ -14,6 +14,7 @@ import AutocompleteTextInput from "../../components/inputs/AutocompleteTextInput
 import {getGroupsJobsSuggestions} from "../../util/user";
 import {useTranslations} from "use-intl";
 import {GetStaticProps} from "next";
+import Select from "../../components/inputs/Select";
 
 function NewUser(): JSX.Element {
 
@@ -33,7 +34,7 @@ function NewUser(): JSX.Element {
     const emailRef = useRef<HTMLInputElement>(null);
     const groupRef = useRef<HTMLInputElement>(null);
     const jobRef = useRef<HTMLInputElement>(null);
-    const accessLevelRef = useRef<HTMLInputElement>(null);
+    const accessLevelRef = useRef<HTMLSelectElement>(null);
 
     const updatePreview = (() => {
         const firstname = (firstnameRef.current as HTMLInputElement).value;
@@ -105,7 +106,7 @@ function NewUser(): JSX.Element {
                         const email = (emailRef.current as HTMLInputElement).value;
                         const group = (groupRef.current as HTMLInputElement).value;
                         const job = (jobRef.current as HTMLInputElement).value;
-                        const accessLevel = (accessLevelRef.current as HTMLInputElement).value.toUpperCase();
+                        const accessLevel = (accessLevelRef.current as HTMLSelectElement).value.toUpperCase();
 
                         const createUserData = {
                             firstName: firstname,
@@ -185,13 +186,11 @@ function NewUser(): JSX.Element {
 
                             <AutocompleteTextInput ref={jobRef} containerClassName="lg:w-1/3 lg:px-2" type="text" label={t("generic.user.job")} required={true} suggestions={suggestions[1]} onChange={updatePreview} />
 
-                            <AutocompleteTextInput ref={accessLevelRef} containerClassName="lg:w-1/3 lg:pl-4" type="text" label={t("generic.user.account-type")} required={true} suggestions={[
-                                t("generic.user.level.guest"),
-                                t("generic.user.level.user"),
-                                t("generic.user.level.administrator")
-                            ]} onChange={updatePreview} validator={(str: string) => {
-                                return ["GUEST", "USER", "ADMINISTRATOR"].includes(str.toUpperCase());
-                            }} />
+                            <Select ref={accessLevelRef} className="lg:w-1/3 lg:pl-4" label={t("generic.user.account-type")} required={true}>
+                                <option value="GUEST">{t("generic.user.level.guest")}</option>
+                                <option value="USER">{t("generic.user.level.user")}</option>
+                                <option value="ADMINISTRATOR">{t("generic.user.level.administrator")}</option>
+                            </Select>
 
                         </div>
 

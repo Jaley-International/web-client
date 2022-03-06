@@ -34,6 +34,7 @@
             "name": "Name",
             "first-name": "First name",
             "last-name": "Last name",
+            "username": "Username",
             "email": "Email address",
             "group": "Group",
             "job": "Job title",

@@ -107,7 +107,7 @@ function LoginPage(): JSX.Element {
                             if (success) {
                                 updateStatus(t("pages.auth.login.redirecting"));
                                 addToast({type: "success", title: t("pages.auth.login.toast.success.title"), message: t("pages.auth.login.toast.success.message")});
-                                router.reload();
+                                router.push("/").then(_ => {});
                             } else {
                                 updateStatus(t("pages.auth.login.login"));
                                 setSubmitting(false);

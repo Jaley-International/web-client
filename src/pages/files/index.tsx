@@ -59,7 +59,7 @@ function FilesPage(): JSX.Element {
             });
             setBreadcrumbItems(newBreadcrumbItems);
         });
-    }, [folderId]);
+    }, [folderId, publicRuntimeConfig.apiUrl]);
 
 
     return (
