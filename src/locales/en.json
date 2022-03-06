@@ -10,8 +10,8 @@
         },
         "toast": {
             "wip": {
-                "title": "Feature Unavailable",
-                "message": "Work in progress feature"
+                "title": "Feature unavailable",
+                "message": "This feature is under development"
             }
         },
         "button": {
