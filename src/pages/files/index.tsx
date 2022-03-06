@@ -47,14 +47,14 @@ function FilesPage(): JSX.Element {
             });
 
             // Update breadcrumb
-            let newBreadcrumbItems: BreadcrumbItemProps[] = [];
+            let newBreadcrumbItems: BreadcrumbItemProps[] = [{icon: faServer, action: () => fileListRef.current?.changerFolder(1)}];
             path.forEach((node, i) => {
-                if (node.id === 1) {
-                    newBreadcrumbItems.push({icon: faServer, action: () => fileListRef.current?.changerFolder(node.id)});
-                } else if (i === path.length - 1) {
-                    newBreadcrumbItems.push({title: node.metaData.name});
-                } else {
-                    newBreadcrumbItems.push({title: node.metaData.name, action: () => fileListRef.current?.changerFolder(node.id)});
+                if (node.id !== 1) {
+                    if (i === path.length - 1) {
+                        newBreadcrumbItems.push({title: node.metaData.name});
+                    } else {
+                        newBreadcrumbItems.push({title: node.metaData.name, action: () => fileListRef.current?.changerFolder(node.id)});
+                    }
                 }
             });
             setBreadcrumbItems(newBreadcrumbItems);
