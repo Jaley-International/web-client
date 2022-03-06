@@ -324,6 +324,9 @@
                     }
                 }
             }
+        },
+        "link-share": {
+            "warning": "Cette page ainsi que toutes ses pièces joints sont établis a l'attention exclusive de ses destinataires.<br></br>Si vous avez eu accès à cette page par erreur, merci de la fermer et d'avertir immédiatement l'expéditeur par e-mail.<br></br>Toute utilisation des pièces jointes non conforme à leur destination, toute diffusion ou toute publication, totale ou partielle, est interdite, sauf autorisation expresse."
         }
     }
 }

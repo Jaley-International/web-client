@@ -86,30 +86,39 @@ function SharePage(): JSX.Element {
                 </Link>
 
                 <Card className="absolute w-1/2 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-2/3">
-                    <div className="md:flex p-4">
-                        <div className="w-full p-10">
-                            <Heading2>{node.metaData.name}</Heading2>
-                            <div className="flex space-x-2 pt-2">
-                                <Badge text={formatBytes(node.metaData.size || 0)} size="small" colour="blue" />
-                                <Badge text={node.metaData.name.split(".").pop()?.toUpperCase() + " File"} size="small" colour="blue" />
+                    <>
+                        <div className="md:flex p-4">
+                            <div className="w-full p-10">
+                                <Heading2>{node.metaData.name}</Heading2>
+                                <div className="flex space-x-2 pt-2">
+                                    <Badge text={formatBytes(node.metaData.size || 0)} size="small" colour="blue" />
+                                    <Badge text={node.metaData.name.split(".").pop()?.toUpperCase() + " File"} size="small" colour="blue" />
+                                </div>
+                            </div>
+                            <div className="p-12 bg-blue-soft rounded-xl">
+                                <div className="w-full h-full flex justify-center">
+                                    <Button className="mx-auto my-auto w-32" size="medium" type="regular" colour="blue" onClick={async () => {
+                                        const status = await downloadFile(node);
+                                        if (status === "ERROR_FETCH")
+                                            addToast({type: "error", title: t("pages.file.list.toast.download.fail.title"), message: t("pages.file.list.toast.download.fail.message")});
+                                        else if (status === "ERROR_DECRYPT")
+                                            addToast({type: "error", title: t("pages.file.list.toast.download.decrypt.title"), message: t("pages.file.list.toast.download.decrypt.message")});
+                                        else if (status !== "SUCCESS")
+                                            addToast({type: "error", title: t("pages.file.list.toast.download.error.title"), message: t("pages.file.list.toast.download.error.message")});
+                                    }}>
+                                        <span><FontAwesomeIcon icon={faDownload} />&nbsp;&nbsp;{t("generic.action.download")}</span>
+                                    </Button>
+                                </div>
                             </div>
                         </div>
-                        <div className="p-12 bg-blue-soft rounded-xl">
-                            <div className="w-full h-full flex justify-center">
-                                <Button className="mx-auto my-auto w-32" size="medium" type="regular" colour="blue" onClick={async () => {
-                                    const status = await downloadFile(node);
-                                    if (status === "ERROR_FETCH")
-                                        addToast({type: "error", title: t("pages.file.list.toast.download.fail.title"), message: t("pages.file.list.toast.download.fail.message")});
-                                    else if (status === "ERROR_DECRYPT")
-                                        addToast({type: "error", title: t("pages.file.list.toast.download.decrypt.title"), message: t("pages.file.list.toast.download.decrypt.message")});
-                                    else if (status !== "SUCCESS")
-                                        addToast({type: "error", title: t("pages.file.list.toast.download.error.title"), message: t("pages.file.list.toast.download.error.message")});
-                                }}>
-                                    <span><FontAwesomeIcon icon={faDownload} />&nbsp;&nbsp;Download</span>
-                                </Button>
-                            </div>
+                        <div className="p-4">
+                            <p className="text-txt-body-muted">
+                                {t.rich("pages.link-share.warning", {
+                                    br: () => <br />
+                                })}
+                            </p>
                         </div>
-                    </div>
+                    </>
                 </Card>
 
             </ContentTransition>

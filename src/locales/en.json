@@ -324,6 +324,9 @@
                     }
                 }
             }
+        },
+        "link-share": {
+            "warning": "The attachements on this page are confidential and are solely intended for the authorised recipients.<br></br>If you were given access to this attachement by error, please close the page and immediately and notify the sender by e-mail.<br></br>Any use other than its intended purpose, dissemination or disclosure, either whole or partial, is prohibited except if formal approval is granted."
         }
     }
 }
