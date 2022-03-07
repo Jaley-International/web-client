@@ -39,7 +39,7 @@ function NotFoundPage(): JSX.Element {
                             <Button className="mx-auto my-auto w-32" size="medium" type="regular" colour="dark" onClick={() => {
                                 window.history.back();
                             }}>
-                                <span><FontAwesomeIcon icon={faChevronCircleLeft} />&nbsp;&nbsp;{t("pages.404.back-button")}</span>
+                                <span><FontAwesomeIcon icon={faChevronCircleLeft} />&nbsp;&nbsp;{t("generic.action.back")}</span>
                             </Button>
                         </div>
                     </div>

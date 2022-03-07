@@ -177,15 +177,15 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                             </span>
                         </div>
                         <div className="w-full p-10">
-                            <Heading2>Folder not found</Heading2>
-                            <span className="text-txt-body">The folder you requested does not exists.</span>
+                            <Heading2>{t("pages.file.list.not-found.title")}</Heading2>
+                            <span className="text-txt-body">{t("pages.file.list.not-found.message")}</span>
                         </div>
                         <div className="p-12">
                             <div className="w-full h-full flex justify-center">
                                 <Button className="mx-auto my-auto w-32" size="medium" type="regular" colour="dark" onClick={() => {
                                     changerFolder(1);
                                 }}>
-                                    <span><FontAwesomeIcon icon={faChevronCircleLeft} />&nbsp;&nbsp;Back</span>
+                                    <span><FontAwesomeIcon icon={faChevronCircleLeft} />&nbsp;&nbsp;{t("generic.action.back")}</span>
                                 </Button>
                             </div>
                         </div>
@@ -218,7 +218,7 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                          }
                      }}
                 >
-                    <Card title="Files" className="pb-2">
+                    <Card title={t("generic.file.title")} className="pb-2">
                         <table className="w-full">
                             <thead>
                             <tr className="border-b border-grey-200 bg-bg-light text-3xs text-txt-body-lightmuted uppercase">

@@ -27,7 +27,8 @@
             "rename": "Renommer",
             "delete": "Supprimer",
             "cancel": "Annuler",
-            "close": "Fermer"
+            "close": "Fermer",
+            "back": "Retour"
         },
         "user": {
             "title": "Utilisateurs",
@@ -105,8 +106,7 @@
     "pages": {
         "404": {
             "title": "Erreur 404",
-            "description": "La page/ressource que vous avez demandé n'éxiste pas.",
-            "back-button": "Retour"
+            "description": "La page/ressource que vous avez demandé n'éxiste pas."
         },
         "auth": {
             "login": {
@@ -322,6 +322,10 @@
                             "message": "Une erreur est survenue lors de la modification du fichier {name}."
                         }
                     }
+                },
+                "not-found": {
+                    "title": "Dossier introuvable",
+                    "message": "Le dossier demandé n'existe pas."
                 }
             }
         },

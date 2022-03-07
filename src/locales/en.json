@@ -27,7 +27,8 @@
             "rename": "Rename",
             "delete": "Delete",
             "cancel": "Cancel",
-            "close": "Close"
+            "close": "Close",
+            "back": "Back"
         },
         "user": {
             "title": "Users",
@@ -322,6 +323,10 @@
                             "message": "Une erreur est survenue lors de la modification du fichier {name}."
                         }
                     }
+                },
+                "not-found": {
+                    "title": "Folder not found",
+                    "message": "The folder you requested does not exists."
                 }
             }
         },
