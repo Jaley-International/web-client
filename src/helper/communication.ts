@@ -1,17 +1,19 @@
 import axios, {AxiosRequestConfig, AxiosRequestHeaders, Method} from "axios";
 import {getCookie} from "cookies-next";
 
+export enum Status {
+    SUCCESS = "SUCCESS",
+    ERROR_UNKNOWN = "ERROR_UNKNOWN",
+    ERROR_FETCH = "ERROR_FETCH",
+    ERROR_DECRYPT = "ERROR_DECRYPT"
+}
+
 export interface APIResponse {
-    status: string;
+    status: Status;
     verbose: string;
     data?: any;
 }
 
-export enum Status {
-    SUCCESS = "SUCCESS",
-    ERROR_FETCH = "ERROR_FETCH",
-    ERROR_DECRYPT = "ERROR_DECRYPT"
-}
 
 /**
  * Makes an HTTP request to the API
@@ -22,13 +24,7 @@ export enum Status {
  * @param {AxiosRequestConfig}  additionalOptions   Additional axios config.
  * @return {Promise<APIResponse>}
  */
-export async function request(
-    method: Method,
-    url: string,
-    data: object,
-    additionalHeaders?: AxiosRequestHeaders,
-    additionalOptions?: AxiosRequestConfig
-): Promise<APIResponse> {
+export async function request(method: Method, url: string, data: object, additionalHeaders?: AxiosRequestHeaders, additionalOptions?: AxiosRequestConfig): Promise<APIResponse> {
 
     const sessionJSON = getCookie("session");
     let sessionId: string;
@@ -64,7 +60,7 @@ export async function request(
                 });
             } catch (_) {
                 resolve({
-                    status: "ERROR_UNKNOWN",
+                    status: Status.ERROR_UNKNOWN,
                     verbose: reason.request.response,
                     data: {}
                 });

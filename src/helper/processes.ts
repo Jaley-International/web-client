@@ -1,18 +1,7 @@
 import forge, {Hex} from "node-forge";
 import {APIResponse, request, Status} from "./communication";
 import {removeCookies, setCookies} from "cookies-next";
-import {
-    addPadding,
-    decrypt,
-    decryptBuffer,
-    encrypt,
-    encryptBuffer,
-    generateRSAKeyPair,
-    pbkdf2,
-    rsaPrivateDecrypt,
-    sha256,
-    sha512,
-} from "./security";
+import {addPadding, decrypt, decryptBuffer, encrypt, encryptBuffer, generateRSAKeyPair, pbkdf2, rsaPrivateDecrypt, sha256, sha512} from "./security";
 import getConfig from "next/config";
 import User, {UserAccessLevel} from "../model/User";
 
@@ -87,12 +76,7 @@ export enum AuthenticationStep {
  * @param {function}    update          Callback function to update the registration status.
  * @return {string}                     Status code returned by API.
  */
-export async function register(
-    registerKey: string,
-    password: string,
-    update: (step: RegisterStep) => void
-): Promise<APIResponse> {
-
+export async function register(registerKey: string, password: string, update: (step: RegisterStep) => void): Promise<Status> {
     const {publicRuntimeConfig} = getConfig();
 
     // Generate AES MasterKey (256 bits)
@@ -135,7 +119,8 @@ export async function register(
     };
 
     update(RegisterStep.SUBMITTING);
-    return await request("POST", `${publicRuntimeConfig.apiUrl}/users/register`, registerData);
+    const {status} = await request("POST", `${publicRuntimeConfig.apiUrl}/users/register`, registerData);
+    return status;
 }
 
 
@@ -148,12 +133,7 @@ export async function register(
  * @param {function}    update          Callback function to update the authentication status.
  * @return {boolean}                    True if authentication is successful, false otherwise
  */
-export async function authenticate(
-    username: string,
-    password: string,
-    update: (step: AuthenticationStep) => void
-): Promise<boolean> {
-
+export async function authenticate(username: string, password: string, update: (step: AuthenticationStep) => void): Promise<boolean> {
     const {publicRuntimeConfig} = getConfig();
 
     // Salt request
@@ -214,7 +194,6 @@ export async function authenticate(
  * @return {string[]}                       Array with file ref and tag.
  */
 async function uploadFileContent(file: File, nodeKey: Hex, iv: string): Promise<[string, string] | [null, null]> {
-
     const {publicRuntimeConfig} = getConfig();
 
     // Reading file
@@ -253,7 +232,6 @@ async function uploadFileContent(file: File, nodeKey: Hex, iv: string): Promise<
  * @return {boolean}                        True if upload is successful, false otherwise
  */
 export async function uploadFile(file: File, containingFolderID: number, parentFolderKey?: Hex): Promise<boolean> {
-
     const {publicRuntimeConfig} = getConfig();
 
     // Generate Node Key (256 bits)
@@ -306,7 +284,6 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
  * @return {boolean}                        True if upload is successful, false otherwise
  */
 export async function overwriteFile(file: File, nodeId: number, nodeKey: Hex, iv: string): Promise<boolean> {
-
     const {publicRuntimeConfig} = getConfig();
 
     // server request to upload file content
@@ -341,7 +318,6 @@ export async function overwriteFile(file: File, nodeId: number, nodeKey: Hex, iv
  * @return {Promise<string>}                Download status
  */
 export async function downloadFile(node: Node): Promise<string> {
-
     const {publicRuntimeConfig} = getConfig();
 
     const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/content`, {}, {
@@ -577,7 +553,6 @@ export async function validateExtendSession(session: Session, apiUrl: string): P
  * Logs out the user.
  */
 export async function terminateSession(): Promise<boolean> {
-
     const {publicRuntimeConfig} = getConfig();
 
     // API Call for session termination
@@ -614,16 +589,7 @@ export async function deleteAccount(username: string): Promise<String> {
  * @param {UserAccessLevel}     accessLevel     (Optional) New user access level.
  * @return {string}                             User creation return status.
  */
-export async function updateAccount(
-    user: User,
-    firstName?: string,
-    lastName?: string,
-    email?: string,
-    group?: string,
-    job?: string,
-    accessLevel?: UserAccessLevel
-): Promise<string> {
-
+export async function updateAccount(user: User, firstName?: string, lastName?: string, email?: string, group?: string, job?: string, accessLevel?: UserAccessLevel): Promise<string> {
     const {publicRuntimeConfig} = getConfig();
 
     const response = await request("PATCH", `${publicRuntimeConfig.apiUrl}/users/${user.username}`, {
