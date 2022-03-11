@@ -24,7 +24,7 @@ import {
     Node, overwriteFile,
     uploadFile
 } from "../../helper/processes";
-import {request} from "../../helper/communication";
+import {request, Status} from "../../helper/communication";
 import React, {forwardRef, Ref, useEffect, useImperativeHandle, useRef, useState} from "react";
 import {ToastProps} from "../toast/Toast";
 import getConfig from "next/config";
@@ -98,7 +98,7 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
 
     const fetchFilesystem = async () => {
         const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${currentFolderId}`, {});
-        if (response.status !== "SUCCESS") {
+        if (response.status !== Status.SUCCESS) {
             setLoaded(true);
             return;
         }
@@ -351,17 +351,17 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                             }}/>
                                                             <ContextMenuItem name={t("generic.action.download")} icon={faCloudDownloadAlt} action={async () => {
                                                                 const status = await downloadFile(node);
-                                                                if (status === "ERROR_FETCH")
+                                                                if (status === Status.ERROR_FETCH)
                                                                     props.addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
-                                                                else if (status === "ERROR_DECRYPT")
+                                                                else if (status === Status.ERROR_DECRYPT)
                                                                     props.addToast({type: "error", title: "Failed to decrypt", message: "An error occurred while decrypting the file."});
-                                                                else if (status !== "SUCCESS")
+                                                                else if (status !== Status.SUCCESS)
                                                                     props.addToast({type: "error", title: "Failed to download", message: "An unexpected error occurred while downloading the file."});
                                                             }}/>
                                                             <ContextMenuItem name={t("generic.action.share")} icon={faShareAlt} action={async () => {
 
                                                                 const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/links`, {});
-                                                                if (response.status !== "SUCCESS")
+                                                                if (response.status !== Status.SUCCESS)
                                                                     return;
 
                                                                 if (response.data.links.length === 0) {
@@ -408,7 +408,7 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                         setModalNodeTarget(null);
                     }} submitCallback={async () => {
                         const response = await request("DELETE", `${publicRuntimeConfig.apiUrl}/file-system/${modalNodeTarget.id}`, {});
-                        if (response.status === "SUCCESS")
+                        if (response.status === Status.SUCCESS)
                             props.addToast({
                                 type: "success",
                                 title: t.rich("pages.file.list.toast.delete.success.title", {type: t(`generic.node.${modalNodeTarget?.type.toLowerCase()}`)}).toString(),

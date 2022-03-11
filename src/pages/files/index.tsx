@@ -12,7 +12,7 @@ import Header from "components/sections/Header";
 import FileListView, {FileListViewRef} from "../../components/sections/FileListView";
 import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
-import {request} from "../../helper/communication";
+import {request, Status} from "../../helper/communication";
 import getConfig from "next/config";
 import {decryptFileSystem, EncryptedNode, Node} from "../../helper/processes";
 import {BreadcrumbItemProps} from "../../components/navigation/breadcrumb/BreadcrumbItem";
@@ -35,7 +35,7 @@ function FilesPage(): JSX.Element {
     useEffect(() => {
         // Get path
         request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${folderId}/path`, {}).then(response => {
-            if (response.status !== "SUCCESS")
+            if (response.status !== Status.SUCCESS)
                 return;
 
             // Decrypt path

@@ -11,7 +11,7 @@ import DeleteUserModal from "../../components/containers/modals/DeleteUserModal"
 import User, {UserAccessLevel} from "../../model/User";
 import OptionsButton from "../../components/buttons/OptionsButton";
 import ContextMenuItem from "../../components/containers/contextmenu/ContextMenuItem";
-import {request} from "../../helper/communication";
+import {request, Status} from "../../helper/communication";
 import {deleteAccount} from "../../helper/processes";
 import getConfig from "next/config";
 import Badge from "../../components/Badge";
@@ -142,7 +142,7 @@ function UserList(): JSX.Element {
 
                     submitCallback={async () => {
                         const statusCode = await deleteAccount(modalUserTarget?.username);
-                        if (statusCode === "SUCCESS") {
+                        if (statusCode === Status.SUCCESS) {
                             await fetchUsers();
                             addToast({
                                 type: "success",

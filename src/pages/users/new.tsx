@@ -6,7 +6,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowLeft, faUser} from "@fortawesome/free-solid-svg-icons";
 import TextInput from "../../components/inputs/TextInput";
 import React, {useContext, useEffect, useRef, useState} from "react";
-import {request} from "../../helper/communication";
+import {request, Status} from "../../helper/communication";
 import getConfig from "next/config";
 import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
@@ -119,7 +119,7 @@ function NewUser(): JSX.Element {
                         };
                         const response = await request("POST", `${publicRuntimeConfig.apiUrl}/users`, createUserData);
 
-                        if (response.status === "SUCCESS") {
+                        if (response.status === Status.SUCCESS) {
                             addToast({
                                 type: "success",
                                 title: t("pages.auth.pre-register.toast.success.title"),

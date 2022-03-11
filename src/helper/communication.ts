@@ -7,6 +7,12 @@ export interface APIResponse {
     data?: any;
 }
 
+export enum Status {
+    SUCCESS = "SUCCESS",
+    ERROR_FETCH = "ERROR_FETCH",
+    ERROR_DECRYPT = "ERROR_DECRYPT"
+}
+
 /**
  * Makes an HTTP request to the API
  * @param {Method}              method              HTTP request method.
@@ -44,7 +50,7 @@ export async function request(
                 resolve(response.data);
             else
                 resolve({
-                    status: "SUCCESS",
+                    status: Status.SUCCESS,
                     verbose: "",
                     data: response
                 })
