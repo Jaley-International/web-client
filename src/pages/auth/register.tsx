@@ -86,7 +86,7 @@ function RegisterPage(): JSX.Element {
                                     submitRef.current.innerText = message;
                             }
 
-                            const {status} = await register(registerKeyRef.current?.value as string, passwordRef.current?.value as string, (step: RegisterStep) => {
+                            const status = await register(registerKeyRef.current?.value as string, passwordRef.current?.value as string, (step: RegisterStep) => {
                                 if (step === RegisterStep.GEN_MASTER_KEY)
                                     updateStatus(t("pages.auth.register.form.button.gen-master-key"));
                                 else if (step === RegisterStep.GEN_CLIENT_RANDOM_VALUE)
@@ -106,7 +106,7 @@ function RegisterPage(): JSX.Element {
                             if (status === Status.SUCCESS) {
                                 addToast({type: "success", title: t("pages.auth.register.toast.success.title"), message: t("pages.user.list.toast.success.message")});
                                 router.push("/auth").then(() => {});
-                            } else if (status === "ERROR_INVALID_REGISTER_KEY") {
+                            } else if (status === Status.ERROR_INVALID_REGISTER_KEY) {
                                 addToast({type: "warning", title: t("pages.auth.register.toast.invalid.title"), message: t("pages.user.list.toast.invalid.message")});
                             } else {
                                 addToast({type: "error", title: t("pages.auth.register.toast.error.title"), message: t("pages.user.list.toast.error.message")});

@@ -125,19 +125,19 @@ function NewUser(): JSX.Element {
                                 title: t("pages.auth.pre-register.toast.success.title"),
                                 message: t("pages.auth.pre-register.toast.success.message")
                             });
-                        } else if (response.status === "ERROR_USERNAME_ALREADY_USED") {
+                        } else if (response.status === Status.ERROR_USERNAME_ALREADY_USED) {
                             addToast({
                                 type: "warning",
                                 title: t("pages.auth.pre-register.toast.username-already-used.title"),
                                 message: t("pages.auth.pre-register.toast.success.username-already-used.message"),
                             });
-                        } else if (response.status === "ERROR_EMAIL_ALREADY_USED") {
+                        } else if (response.status === Status.ERROR_EMAIL_ALREADY_USED) {
                             addToast({
                                 type: "warning",
                                 title: t("pages.auth.pre-register.toast.email-already-used.title"),
                                 message: t("pages.auth.pre-register.toast.email-already-used.message")
                             });
-                        } else if (response.status === "ERROR_INVALID_ACCESS_LEVEL") {
+                        } else if (response.status === Status.ERROR_INVALID_ACCESS_LEVEL) {
                             addToast({
                                 type: "error",
                                 title: t("pages.auth.pre-register.toast.invalid-access-level.title"),
