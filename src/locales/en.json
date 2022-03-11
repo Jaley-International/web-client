@@ -61,7 +61,6 @@
     },
     "navbar": {
         "files": "Files",
-        "notifications": "Notifications",
         "my-account": "My account",
         "activity-log": "Activity log",
         "admin-panel": "Admin panel",
