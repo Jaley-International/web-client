@@ -2,9 +2,10 @@ import {Node} from "../../../helper/processes";
 import {useTranslations} from "use-intl";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheckCircle, faTimesCircle, faUser} from "@fortawesome/free-regular-svg-icons";
-import React from "react";
+import React, {useState} from "react";
 import Button from "../../buttons/Button";
 import {faPlus} from "@fortawesome/free-solid-svg-icons";
+import NewShareModal from "../../containers/modals/NewShareModal";
 
 interface Props {
     node: Node;
@@ -14,6 +15,8 @@ function InternalSharing(props: Props): JSX.Element {
 
     const t = useTranslations();
 
+    const [showNewShareModal, setShowNewShareModal] = useState<boolean>(false);
+
     return (
         <>
             <table className="w-full">
@@ -22,7 +25,9 @@ function InternalSharing(props: Props): JSX.Element {
                     <th className="w-3/6 sticky top-0 font-semibold text-left px-6 py-4 space-x-3">
                         <FontAwesomeIcon icon={faUser}/>
                         <span>{t("generic.file.shared-with")}</span>
-                        <Button size="small" type="soft" colour="green" className="absolute right-0">
+                        <Button size="small" type="soft" colour="green" className="absolute right-0" onClick={() => {
+                            setShowNewShareModal(true);
+                        }}>
                             <>
                                 <FontAwesomeIcon icon={faPlus}/>&nbsp;&nbsp;Add user
                             </>
@@ -55,25 +60,28 @@ function InternalSharing(props: Props): JSX.Element {
                                 </div>
                             </td>
                             <td className="py-2 px-4 text-center">
-                        <span className="text-txt-body">
-                            <FontAwesomeIcon className="m-auto text-green" icon={faCheckCircle}/>
-                        </span>
+                                <span className="text-txt-body">
+                                    <FontAwesomeIcon className="m-auto text-green" icon={faCheckCircle}/>
+                                </span>
                             </td>
                             <td className="py-2 px-4 text-center">
-                        <span className="text-txt-body">
-                            <FontAwesomeIcon className="m-auto text-green" icon={faCheckCircle}/>
-                        </span>
+                                <span className="text-txt-body">
+                                    <FontAwesomeIcon className="m-auto text-green" icon={faCheckCircle}/>
+                                </span>
                             </td>
                             <td className="py-2 px-4 text-center">
-                        <span className="text-txt-body">
-                            <FontAwesomeIcon className="m-auto text-red-light" icon={faTimesCircle}/>
-                        </span>
+                                <span className="text-txt-body">
+                                    <FontAwesomeIcon className="m-auto text-red-light" icon={faTimesCircle}/>
+                                </span>
                             </td>
                         </tr>
                     );
                 })}
                 </tbody>
             </table>
+            {showNewShareModal &&
+                <NewShareModal node={props.node} closeCallback={() => setShowNewShareModal(false)} />
+            }
         </>
     );
 }
