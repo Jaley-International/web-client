@@ -2,20 +2,41 @@ import {Node} from "../../../helper/processes";
 import {useTranslations} from "use-intl";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheckCircle, faTimesCircle, faUser} from "@fortawesome/free-regular-svg-icons";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Button from "../../buttons/Button";
 import {faPlus} from "@fortawesome/free-solid-svg-icons";
 import NewShareModal from "../../containers/modals/NewShareModal";
+import {request} from "../../../helper/communication";
+import getConfig from "next/config";
+import Share from "../../../model/Share";
+import {ToastProps} from "../../toast/Toast";
 
 interface Props {
     node: Node;
+    addToast: (toast: ToastProps) => void;
 }
 
 function InternalSharing(props: Props): JSX.Element {
 
+    const {publicRuntimeConfig} = getConfig();
     const t = useTranslations();
 
     const [showNewShareModal, setShowNewShareModal] = useState<boolean>(false);
+
+    const [shares, setShares] = useState<Share[]>([]);
+    const [loaded, setLoaded] = useState<boolean>(false);
+
+    const fetchShares = async () => {
+        const sharesListResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${props.node.id}/shares`, {});
+        const shares = sharesListResponse.data.shares;
+        setShares(shares);
+        setLoaded(true);
+    };
+
+    useEffect(() => {
+        if (!loaded)
+            fetchShares().then(_ => {});
+    });
 
     return (
         <>
@@ -45,7 +66,7 @@ function InternalSharing(props: Props): JSX.Element {
                 </tr>
                 </thead>
                 <tbody className="divide-y">
-                {[0,1,2].map((user, index) => { // TODO fetch and display real users
+                {shares.map((share, index) => {
                     return (
                         <tr className="border-b border-grey-200" key={index}>
                             <td className="py-2 px-4">
@@ -54,8 +75,8 @@ function InternalSharing(props: Props): JSX.Element {
                                         <FontAwesomeIcon className="m-auto text-silver-dark" icon={faUser}/>
                                     </div>
                                     <div className="grid content-center leading-4">
-                                        <span className="text-txt-heading font-semibold text-2xs">John Doe</span>
-                                        <span className="text-txt-body-muted font-light text-4xs">Legal department, Lawyer</span>
+                                        <span className="text-txt-heading font-semibold text-2xs">{share.recipient.firstName} {share.recipient.lastName}</span>
+                                        <span className="text-txt-body-muted font-light text-4xs">{share.recipient.group}, {share.recipient.job}</span>
                                     </div>
                                 </div>
                             </td>
@@ -66,7 +87,7 @@ function InternalSharing(props: Props): JSX.Element {
                             </td>
                             <td className="py-2 px-4 text-center">
                                 <span className="text-txt-body">
-                                    <FontAwesomeIcon className="m-auto text-green" icon={faCheckCircle}/>
+                                    <FontAwesomeIcon className="m-auto text-red-light" icon={faTimesCircle}/>
                                 </span>
                             </td>
                             <td className="py-2 px-4 text-center">
@@ -80,7 +101,7 @@ function InternalSharing(props: Props): JSX.Element {
                 </tbody>
             </table>
             {showNewShareModal &&
-                <NewShareModal node={props.node} closeCallback={() => setShowNewShareModal(false)} />
+                <NewShareModal node={props.node} closeCallback={() => setShowNewShareModal(false)} addToast={props.addToast} updateCallback={() => fetchShares()} />
             }
         </>
     );

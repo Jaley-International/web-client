@@ -1,22 +1,45 @@
-import {Node} from "../../../helper/processes";
+import {Node, shareNode} from "../../../helper/processes";
 import ModalHeader from "./subcomponents/ModalHeader";
 import {useTranslations} from "use-intl";
-import React, {ChangeEvent, useState} from "react";
+import React, {ChangeEvent, useEffect, useState} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faUser} from "@fortawesome/free-regular-svg-icons";
 import Button from "../../buttons/Button";
 import TextInput from "../../inputs/TextInput";
+import {request, Status} from "../../../helper/communication";
+import getConfig from "next/config";
+import User from "../../../model/User";
+import {ToastProps} from "../../toast/Toast";
 
 interface Props {
     node: Node;
     closeCallback: () => void;
+    addToast: (toast: ToastProps) => void;
+    updateCallback: () => void;
 }
 
 function NewShareModal(props: Props): JSX.Element {
 
+    const {publicRuntimeConfig} = getConfig();
     const t = useTranslations();
 
     const [searchQuery, setSearchQuery] = useState<string>("");
+
+    const [users, setUsers] = useState<User[]>([]);
+    const [loaded, setLoaded] = useState<boolean>(false);
+
+    const fetchShares = async () => {
+        //TODO get users who are not shared with the node
+        const usersListResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/users`, {});
+        const users = usersListResponse.data.users;
+        setUsers(users);
+        setLoaded(true);
+    };
+
+    useEffect(() => {
+        if (!loaded)
+            fetchShares().then(_ => {});
+    });
 
     return (
         <>
@@ -27,7 +50,7 @@ function NewShareModal(props: Props): JSX.Element {
                     <div className="py-8 px-10 space-y-4">
 
                         <TextInput type="text" label="Search a user" onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                            setSearchQuery(e.currentTarget.value);
+                            setSearchQuery(e.currentTarget.value.toLowerCase());
                         }} />
 
                         <table className="w-full">
@@ -42,7 +65,16 @@ function NewShareModal(props: Props): JSX.Element {
                             </tr>
                             </thead>
                             <tbody className="divide-y">
-                            {[0,1,2].map((user, index) => { // TODO fetch and display real users
+                            {users
+                                .filter(user => {
+                                    if (user.username.toLowerCase().includes(searchQuery)) return true;
+                                    if (user.firstName.toLowerCase().includes(searchQuery)) return true;
+                                    if (user.lastName.toLowerCase().includes(searchQuery)) return true;
+                                    if (user.email.toLowerCase().includes(searchQuery)) return true;
+                                    if (user.job.toLowerCase().includes(searchQuery)) return true;
+                                    return user.group.toLowerCase().includes(searchQuery);
+                                })
+                                .map((user, index) => {
                                 return (
                                     <tr className="border-b border-grey-200" key={index}>
                                         <td className="py-2 px-4">
@@ -51,17 +83,28 @@ function NewShareModal(props: Props): JSX.Element {
                                                     <FontAwesomeIcon className="m-auto text-silver-dark" icon={faUser}/>
                                                 </div>
                                                 <div className="grid content-center leading-4">
-                                                    <span className="text-txt-heading font-semibold text-2xs">John Doe</span>
-                                                    <span className="text-txt-body-muted font-light text-4xs">Legal department, Lawyer</span>
+                                                    <span className="text-txt-heading font-semibold text-2xs">{user.firstName} {user.lastName}</span>
+                                                    <span className="text-txt-body-muted font-light text-4xs">{user.group}, {user.job}</span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="text-center">
                                             <span className="text-txt-body">
-                                                <Button size="medium" type="regular" colour="green" onClick={(e) => {
-                                                    // TODO Share with user
-                                                    e.currentTarget.innerText = "Shared";
-                                                    e.currentTarget.disabled = true;
+                                                <Button size="medium" type="regular" colour="green" onClick={async (e) => {
+                                                    if (await shareNode(props.node, user)) {
+                                                        const button = e.target as HTMLButtonElement;
+                                                        button.innerText = "Shared";
+                                                        button.disabled = true;
+                                                        button.classList.remove("bg-green");
+                                                        button.classList.add("bg-grey-500");
+                                                        props.updateCallback();
+                                                    } else {
+                                                        props.addToast({
+                                                            type: "error",
+                                                            title: "Fail to share with user",
+                                                            message: "An unexpected error occurred while sharing the file/folder."
+                                                        });
+                                                    }
                                                 }}>
                                                     Grant access
                                                 </Button>

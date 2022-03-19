@@ -1,7 +1,19 @@
 import forge, {Hex} from "node-forge";
 import {APIResponse, request, Status} from "./communication";
 import {removeCookies, setCookies} from "cookies-next";
-import {addPadding, decrypt, decryptBuffer, encrypt, encryptBuffer, generateRSAKeyPair, pbkdf2, rsaPrivateDecrypt, sha256, sha512} from "./security";
+import {
+    addPadding,
+    decrypt,
+    decryptBuffer,
+    encrypt,
+    encryptBuffer,
+    generateRSAKeyPair,
+    pbkdf2,
+    rsaPrivateDecrypt,
+    rsaPublicEncrypt,
+    sha256,
+    sha512
+} from "./security";
 import getConfig from "next/config";
 import User, {UserAccessLevel} from "../model/User";
 
@@ -163,13 +175,13 @@ export async function authenticate(username: string, password: string, update: (
 
     // Decrypting keys
     update(AuthenticationStep.DECRYPTING_KEYS);
-    const masterKey = decrypt("AES-CTR", derivedEncryptionKey, salt, authResponse.data.loginDetails.encryptedMasterKey);
-    const privateSharingKey = decrypt("AES-CTR", masterKey, salt, authResponse.data.loginDetails.encryptedRsaPrivateSharingKey);
+    const masterKey = decrypt("AES-CTR", derivedEncryptionKey, salt, authResponse.data.loginDetails.user.encryptedMasterKey);
+    const privateSharingKey = decrypt("AES-CTR", masterKey, salt, authResponse.data.loginDetails.user.encryptedRsaPrivateSharingKey);
     const sessionIdentifier = rsaPrivateDecrypt(privateSharingKey, authResponse.data.loginDetails.encryptedSessionIdentifier);
 
     // Storing keys to the session storage
     localStorage.setItem("masterKey", masterKey);
-    localStorage.setItem("publicSharingKey", authResponse.data.loginDetails.rsaPublicSharingKey);
+    localStorage.setItem("publicSharingKey", authResponse.data.loginDetails.user.rsaPublicSharingKey);
     localStorage.setItem("privateSharingKey", privateSharingKey);
 
     // Storing session in cookies
@@ -180,6 +192,15 @@ export async function authenticate(username: string, password: string, update: (
         sameSite: true,
         secure: true
     });
+
+    // Saving current user to local storage
+    localStorage.setItem("username", authResponse.data.loginDetails.user.username);
+    localStorage.setItem("email", authResponse.data.loginDetails.user.email);
+    localStorage.setItem("firstName", authResponse.data.loginDetails.user.firstName);
+    localStorage.setItem("lastName", authResponse.data.loginDetails.user.lastName);
+    localStorage.setItem("group", authResponse.data.loginDetails.user.group);
+    localStorage.setItem("job", authResponse.data.loginDetails.user.job);
+    localStorage.setItem("accessLevel", authResponse.data.loginDetails.user.accessLevel);
 
     return true;
 }
@@ -602,4 +623,31 @@ export async function updateAccount(user: User, firstName?: string, lastName?: s
     });
 
     return response.status;
+}
+
+
+export async function shareNode(node: Node, recipient: User): Promise<boolean> {
+    const {publicRuntimeConfig} = getConfig();
+
+    // getting recipient's public sharing key
+    const sharingKeysResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/users/${recipient.username}/sharing-keys`, {});
+    const recipientPublicSharingKey = sharingKeysResponse.data.keys.publicSharingKey;
+
+    // getting sender's public sharing key
+    const senderPublicSharingKey = localStorage.getItem("publicSharingKey");
+    if (!senderPublicSharingKey)
+        return false;
+
+    // keys encryption
+    const shareKey = rsaPublicEncrypt(recipientPublicSharingKey, node.nodeKey);
+    const shareSignature = rsaPublicEncrypt(senderPublicSharingKey, node.nodeKey);
+
+    // api call
+    const shareResponse = await request("POST", `${publicRuntimeConfig.apiUrl}/shares`, {
+        nodeId: node.id,
+        recipientUsername: recipient.username,
+        shareKey: shareKey,
+        shareSignature: shareSignature
+    });
+    return shareResponse.status === Status.SUCCESS;
 }

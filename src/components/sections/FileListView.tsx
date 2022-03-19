@@ -435,7 +435,7 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                     }} />
                 }
                 {showShareLinkModal && modalNodeTarget &&
-                    <ShareModal closeCallback={() => setShowShareLinkModal(false)} node={modalNodeTarget} />
+                    <ShareModal closeCallback={() => setShowShareLinkModal(false)} node={modalNodeTarget} addToast={props.addToast} />
                 }
             </>
         );

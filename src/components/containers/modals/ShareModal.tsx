@@ -5,10 +5,12 @@ import LinkSharing from "../../sections/sharing/LinkSharing";
 import Tabs from "../Tabs";
 import InternalSharing from "../../sections/sharing/InternalSharing";
 import React from "react";
+import {ToastProps} from "../../toast/Toast";
 
 interface Props {
     node: Node;
     closeCallback: () => void;
+    addToast: (toast: ToastProps) => void;
 }
 
 function ShareModal(props: Props): JSX.Element {
@@ -24,7 +26,7 @@ function ShareModal(props: Props): JSX.Element {
 
                     <div className="px-10 py-8">
                         <Tabs tabs={[
-                            {name: "Internal sharing", child: <InternalSharing node={props.node} />},
+                            {name: "Internal sharing", child: <InternalSharing node={props.node} addToast={props.addToast} />},
                             {name: "Link sharing", child: <LinkSharing node={props.node} />}
                         ]} />
                     </div>
