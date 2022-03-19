@@ -1,7 +1,6 @@
 import {Node} from "../../../helper/processes";
 import ModalHeader from "./subcomponents/ModalHeader";
 import Button from "../../buttons/Button";
-import {capitalize} from "../../../util/string";
 import {useTranslations} from "use-intl";
 
 interface Props {

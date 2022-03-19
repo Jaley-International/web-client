@@ -40,7 +40,7 @@ function Navbar(): JSX.Element {
                 </Link>
 
                 <NavbarItem name={t("navbar.files")} icon={faFile} activeRoutes={[/^\/files$/]} href="/files" />
-                <NavbarItem name={t("navbar.activity-log")} icon={faListUl} activeRoutes={[/^activity.*$/]} href="/activity" />
+                <NavbarItem name={t("navbar.activity-log")} icon={faListUl} activeRoutes={[/^\/activity.*$/]} href="/activity" />
 
                 <div className="w-full py-6">
                     <hr className="mx-auto w-2/3 text-grey-200" />
