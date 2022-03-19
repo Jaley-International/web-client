@@ -18,7 +18,6 @@ import OptionsButton from "../buttons/OptionsButton";
 import ContextMenuItem from "../containers/contextmenu/ContextMenuItem";
 import {
     createFolder,
-    createNodeShareLink,
     decryptFileSystem,
     downloadFile, EncryptedNode, moveNode,
     Node, overwriteFile,
@@ -31,7 +30,7 @@ import getConfig from "next/config";
 import DeleteNodeModal from "../containers/modals/DeleteNodeModal";
 import OverwriteFileModal from "../containers/modals/OverwriteFileModal";
 import CreateFolderModal from "../containers/modals/CreateFolderModal";
-import ShareLinkModal from "../containers/modals/ShareLinkModal";
+import ShareModal from "../containers/modals/ShareModal";
 import Card from "components/containers/Card";
 import {nodeToDescription, nodeToIcon} from "../../util/node";
 import {useRouter} from "next/router";
@@ -39,7 +38,6 @@ import {capitalize} from "../../util/string";
 import {Heading2} from "../text/Headings";
 import Button from "../buttons/Button";
 import {useTranslations} from "use-intl";
-import Link from "next/link";
 
 interface Props {
     addToast: (toast: ToastProps) => void;
@@ -331,7 +329,8 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                                 props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                             }}/>
                                                             <ContextMenuItem name={t("generic.action.share")} icon={faShareAlt} action={() => {
-                                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
+                                                                setModalNodeTarget(node);
+                                                                setShowShareLinkModal(true);
                                                             }}/>
                                                             <ContextMenuItem name={t("generic.action.manage-permissions")} icon={faUsersCog} action={() => {
                                                                 props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
@@ -359,19 +358,6 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                                     props.addToast({type: "error", title: "Failed to download", message: "An unexpected error occurred while downloading the file."});
                                                             }}/>
                                                             <ContextMenuItem name={t("generic.action.share")} icon={faShareAlt} action={async () => {
-
-                                                                const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/links`, {});
-                                                                if (response.status !== Status.SUCCESS)
-                                                                    return;
-
-                                                                if (response.data.links.length === 0) {
-                                                                    const shareLink = await createNodeShareLink(node);
-                                                                    if (shareLink)
-                                                                        node.shareLink = shareLink;
-                                                                } else {
-                                                                    node.shareLink = response.data.links[0];
-                                                                }
-
                                                                 setModalNodeTarget(node);
                                                                 setShowShareLinkModal(true);
                                                             }}/>
@@ -454,8 +440,8 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                         await fetchFilesystem();
                     }} />
                 }
-                {showShareLinkModal && modalNodeTarget && modalNodeTarget.shareLink &&
-                    <ShareLinkModal closeCallback={() => setShowShareLinkModal(false)} sharelink={modalNodeTarget.shareLink} />
+                {showShareLinkModal && modalNodeTarget &&
+                    <ShareModal closeCallback={() => setShowShareLinkModal(false)} node={modalNodeTarget} />
                 }
             </>
         );

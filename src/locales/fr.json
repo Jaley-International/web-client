@@ -97,9 +97,15 @@
                 "folder-name": "Nom du dossier",
                 "submit": "Créer le dossier"
             },
-            "link-share": {
-                "title": "Partage par lien",
-                "link": "Lien de partage privé"
+            "share": {
+                "title": "Partager",
+                "link": {
+                    "label": "Lien de partage privé",
+                    "folder-wip": "Le partage de dossier par lien est en cours de développement."
+                },
+                "internal": {
+
+                }
             }
         }
     },
