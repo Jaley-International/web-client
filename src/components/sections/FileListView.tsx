@@ -332,9 +332,6 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                                 setModalNodeTarget(node);
                                                                 setShowShareLinkModal(true);
                                                             }}/>
-                                                            <ContextMenuItem name={t("generic.action.manage-permissions")} icon={faUsersCog} action={() => {
-                                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
-                                                            }}/>
                                                             <ContextMenuItem name={t("generic.action.lock-file")} icon={faLock} action={() => {
                                                                 props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                             }}/>
@@ -360,9 +357,6 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                             <ContextMenuItem name={t("generic.action.share")} icon={faShareAlt} action={async () => {
                                                                 setModalNodeTarget(node);
                                                                 setShowShareLinkModal(true);
-                                                            }}/>
-                                                            <ContextMenuItem name={t("generic.action.manage-permissions")} icon={faUsersCog} action={() => {
-                                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                             }}/>
                                                             <ContextMenuItem name={t("generic.action.lock-file")} icon={faLock} action={() => {
                                                                 props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});

@@ -7,11 +7,9 @@ import {decrypt} from "../../../helper/security";
 import forge from "node-forge";
 import {hexToBase64Url} from "../../../util/string";
 import TextInput from "../../inputs/TextInput";
-import Button from "../../buttons/Button";
 
 interface Props {
     node: Node;
-    closeCallback: () => void;
 }
 
 function LinkSharing(props: Props): JSX.Element {
@@ -73,11 +71,6 @@ function LinkSharing(props: Props): JSX.Element {
             {props.node.type === "FOLDER" &&
                 <p className="text-center">{t("modal.node.share.link.folder-wip")}</p>
             }
-
-            <div className="pt-8 text-center space-x-4">
-                <Button size="medium" type="regular" colour="blue" onClick={props.closeCallback}>{t("generic.action.close")}</Button>
-            </div>
-
         </>
     );
 }
