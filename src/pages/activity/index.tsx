@@ -6,14 +6,13 @@ import {GetStaticProps} from "next";
 import EmptyActivities from "../../components/sections/EmptyActivities";
 import {useRouter} from "next/router";
 import Badge from "../../components/Badge";
-import Activity from "../../components/activities/Activity";
-import User, {UserAccessLevel} from "../../model/User";
-import {decryptFileSystem, EncryptedNode, MetaData, Node, ShareLink} from "../../helper/processes";
+import User from "../../model/User";
+import {decryptFileSystem, EncryptedNode, Node} from "../../helper/processes";
 import {request} from "../../helper/communication";
 import getConfig from "next/config";
 import {useTranslations} from "use-intl";
+import Log, {ActivityType} from "../../model/Log";
 import FileUploadActivity from "../../components/activities/FileUploadActivity";
-import {Hex} from "node-forge";
 
 function ActivityPage(): JSX.Element {
 
@@ -21,9 +20,10 @@ function ActivityPage(): JSX.Element {
     const t = useTranslations();
     const router = useRouter();
 
-    // TODO : Change states for entities themselves instead of ids
     const [node, setNode] = useState<Node | null>(null);
     const [user, setUser] = useState<User | null>(null);
+    const [userLogs, setUserLogs] = useState<Log[]>([]);
+    const [nodeLogs, setNodeLogs] = useState<Log[]>([]);
 
     const [loaded, setLoaded] = useState<boolean>(false);
 
@@ -67,6 +67,16 @@ function ActivityPage(): JSX.Element {
             setNode(null);
         }
 
+        // Fetch user logs
+        const userLogsResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/logs/user-logs`, {});
+        const userLogs = userLogsResponse.data.logs;
+        setUserLogs(userLogs);
+
+        // Fetch node logs
+        const nodeLogsResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/logs/node-logs`, {});
+        const nodeLogs = nodeLogsResponse.data.logs;
+        setNodeLogs(nodeLogs);
+
         setLoaded(true);
     };
 
@@ -105,42 +115,103 @@ function ActivityPage(): JSX.Element {
 
                 {loaded &&
                     <ContentTransition>
-                    {(!user && !node) ?
+                    {(!userLogs && !nodeLogs) ?
                         <EmptyActivities />
                         :
                         <div className="pt-4 px-6 space-y-6 mb-2">
-                            {[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map((activity, index) => {
-                                return (
-                                    <FileUploadActivity
-                                        activity={{
-                                            user: {
-                                                username: "eporet",
-                                                email: "eva.poret@company.com",
-                                                firstName: "Eva",
-                                                lastName: "PORET",
-                                                profilePicture: "https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
-                                                job: "",
-                                                group: "",
-                                                accessLevel: UserAccessLevel.USER,
-                                                createdAt: 0
-                                            },
-                                            timestamp: 0
-                                        }}
-                                        node={{
-                                            id: 42,
-                                            iv: "abc",
-                                            tag: "abc",
-                                            nodeKey: "abc",
-                                            metaData: {name: "2021 Expenses.csv"},
-                                            type: "FILE",
-                                            ref: "abc",
-                                            parentKey: "abc",
-                                            children: []
-                                        }}
-                                    />
+                            {userLogs.concat(nodeLogs)
+                                .sort((a, b) => a.timestamp > b.timestamp ? -1 : 1)
+                                .map((activity, index) => {
 
-                                );
-                            })}
+                                    switch (activity.activityType) {
+                                        /*
+                                        // user
+                                        case ActivityType.USER_CREATION:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);
+                                        case ActivityType.USER_REGISTRATION:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);
+                                        case ActivityType.USER_LOGIN:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);
+                                        case ActivityType.USER_UPDATE:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);
+                                        case ActivityType.USER_DELETION:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);
+                                        case ActivityType.USER_VALIDATION:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);
+
+                                        // folder
+                                        case ActivityType.FOLDER_CREATION:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);
+                                        case ActivityType.FOLDER_DELETION:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);
+                                        case ActivityType.FOLDER_MOVING:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);
+
+                                        // file
+                                        case ActivityType.FILE_DELETION:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);
+                                        case ActivityType.FILE_DOWNLOAD:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);
+                                        case ActivityType.FILE_MOVING:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);
+                                        case ActivityType.FILE_OVERWRITE:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);
+                                        case ActivityType.FILE_SHARING:
+                                            return (<UserCreationActivity
+                                                key={index}
+                                                user={activity.subject}
+                                            />);*/
+
+                                        case ActivityType.FILE_UPLOAD:
+                                            const node = decryptFileSystem(activity.node, 0);
+                                            if (node)
+                                                return (<FileUploadActivity
+                                                    key={index}
+                                                    activity={{user: activity.curUser, timestamp: activity.timestamp}}
+                                                    node={node}
+                                                />);
+                                    }
+                                })
+                            }
                         </div>
                     }
                     </ContentTransition>

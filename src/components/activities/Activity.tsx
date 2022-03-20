@@ -3,6 +3,7 @@ import User from "../../model/User";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faUser} from "@fortawesome/free-solid-svg-icons";
 import Badge from "../Badge";
+import {timeSince} from "../../util/string";
 
 export interface ActivityProps {
     user: User;
@@ -31,7 +32,7 @@ function Activity(props: Props): JSX.Element {
                 {props.children}
             </p>
 
-            <Badge text={props.activity.timestamp.toString()} size="small" colour="light" className="my-auto absolute transform -translate-x-1/2 right-0 mt-1" />
+            <Badge text={`${timeSince(props.activity.timestamp)} ago`} size="small" colour="light" className="my-auto absolute transform -translate-x-1/2 right-0 mt-1" />
         </div>
     );
 }
