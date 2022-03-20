@@ -60,7 +60,8 @@ function SharePage(): JSX.Element {
                             ref: "",
                             shareLink: response.data.link,
                             tag: encryptedNode.tag,
-                            type: encryptedNode.type
+                            type: encryptedNode.type,
+                            shares: []
                         });
                     } catch (e) {
                         console.error(e)

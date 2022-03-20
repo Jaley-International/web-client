@@ -10,9 +10,8 @@ import {
     faCloudDownloadAlt, faExclamationTriangle, faFileImport,
     faGripLinesVertical, faLock,
     faPencilAlt,
-    faShareAlt,
-    faUserFriends,
-    faUsersCog
+    faShareAlt, faUser,
+    faUserFriends
 } from "@fortawesome/free-solid-svg-icons";
 import OptionsButton from "../buttons/OptionsButton";
 import ContextMenuItem from "../containers/contextmenu/ContextMenuItem";
@@ -313,12 +312,17 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                             </td>
                                             <td className="py-2 px-4">
                                                 <div className="flex">
-                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                                    <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
+                                                    {node.shares.map((share, index) => {
+                                                        if (index < 5) {
+                                                            if (share.recipient.profilePicture) {
+                                                                return (<div key={index} title={`${share.recipient.firstName} ${share.recipient.lastName}`} className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: share.recipient.profilePicture}}/>);
+                                                            } else {
+                                                                return (<div key={index} title={`${share.recipient.firstName} ${share.recipient.lastName}`} className="grid h-9 w-9 rounded-full bg-silver my-auto -mr-3"><FontAwesomeIcon className="m-auto text-silver-dark" icon={faUser}/></div>);
+                                                            }
+                                                        } else if (index === 5) {
+                                                            return (<div key={index} className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+{node.shares.length - 5}&nbsp;</div>);
+                                                        }
+                                                    })}
                                                 </div>
                                             </td>
                                             <td className="py-2 px-4">

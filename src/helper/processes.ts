@@ -51,6 +51,7 @@ export interface Node {
     ref: string;
     parentKey: Hex;
     children: Node[];
+    shares: Share[];
     shareLink?: ShareLink;
 }
 
@@ -509,7 +510,8 @@ export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number
             parentKey: "",
             metaData: {name: "root"},
             ref: encryptedNode.ref,
-            type: encryptedNode.type
+            type: encryptedNode.type,
+            shares: []
         };
 
     } else {
@@ -542,7 +544,8 @@ export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number
                 parentKey: decrypt("AES-CTR", nodeKey, encryptedNode.iv, encryptedNode.parentEncryptedKey),
                 metaData: JSON.parse(decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedMetadata)),
                 ref: encryptedNode.ref,
-                type: encryptedNode.type
+                type: encryptedNode.type,
+                shares: encryptedNode.shares
             }
         }
     }
