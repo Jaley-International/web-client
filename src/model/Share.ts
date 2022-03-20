@@ -4,7 +4,6 @@ export default interface Share {
     id: number;
     shareKey: string;
     shareSignature: string;
-    //sender: User;
+    sender: User;
     recipient: User;
-    //node: Node;
 }

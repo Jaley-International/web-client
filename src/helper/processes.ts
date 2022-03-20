@@ -16,6 +16,7 @@ import {
 } from "./security";
 import getConfig from "next/config";
 import User, {UserAccessLevel} from "../model/User";
+import Share from "../model/Share";
 
 export interface EncryptedNode {
     id: number;
@@ -26,6 +27,9 @@ export interface EncryptedNode {
     type: "FOLDER" | "FILE";
     ref: string;
     parentEncryptedKey: Hex;
+    owner: User,
+    shares: Share[];
+    parent: EncryptedNode;
     children: EncryptedNode[];
 }
 
@@ -127,7 +131,7 @@ export async function register(registerKey: string, password: string, update: (s
         encryptedMasterKey: encryptedMasterKey,
         hashedAuthenticationKey: hashedAuthenticationKey,
         encryptedRsaPrivateSharingKey: encryptedPrivateSharingKey,
-        rsaPublicSharingKey: publicSharingKey
+        rsaPublicSharingKey: publicSharingKey,
     };
 
     update(RegisterStep.SUBMITTING);
@@ -473,6 +477,8 @@ export async function createNodeShareLink(node: Node): Promise<ShareLink | null>
  */
 export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number = 0): Node | null {
 
+    const username = localStorage.getItem("username"); // current user username
+
     // Fetch Master Key
     const masterKey = localStorage.getItem("masterKey");
     if (!masterKey)
@@ -482,10 +488,18 @@ export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number
     if (maxDepth < 0)
         return null;
 
-    let node: Node | null;
+    // Checking if node is shared with user
+    let share: Share | null = null;
+    for (let s of encryptedNode.shares)
+        if (s.recipient.username === username)
+            share = s;
 
-    // Decrypt current node
+    let node: Node | null = null;
+
+
     if (encryptedNode.id === 1) {
+
+        // No decryption when node is root
         node = {
             id: encryptedNode.id,
             children: [],
@@ -497,32 +511,51 @@ export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number
             ref: encryptedNode.ref,
             type: encryptedNode.type
         };
+
     } else {
+
+        let nodeKey: Hex | null = null;
         const iv = forge.util.hexToBytes(encryptedNode.iv);
-        const nodeKey = decrypt("AES-CTR", masterKey, iv, encryptedNode.encryptedNodeKey);
-        node = {
-            id: encryptedNode.id,
-            children: [],
-            iv: encryptedNode.iv,
-            tag: encryptedNode.tag,
-            nodeKey: nodeKey,
-            parentKey: decrypt("AES-CTR", nodeKey, encryptedNode.iv, encryptedNode.parentEncryptedKey),
-            metaData: JSON.parse(decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedMetadata)),
-            ref: encryptedNode.ref,
-            type: encryptedNode.type
+
+        if (encryptedNode.owner.username === username) {
+
+            // Decryption when user owns the node
+            nodeKey = decrypt("AES-CTR", masterKey, iv, encryptedNode.encryptedNodeKey);
+
+        } else if (share) {
+
+            // Decryption when node is shared with user
+            const privateSharingKey = localStorage.getItem("privateSharingKey");
+            if (privateSharingKey)
+                nodeKey = rsaPrivateDecrypt(privateSharingKey, share.shareKey);
+        }
+
+        //TODO Decryption when user is admin
+
+        if (nodeKey) {
+            node = {
+                id: encryptedNode.id,
+                children: [],
+                iv: encryptedNode.iv,
+                tag: encryptedNode.tag,
+                nodeKey: nodeKey,
+                parentKey: decrypt("AES-CTR", nodeKey, encryptedNode.iv, encryptedNode.parentEncryptedKey),
+                metaData: JSON.parse(decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedMetadata)),
+                ref: encryptedNode.ref,
+                type: encryptedNode.type
+            }
         }
     }
 
     // Decrypt children
     if (maxDepth > 0) {
         for (const encryptedChild of encryptedNode.children) {
-            // TODO Check node ownership
             try {
                 const child = decryptFileSystem(encryptedChild, maxDepth - 1);
-                if (child)
+                if (node && child)
                     node.children.push(child);
             } catch (_) {
-                console.warn(`Could not decrypt node ${encryptedChild.id}. Not owner ?`);
+                console.warn(`Could not decrypt node ${encryptedChild.id}.`);
             }
         }
     }
