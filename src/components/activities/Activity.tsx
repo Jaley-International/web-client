@@ -4,17 +4,23 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faUser} from "@fortawesome/free-solid-svg-icons";
 import Badge from "../Badge";
 
-interface Props {
+export interface ActivityProps {
     user: User;
+    timestamp: number;
+}
+
+interface Props {
+    activity: ActivityProps;
+    children: JSX.Element;
 }
 
 function Activity(props: Props): JSX.Element {
     return (
         <div className="bg-bg shadow-card px-2 py-3 rounded-xl flex text-xs">
-            {props.user.profilePicture ?
+            {props.activity.user.profilePicture ?
                 <div
                     className="bg-cover bg-center w-9 h-9 rounded-full mr-1"
-                    style={{backgroundImage: `url(${props.user.profilePicture})`}}/>
+                    style={{backgroundImage: `url(${props.activity.user.profilePicture})`}}/>
                 :
                 <div
                     className="grid h-9 w-9 rounded-full bg-silver my-auto mr-1">
@@ -22,13 +28,10 @@ function Activity(props: Props): JSX.Element {
                 </div>
             }
             <p className="my-auto text-grey-600">
-                <span className="text-grey-800 font-medium cursor-pointer">{props.user.firstName} {props.user.lastName}</span>
-                &nbsp;uploaded the file
-                "<span className="text-grey-800 font-medium cursor-pointer">2021 Expenses.csv</span>" into&nbsp;
-                <span className="text-grey-800 font-medium cursor-pointer">Budget</span> / <span className="text-grey-800 font-medium cursor-pointer">2021</span> / <span className="text-grey-800 font-medium cursor-pointer">Expense reports</span>.
+                {props.children}
             </p>
 
-            <Badge text="21 minutes ago" size="small" colour="light" className="my-auto absolute transform -translate-x-1/2 right-0 mt-1" />
+            <Badge text={props.activity.timestamp.toString()} size="small" colour="light" className="my-auto absolute transform -translate-x-1/2 right-0 mt-1" />
         </div>
     );
 }
