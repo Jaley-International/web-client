@@ -24,6 +24,7 @@
             "lock-file": "Verrouiller le fichier",
             "lock-folder": "Verrouiller le dossier",
             "overwrite": "Écraser",
+            "view-history": "Consulter l'historique",
             "rename": "Renommer",
             "delete": "Supprimer",
             "cancel": "Annuler",

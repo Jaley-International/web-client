@@ -24,6 +24,7 @@
             "lock-file": "Lock file",
             "lock-folder": "Lock folder",
             "overwrite": "Overwrite",
+            "view-history": "View activity log",
             "rename": "Rename",
             "delete": "Delete",
             "cancel": "Cancel",
