@@ -8,7 +8,7 @@ import {
 import {
     faChevronCircleLeft,
     faCloudDownloadAlt, faExclamationTriangle, faFileImport,
-    faGripLinesVertical, faLock,
+    faGripLinesVertical, faListUl, faLock,
     faPencilAlt,
     faShareAlt, faUser,
     faUserFriends
@@ -336,6 +336,7 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                                 setModalNodeTarget(node);
                                                                 setShowShareLinkModal(true);
                                                             }}/>
+                                                            <ContextMenuItem name={t("generic.action.view-history")} icon={faListUl} href={`/activity?node=${node.id}`} />
                                                             <ContextMenuItem name={t("generic.action.lock-file")} icon={faLock} action={() => {
                                                                 props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                             }}/>
@@ -362,6 +363,7 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                                 setModalNodeTarget(node);
                                                                 setShowShareLinkModal(true);
                                                             }}/>
+                                                            <ContextMenuItem name={t("generic.action.view-history")} icon={faListUl} href={`/activity?node=${node.id}`} />
                                                             <ContextMenuItem name={t("generic.action.lock-file")} icon={faLock} action={() => {
                                                                 props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                             }}/>

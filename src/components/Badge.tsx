@@ -1,8 +1,13 @@
+import {faTimes} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+
 interface Props {
     text: string;
     size: "large" | "medium" | "small" | "extrasmall";
-    colour: "blue" | "green" | "orange" | "red" | "cyan" | "dark";
+    colour: "blue" | "green" | "orange" | "red" | "cyan" | "dark" | "light";
     className?: string;
+    removeCallback?: () => void;
+    clickCallback?: () => void;
 }
 
 function Badge(props: Props): JSX.Element {
@@ -15,9 +20,27 @@ function Badge(props: Props): JSX.Element {
         sizeClass = "rounded-md px-2 py-0.5 text-4xs";
 
     return (
-        <span className={`font-semibold text-${props.colour} bg-${props.colour}-soft ${sizeClass} ${props.className}`}>
-            {props.text}
-        </span>
+        <>
+            <span
+                className={`font-semibold select-none
+                    ${props.colour === "dark" ?
+                        `text-white bg-${props.colour}` : `${props.colour === "light" ? `text-txt-heading bg-silver` : `text-${props.colour} bg-${props.colour}-soft`}`
+                    }
+                    ${props.clickCallback ? "cursor-pointer" : ""}
+                    ${props.removeCallback ? "pr-2" : ""}
+                    ${sizeClass}
+                    ${props.className}`
+                }
+            >
+                <span onClick={props.clickCallback}>
+                    {props.text}
+                </span>
+                {props.removeCallback &&
+                <span className="font-light cursor-pointer" onClick={props.removeCallback}>
+                    &nbsp;&nbsp;&nbsp;<FontAwesomeIcon icon={faTimes} />
+                </span>}
+            </span>
+        </>
     );
 }
 

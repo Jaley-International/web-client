@@ -23,6 +23,7 @@
             "lock-file": "Lock file",
             "lock-folder": "Lock folder",
             "overwrite": "Overwrite",
+            "view-history": "View activity log",
             "rename": "Rename",
             "delete": "Delete",
             "cancel": "Cancel",
@@ -60,7 +61,6 @@
     },
     "navbar": {
         "files": "Files",
-        "notifications": "Notifications",
         "my-account": "My account",
         "activity-log": "Activity log",
         "admin-panel": "Admin panel",
