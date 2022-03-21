@@ -15,7 +15,9 @@ import Log, {ActivityType} from "../../model/Log";
 import FileUploadActivity from "../../components/activities/FileUploadActivity";
 import FileSharingActivity from "../../components/activities/FileSharingActivity";
 import FileOverwriteActivity from "../../components/activities/FileOverwriteActivity";
-import FileMovingActivity from "../../components/activities/FileMovingActivity";
+import NodeMovingActivity from "../../components/activities/NodeMovingActivity";
+import FileDownloadActivity from "../../components/activities/FileDownloadActivity";
+import FileDeletionActivity from "../../components/activities/FileDeletionActivity";
 
 function ActivityPage(): JSX.Element {
 
@@ -128,6 +130,8 @@ function ActivityPage(): JSX.Element {
                                 .map((activity, index) => {
 
                                     let node: Node | null;
+                                    let oldParent: Node | null;
+                                    let newParent: Node | null;
 
                                     switch (activity.activityType) {
 
@@ -174,29 +178,44 @@ function ActivityPage(): JSX.Element {
                                             return (<UserCreationActivity
                                                 key={index}
                                                 user={activity.subject}
-                                            />);
-                                        case ActivityType.FOLDER_MOVING:
-                                            return (<UserCreationActivity
-                                                key={index}
-                                                user={activity.subject}
-                                            />);
+                                            />);*/
 
                                         // file
                                         case ActivityType.FILE_DELETION:
-                                            return (<UserCreationActivity
-                                                key={index}
-                                                user={activity.subject}
-                                            />);
+                                            node = decryptFileSystem(activity.node, 0);
+                                            if (node)
+                                                return (<FileDeletionActivity
+                                                    key={index}
+                                                    activity={{user: activity.curUser, timestamp: activity.timestamp}}
+                                                    node={node}
+                                                />);
+                                            break;
+
                                         case ActivityType.FILE_DOWNLOAD:
-                                            return (<UserCreationActivity
-                                                key={index}
-                                                user={activity.subject}
-                                            />);
+                                            node = decryptFileSystem(activity.node, 0);
+                                            if (node)
+                                                return (<FileDownloadActivity
+                                                    key={index}
+                                                    activity={{user: activity.curUser, timestamp: activity.timestamp}}
+                                                    node={node}
+                                                />);
+                                            break;
+
                                         case ActivityType.FILE_MOVING:
-                                            return (<UserCreationActivity
-                                                key={index}
-                                                user={activity.subject}
-                                            />);*/
+                                        case ActivityType.FOLDER_MOVING:
+                                            node = decryptFileSystem(activity.node, 0);
+                                            oldParent = decryptFileSystem(activity.oldParent, 0);
+                                            newParent = decryptFileSystem(activity.newParent, 0);
+                                            if (node && oldParent && newParent) {
+                                                return (<NodeMovingActivity
+                                                    key={index}
+                                                    activity={{user: activity.curUser, timestamp: activity.timestamp}}
+                                                    node={node}
+                                                    oldParent={oldParent}
+                                                    newParent={newParent}
+                                                />);
+                                            }
+                                            break;
 
                                         case ActivityType.FILE_OVERWRITE:
                                             node = decryptFileSystem(activity.node, 0);

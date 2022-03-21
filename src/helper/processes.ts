@@ -492,12 +492,12 @@ export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number
 
     // Checking if node is shared with user
     let share: Share | null = null;
-    for (let s of encryptedNode.shares)
-        if (s.recipient.username === username)
-            share = s;
+    if (encryptedNode.shares)
+        for (let s of encryptedNode.shares)
+            if (s.recipient.username === username)
+                share = s;
 
     let node: Node | null = null;
-
 
     if (encryptedNode.id === 1) {
 
@@ -520,7 +520,7 @@ export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number
         let nodeKey: Hex | null = null;
         const iv = forge.util.hexToBytes(encryptedNode.iv);
 
-        if (encryptedNode.owner.username === username) {
+        if (encryptedNode.owner && encryptedNode.owner.username === username) {
 
             // Decryption when user owns the node
             nodeKey = decrypt("AES-CTR", masterKey, iv, encryptedNode.encryptedNodeKey);
