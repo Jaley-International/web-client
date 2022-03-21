@@ -13,6 +13,8 @@ import getConfig from "next/config";
 import {useTranslations} from "use-intl";
 import Log, {ActivityType} from "../../model/Log";
 import FileUploadActivity from "../../components/activities/FileUploadActivity";
+import FileSharingActivity from "../../components/activities/FileSharingActivity";
+import FileOverwriteActivity from "../../components/activities/FileOverwriteActivity";
 
 function ActivityPage(): JSX.Element {
 
@@ -123,6 +125,8 @@ function ActivityPage(): JSX.Element {
                                 .sort((a, b) => a.timestamp > b.timestamp ? -1 : 1)
                                 .map((activity, index) => {
 
+                                    let node: Node | null;
+
                                     switch (activity.activityType) {
                                         /*
                                         // user
@@ -189,26 +193,40 @@ function ActivityPage(): JSX.Element {
                                             return (<UserCreationActivity
                                                 key={index}
                                                 user={activity.subject}
-                                            />);
-                                        case ActivityType.FILE_OVERWRITE:
-                                            return (<UserCreationActivity
-                                                key={index}
-                                                user={activity.subject}
-                                            />);
-                                        case ActivityType.FILE_SHARING:
-                                            return (<UserCreationActivity
-                                                key={index}
-                                                user={activity.subject}
                                             />);*/
 
+                                        case ActivityType.FILE_OVERWRITE:
+                                            node = decryptFileSystem(activity.node, 0);
+                                            if (node) {
+                                                return (<FileOverwriteActivity
+                                                    key={index}
+                                                    activity={{user: activity.curUser, timestamp: activity.timestamp}}
+                                                    node={node}
+                                                />);
+                                            }
+                                            break;
+
+                                        case ActivityType.FILE_SHARING:
+                                            node = decryptFileSystem(activity.node, 0);
+                                            if (node && activity.sharedWith) {
+                                                return (<FileSharingActivity
+                                                    key={index}
+                                                    activity={{user: activity.curUser, timestamp: activity.timestamp}}
+                                                    node={node}
+                                                    recipient={activity.sharedWith}
+                                                />);
+                                            }
+                                            break;
+
                                         case ActivityType.FILE_UPLOAD:
-                                            const node = decryptFileSystem(activity.node, 0);
+                                            node = decryptFileSystem(activity.node, 0);
                                             if (node)
                                                 return (<FileUploadActivity
                                                     key={index}
                                                     activity={{user: activity.curUser, timestamp: activity.timestamp}}
                                                     node={node}
                                                 />);
+                                            break;
                                     }
                                 })
                             }
