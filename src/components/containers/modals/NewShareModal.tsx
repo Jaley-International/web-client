@@ -6,9 +6,9 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faUser} from "@fortawesome/free-regular-svg-icons";
 import Button from "../../buttons/Button";
 import TextInput from "../../inputs/TextInput";
-import {request, Status} from "../../../helper/communication";
+import {request} from "../../../helper/communication";
 import getConfig from "next/config";
-import User from "../../../model/User";
+import User, {UserStatus} from "../../../model/User";
 import {ToastProps} from "../../toast/Toast";
 
 interface Props {
@@ -31,7 +31,23 @@ function NewShareModal(props: Props): JSX.Element {
     const fetchShares = async () => {
         //TODO get users who are not shared with the node
         const usersListResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/users`, {});
-        const users = usersListResponse.data.users;
+        let users: User[] = usersListResponse.data.users;
+
+        // filters out users who already have access to the node
+        users = users.filter(user => {
+
+            // checking if user is owner of the node
+            if (props.node.owner && user.username === props.node.owner.username) return false;
+
+            // checking if already shared
+            for (let share of props.node.shares)
+                if (user.username === share.recipient.username)
+                    return false;
+
+            // checking if user registered
+            return user.userStatus === UserStatus.OK;
+        });
+
         setUsers(users);
         setLoaded(true);
     };

@@ -50,6 +50,7 @@ export interface Node {
     type: "FOLDER" | "FILE";
     ref: string;
     parentKey: Hex;
+    owner?: User;
     children: Node[];
     shares: Share[];
     shareLink?: ShareLink;
@@ -545,6 +546,7 @@ export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number
                 metaData: JSON.parse(decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedMetadata)),
                 ref: encryptedNode.ref,
                 type: encryptedNode.type,
+                owner: encryptedNode.owner,
                 shares: encryptedNode.shares
             }
         }
