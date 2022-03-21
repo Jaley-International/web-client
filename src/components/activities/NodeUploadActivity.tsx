@@ -9,7 +9,7 @@ interface Props {
     node: Node;
 }
 
-function FileUploadActivity(props: Props): JSX.Element {
+function NodeUploadActivity(props: Props): JSX.Element {
 
     const {publicRuntimeConfig} = getConfig();
 
@@ -42,7 +42,7 @@ function FileUploadActivity(props: Props): JSX.Element {
         <Activity activity={props.activity}>
             <>
                 <span className="text-grey-800 font-medium cursor-pointer">{props.activity.user.firstName} {props.activity.user.lastName}</span>
-                &nbsp;uploaded the file
+                &nbsp;uploaded the {props.node.type === "FILE" ? "file" : "folder"}&nbsp;
                 &quot;<span className="text-grey-800 font-medium cursor-pointer">{props.node.metaData.name}</span>&quot; into&nbsp;
 
                 {path.map((parent, index) => {
@@ -53,4 +53,4 @@ function FileUploadActivity(props: Props): JSX.Element {
     );
 }
 
-export default FileUploadActivity;
+export default NodeUploadActivity;

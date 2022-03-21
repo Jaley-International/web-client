@@ -22,8 +22,8 @@ function NodeMovingActivity(props: Props): JSX.Element {
     const [loaded, setLoaded] = useState<boolean>(false);
 
     const fetchPaths = async () => {
-        const oldParentPathResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${props.oldParent}/path`, {});
-        const newParentPathResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${props.newParent}/path`, {});
+        const oldParentPathResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${props.oldParent.id}/path`, {});
+        const newParentPathResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${props.newParent.id}/path`, {});
 
         // decryption
 
@@ -71,6 +71,7 @@ function NodeMovingActivity(props: Props): JSX.Element {
                         return <span key={index} className="text-grey-800 font-medium cursor-pointer">/{parent.metaData.name}</span>;
                     })}
                 </span>
+                &quot;
             </>
         </Activity>
     );

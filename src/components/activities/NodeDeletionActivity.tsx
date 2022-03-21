@@ -7,16 +7,16 @@ interface Props {
     node: Node;
 }
 
-function FileDeletionActivity(props: Props): JSX.Element {
+function NodeDeletionActivity(props: Props): JSX.Element {
     return (
         <Activity activity={props.activity}>
             <>
                 <span className="text-grey-800 font-medium cursor-pointer">{props.activity.user.firstName} {props.activity.user.lastName}</span>
-                &nbsp;deleted the file
+                &nbsp;deleted the {props.node.type === "FILE" ? "file" : "folder"}&nbsp;
                 &quot;<span className="text-grey-800 font-medium cursor-pointer">{props.node.metaData.name}</span>
             </>
         </Activity>
     );
 }
 
-export default FileDeletionActivity;
+export default NodeDeletionActivity;

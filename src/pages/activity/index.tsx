@@ -1,6 +1,5 @@
 import Navbar from "../../components/navigation/navbar/Navbar";
 import Header from "../../components/sections/Header";
-import ContentTransition from "../../components/sections/ContentTransition";
 import React, {useEffect, useState} from "react";
 import {GetStaticProps} from "next";
 import EmptyActivities from "../../components/sections/EmptyActivities";
@@ -12,12 +11,12 @@ import {request} from "../../helper/communication";
 import getConfig from "next/config";
 import {useTranslations} from "use-intl";
 import Log, {ActivityType} from "../../model/Log";
-import FileUploadActivity from "../../components/activities/FileUploadActivity";
+import NodeUploadActivity from "../../components/activities/NodeUploadActivity";
 import FileSharingActivity from "../../components/activities/FileSharingActivity";
 import FileOverwriteActivity from "../../components/activities/FileOverwriteActivity";
 import NodeMovingActivity from "../../components/activities/NodeMovingActivity";
 import FileDownloadActivity from "../../components/activities/FileDownloadActivity";
-import FileDeletionActivity from "../../components/activities/FileDeletionActivity";
+import NodeDeletionActivity from "../../components/activities/NodeDeletionActivity";
 
 function ActivityPage(): JSX.Element {
 
@@ -119,8 +118,7 @@ function ActivityPage(): JSX.Element {
                     </div>
                 </Header>
 
-                {loaded &&
-                    <ContentTransition>
+                {loaded && <>
                     {(!userLogs && !nodeLogs) ?
                         <EmptyActivities />
                         :
@@ -166,25 +164,14 @@ function ActivityPage(): JSX.Element {
                                             return (<UserCreationActivity
                                                 key={index}
                                                 user={activity.subject}
-                                            />);
-
-                                        // folder
-                                        case ActivityType.FOLDER_CREATION:
-                                            return (<UserCreationActivity
-                                                key={index}
-                                                user={activity.subject}
-                                            />);
-                                        case ActivityType.FOLDER_DELETION:
-                                            return (<UserCreationActivity
-                                                key={index}
-                                                user={activity.subject}
                                             />);*/
 
-                                        // file
+                                        // node activities
                                         case ActivityType.FILE_DELETION:
+                                        case ActivityType.FOLDER_DELETION:
                                             node = decryptFileSystem(activity.node, 0);
                                             if (node)
-                                                return (<FileDeletionActivity
+                                                return (<NodeDeletionActivity
                                                     key={index}
                                                     activity={{user: activity.curUser, timestamp: activity.timestamp}}
                                                     node={node}
@@ -206,7 +193,7 @@ function ActivityPage(): JSX.Element {
                                             node = decryptFileSystem(activity.node, 0);
                                             oldParent = decryptFileSystem(activity.oldParent, 0);
                                             newParent = decryptFileSystem(activity.newParent, 0);
-                                            if (node && oldParent && newParent) {
+                                            if (!!node && !!oldParent && !!newParent) {
                                                 return (<NodeMovingActivity
                                                     key={index}
                                                     activity={{user: activity.curUser, timestamp: activity.timestamp}}
@@ -241,9 +228,10 @@ function ActivityPage(): JSX.Element {
                                             break;
 
                                         case ActivityType.FILE_UPLOAD:
+                                        case ActivityType.FOLDER_CREATION:
                                             node = decryptFileSystem(activity.node, 0);
                                             if (node)
-                                                return (<FileUploadActivity
+                                                return (<NodeUploadActivity
                                                     key={index}
                                                     activity={{user: activity.curUser, timestamp: activity.timestamp}}
                                                     node={node}
@@ -254,7 +242,7 @@ function ActivityPage(): JSX.Element {
                             }
                         </div>
                     }
-                    </ContentTransition>
+                    </>
                 }
 
             </div>
