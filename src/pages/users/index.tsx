@@ -1,6 +1,6 @@
 import Navbar from "../../components/navigation/navbar/Navbar";
 import Header from "../../components/sections/Header";
-import {faPlus, faUser, faUserFriends, faIdCardAlt} from "@fortawesome/free-solid-svg-icons";
+import {faPlus, faUser, faUserFriends, faIdCardAlt, faListUl} from "@fortawesome/free-solid-svg-icons";
 import {faEye, faTimesCircle} from "@fortawesome/free-regular-svg-icons";
 import Card from "../../components/containers/Card";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -11,7 +11,7 @@ import DeleteUserModal from "../../components/containers/modals/DeleteUserModal"
 import User, {UserAccessLevel} from "../../model/User";
 import OptionsButton from "../../components/buttons/OptionsButton";
 import ContextMenuItem from "../../components/containers/contextmenu/ContextMenuItem";
-import {request} from "../../helper/communication";
+import {request, Status} from "../../helper/communication";
 import {deleteAccount} from "../../helper/processes";
 import getConfig from "next/config";
 import Badge from "../../components/Badge";
@@ -119,6 +119,7 @@ function UserList(): JSX.Element {
                                                 <OptionsButton>
                                                     <ContextMenuItem name={t("generic.action.view-edit")} icon={faEye}
                                                                      href={`/users/${user.username}`}/>
+                                                    <ContextMenuItem name={t("generic.action.view-history")} icon={faListUl} href={`/activity?user=${user.username}`} />
                                                     <ContextMenuItem name={t("generic.action.delete")} icon={faTimesCircle}
                                                                      action={() => {
                                                                          setModalUserTarget(user);
@@ -142,7 +143,7 @@ function UserList(): JSX.Element {
 
                     submitCallback={async () => {
                         const statusCode = await deleteAccount(modalUserTarget?.username);
-                        if (statusCode === "SUCCESS") {
+                        if (statusCode === Status.SUCCESS) {
                             await fetchUsers();
                             addToast({
                                 type: "success",

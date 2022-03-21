@@ -12,10 +12,10 @@ import {faCalendar, faFile, faFileWord} from "@fortawesome/free-regular-svg-icon
 import Badge from "../../components/Badge";
 import User, {UserAccessLevel} from "../../model/User";
 import TextInput from "../../components/inputs/TextInput";
-import {request} from "../../helper/communication";
+import {request, Status} from "../../helper/communication";
 import getConfig from "next/config";
 import {capitalize} from "../../util/string";
-import {updateAccount} from "../../helper/processes";
+import {deleteAccount, updateAccount} from "../../helper/processes";
 import ToastContext from "../../contexts/ToastContext";
 import ContentTransition from "../../components/sections/ContentTransition";
 import AutocompleteTextInput from "../../components/inputs/AutocompleteTextInput";
@@ -23,6 +23,7 @@ import {getGroupsJobsSuggestions} from "../../util/user";
 import {GetStaticPaths, GetStaticProps} from "next";
 import {useTranslations} from "use-intl";
 import Select from "../../components/inputs/Select";
+import DeleteUserModal from "../../components/containers/modals/DeleteUserModal";
 
 function UserPage(): JSX.Element {
 
@@ -37,9 +38,11 @@ function UserPage(): JSX.Element {
     const [user, setUser] = useState<User | null>(null);
     const [loaded, setLoaded] = useState<boolean>(false);
 
+    const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+
     const fetchUser = async (username: string) => {
         const response = await request("GET", `${publicRuntimeConfig.apiUrl}/users/${username}`, {});
-        if (response.status === "SUCCESS") {
+        if (response.status === Status.SUCCESS) {
             const rawUser = response.data.user;
             setUser({
                 username: rawUser.username,
@@ -50,7 +53,8 @@ function UserPage(): JSX.Element {
                 job: rawUser.job || "Unknown",
                 group: rawUser.group || "Unknown",
                 accessLevel: rawUser.accessLevel,
-                createdAt: rawUser.createdAt
+                createdAt: rawUser.createdAt,
+                userStatus: rawUser.userStatus
             });
         } else {
             setUser(null);
@@ -292,7 +296,7 @@ function UserPage(): JSX.Element {
 
                                         const status = await updateAccount(user, firstname, lastname, email, group, job, accessLevel as UserAccessLevel);
 
-                                        if (status === "SUCCESS")
+                                        if (status === Status.SUCCESS)
                                             addToast({
                                                 type: "success",
                                                 title: t("pages.user.details.toast.success.title"),
@@ -378,7 +382,7 @@ function UserPage(): JSX.Element {
                                             </div>
                                             <div className="w-96 text-center my-auto h-full">
                                                 <Button size="medium" type="regular" colour="red" onClick={() => {
-                                                    addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
+                                                    setShowDeleteModal(true);
                                                 }}>{t("pages.user.details.delete.button")}</Button>
                                             </div>
                                         </div>
@@ -413,6 +417,33 @@ function UserPage(): JSX.Element {
 
 
             </div>
+            {showDeleteModal && user &&
+                <DeleteUserModal user={user} submitCallback={async () => {
+                        const statusCode = await deleteAccount(user.username);
+                        if (statusCode === Status.SUCCESS) {
+                            addToast({
+                                type: "success",
+                                title: t("pages.user.list.toast.success.title"),
+                                message: t("pages.user.list.toast.success.message")
+                            });
+                            await router.push("/users");
+                        } else if (statusCode === "ERROR_USER_NOT_FOUND") {
+                            addToast({
+                                type: "error",
+                                title: t("pages.user.list.toast.not-found.title"),
+                                message: t("pages.user.list.toast.not-found.message")
+                            });
+                        } else {
+                            addToast({
+                                type: "error",
+                                title: t("pages.user.list.toast.error.title"),
+                                message: t("pages.user.list.toast.error.message")
+                            });
+                        }
+                    }}
+                    closeCallback={() => setShowDeleteModal(false)}
+                />
+            }
         </div>
     );
 }

@@ -20,14 +20,15 @@
             "preview": "Aperçu",
             "download": "Télécharger",
             "share": "Partager",
-            "manage-permissions": "Modifier les permissions",
             "lock-file": "Verrouiller le fichier",
             "lock-folder": "Verrouiller le dossier",
             "overwrite": "Écraser",
+            "view-history": "Consulter l'historique",
             "rename": "Renommer",
             "delete": "Supprimer",
             "cancel": "Annuler",
-            "close": "Fermer"
+            "close": "Fermer",
+            "back": "Retour"
         },
         "user": {
             "title": "Utilisateurs",
@@ -60,7 +61,6 @@
     },
     "navbar": {
         "files": "Fichiers",
-        "notifications": "Notifications",
         "my-account": "Mon compte",
         "activity-log": "Journal d'activité",
         "admin-panel": "Panneau Administration",
@@ -96,17 +96,22 @@
                 "folder-name": "Nom du dossier",
                 "submit": "Créer le dossier"
             },
-            "link-share": {
-                "title": "Partage par lien",
-                "link": "Lien de partage privé"
+            "share": {
+                "title": "Partager",
+                "link": {
+                    "label": "Lien de partage privé",
+                    "folder-wip": "Le partage de dossier par lien est en cours de développement."
+                },
+                "internal": {
+
+                }
             }
         }
     },
     "pages": {
         "404": {
             "title": "Erreur 404",
-            "description": "La page/ressource que vous avez demandé n'éxiste pas.",
-            "back-button": "Retour"
+            "description": "La page/ressource que vous avez demandé n'éxiste pas."
         },
         "auth": {
             "login": {
@@ -322,6 +327,10 @@
                             "message": "Une erreur est survenue lors de la modification du fichier {name}."
                         }
                     }
+                },
+                "not-found": {
+                    "title": "Dossier introuvable",
+                    "message": "Le dossier demandé n'existe pas."
                 }
             }
         },

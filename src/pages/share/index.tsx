@@ -8,7 +8,7 @@ import Badge from "../../components/Badge";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {faCloud, faDownload, faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {base64UrlToHex, formatBytes} from "../../util/string";
-import {request} from "../../helper/communication";
+import {request, Status} from "../../helper/communication";
 import {ShareLink, Node, EncryptedNode, downloadFile} from "../../helper/processes";
 import forge from "node-forge";
 import {decrypt} from "../../helper/security";
@@ -41,7 +41,7 @@ function SharePage(): JSX.Element {
 
             request("GET", `${publicRuntimeConfig.apiUrl}/links/${id}/node`, {}).then((response) => {
 
-                if (response.status === "SUCCESS") {
+                if (response.status === Status.SUCCESS) {
 
                     const sharelink: ShareLink = response.data.link;
                     const encryptedNode: EncryptedNode = response.data.node;
@@ -60,7 +60,8 @@ function SharePage(): JSX.Element {
                             ref: "",
                             shareLink: response.data.link,
                             tag: encryptedNode.tag,
-                            type: encryptedNode.type
+                            type: encryptedNode.type,
+                            shares: []
                         });
                     } catch (e) {
                         console.error(e)
@@ -99,11 +100,11 @@ function SharePage(): JSX.Element {
                                 <div className="w-full h-full flex justify-center">
                                     <Button className="mx-auto my-auto w-32" size="medium" type="regular" colour="blue" onClick={async () => {
                                         const status = await downloadFile(node);
-                                        if (status === "ERROR_FETCH")
+                                        if (status === Status.ERROR_FETCH)
                                             addToast({type: "error", title: t("pages.file.list.toast.download.fail.title"), message: t("pages.file.list.toast.download.fail.message")});
-                                        else if (status === "ERROR_DECRYPT")
+                                        else if (status === Status.ERROR_DECRYPT)
                                             addToast({type: "error", title: t("pages.file.list.toast.download.decrypt.title"), message: t("pages.file.list.toast.download.decrypt.message")});
-                                        else if (status !== "SUCCESS")
+                                        else if (status !== Status.SUCCESS)
                                             addToast({type: "error", title: t("pages.file.list.toast.download.error.title"), message: t("pages.file.list.toast.download.error.message")});
                                     }}>
                                         <span><FontAwesomeIcon icon={faDownload} />&nbsp;&nbsp;{t("generic.action.download")}</span>

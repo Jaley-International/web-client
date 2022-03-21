@@ -40,14 +40,13 @@ function Navbar(): JSX.Element {
                 </Link>
 
                 <NavbarItem name={t("navbar.files")} icon={faFile} activeRoutes={[/^\/files$/]} href="/files" />
-                <NavbarItem name={t("navbar.notifications")} activeRoutes={[]} icon={faBell} badge="12" className="cursor-not-allowed" />
-                <NavbarItem name={t("navbar.my-account")} activeRoutes={[]} icon={faUserCircle} className="cursor-not-allowed" />
+                <NavbarItem name={t("navbar.activity-log")} icon={faListUl} activeRoutes={[/^\/activity.*$/]} href="/activity" />
 
                 <div className="w-full py-6">
                     <hr className="mx-auto w-2/3 text-grey-200" />
                 </div>
 
-                <NavbarItem name={t("navbar.activity-log")} activeRoutes={[]} icon={faListUl} className="cursor-not-allowed" />
+                <NavbarItem name={t("navbar.my-account")} activeRoutes={[]} icon={faUserCircle} className="cursor-not-allowed" />
                 <NavbarItem name={t("navbar.admin-panel")} activeRoutes={[/^\/users.*$/]} icon={faUserShield} href="/users" />
 
                 <NavbarItem name={t("navbar.logout")} active={false} activeRoutes={[]} icon={faSignOutAlt} className="absolute inset-x-0 bottom-2" action={async () => {

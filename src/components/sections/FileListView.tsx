@@ -8,30 +8,28 @@ import {
 import {
     faChevronCircleLeft,
     faCloudDownloadAlt, faExclamationTriangle, faFileImport,
-    faGripLinesVertical, faLock,
+    faGripLinesVertical, faListUl, faLock,
     faPencilAlt,
-    faShareAlt,
-    faUserFriends,
-    faUsersCog
+    faShareAlt, faUser,
+    faUserFriends
 } from "@fortawesome/free-solid-svg-icons";
 import OptionsButton from "../buttons/OptionsButton";
 import ContextMenuItem from "../containers/contextmenu/ContextMenuItem";
 import {
     createFolder,
-    createNodeShareLink,
     decryptFileSystem,
     downloadFile, EncryptedNode, moveNode,
     Node, overwriteFile,
     uploadFile
 } from "../../helper/processes";
-import {request} from "../../helper/communication";
+import {request, Status} from "../../helper/communication";
 import React, {forwardRef, Ref, useEffect, useImperativeHandle, useRef, useState} from "react";
 import {ToastProps} from "../toast/Toast";
 import getConfig from "next/config";
 import DeleteNodeModal from "../containers/modals/DeleteNodeModal";
 import OverwriteFileModal from "../containers/modals/OverwriteFileModal";
 import CreateFolderModal from "../containers/modals/CreateFolderModal";
-import ShareLinkModal from "../containers/modals/ShareLinkModal";
+import ShareModal from "../containers/modals/ShareModal";
 import Card from "components/containers/Card";
 import {nodeToDescription, nodeToIcon} from "../../util/node";
 import {useRouter} from "next/router";
@@ -39,7 +37,6 @@ import {capitalize} from "../../util/string";
 import {Heading2} from "../text/Headings";
 import Button from "../buttons/Button";
 import {useTranslations} from "use-intl";
-import Link from "next/link";
 
 interface Props {
     addToast: (toast: ToastProps) => void;
@@ -98,7 +95,7 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
 
     const fetchFilesystem = async () => {
         const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${currentFolderId}`, {});
-        if (response.status !== "SUCCESS") {
+        if (response.status !== Status.SUCCESS) {
             setLoaded(true);
             return;
         }
@@ -177,15 +174,15 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                             </span>
                         </div>
                         <div className="w-full p-10">
-                            <Heading2>Folder not found</Heading2>
-                            <span className="text-txt-body">The folder you requested does not exists.</span>
+                            <Heading2>{t("pages.file.list.not-found.title")}</Heading2>
+                            <span className="text-txt-body">{t("pages.file.list.not-found.message")}</span>
                         </div>
                         <div className="p-12">
                             <div className="w-full h-full flex justify-center">
                                 <Button className="mx-auto my-auto w-32" size="medium" type="regular" colour="dark" onClick={() => {
                                     changerFolder(1);
                                 }}>
-                                    <span><FontAwesomeIcon icon={faChevronCircleLeft} />&nbsp;&nbsp;Back</span>
+                                    <span><FontAwesomeIcon icon={faChevronCircleLeft} />&nbsp;&nbsp;{t("generic.action.back")}</span>
                                 </Button>
                             </div>
                         </div>
@@ -218,7 +215,7 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                          }
                      }}
                 >
-                    <Card title="Files" className="pb-2">
+                    <Card title={t("generic.file.title")} className="pb-2">
                         <table className="w-full">
                             <thead>
                             <tr className="border-b border-grey-200 bg-bg-light text-3xs text-txt-body-lightmuted uppercase">
@@ -315,12 +312,17 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                             </td>
                                             <td className="py-2 px-4">
                                                 <div className="flex">
-                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1458071103673-6a6e4c4a3413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80)"}}/>
-                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1470406852800-b97e5d92e2aa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80)"}}/>
-                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1502323777036-f29e3972d82f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                                    <div className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: "url(https://images.unsplash.com/photo-1521132293557-5b908a59d1e1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=60)"}}/>
-                                                    <div className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+4&nbsp;</div>
+                                                    {node.shares.map((share, index) => {
+                                                        if (index < 5) {
+                                                            if (share.recipient.profilePicture) {
+                                                                return (<div key={index} title={`${share.recipient.firstName} ${share.recipient.lastName}`} className="bg-cover bg-center w-9 h-9 rounded-full border-2 border-white -mr-3" style={{backgroundImage: share.recipient.profilePicture}}/>);
+                                                            } else {
+                                                                return (<div key={index} title={`${share.recipient.firstName} ${share.recipient.lastName}`} className="grid h-9 w-9 rounded-full bg-silver my-auto -mr-3"><FontAwesomeIcon className="m-auto text-silver-dark" icon={faUser}/></div>);
+                                                            }
+                                                        } else if (index === 5) {
+                                                            return (<div key={index} className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-tr from-silver-gradient-from to-silver-gradient-to text-2xs font-semibold text-txt-body tracking-tighter flex justify-center items-center">+{node.shares.length - 5}&nbsp;</div>);
+                                                        }
+                                                    })}
                                                 </div>
                                             </td>
                                             <td className="py-2 px-4">
@@ -331,11 +333,10 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                                 props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                             }}/>
                                                             <ContextMenuItem name={t("generic.action.share")} icon={faShareAlt} action={() => {
-                                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
+                                                                setModalNodeTarget(node);
+                                                                setShowShareLinkModal(true);
                                                             }}/>
-                                                            <ContextMenuItem name={t("generic.action.manage-permissions")} icon={faUsersCog} action={() => {
-                                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
-                                                            }}/>
+                                                            <ContextMenuItem name={t("generic.action.view-history")} icon={faListUl} href={`/activity?node=${node.id}`} />
                                                             <ContextMenuItem name={t("generic.action.lock-file")} icon={faLock} action={() => {
                                                                 props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                             }}/>
@@ -351,33 +352,18 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                                             }}/>
                                                             <ContextMenuItem name={t("generic.action.download")} icon={faCloudDownloadAlt} action={async () => {
                                                                 const status = await downloadFile(node);
-                                                                if (status === "ERROR_FETCH")
+                                                                if (status === Status.ERROR_FETCH)
                                                                     props.addToast({type: "error", title: "Failed to download", message: "An error occurred while fetching the file."});
-                                                                else if (status === "ERROR_DECRYPT")
+                                                                else if (status === Status.ERROR_DECRYPT)
                                                                     props.addToast({type: "error", title: "Failed to decrypt", message: "An error occurred while decrypting the file."});
-                                                                else if (status !== "SUCCESS")
+                                                                else if (status !== Status.SUCCESS)
                                                                     props.addToast({type: "error", title: "Failed to download", message: "An unexpected error occurred while downloading the file."});
                                                             }}/>
                                                             <ContextMenuItem name={t("generic.action.share")} icon={faShareAlt} action={async () => {
-
-                                                                const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/links`, {});
-                                                                if (response.status !== "SUCCESS")
-                                                                    return;
-
-                                                                if (response.data.links.length === 0) {
-                                                                    const shareLink = await createNodeShareLink(node);
-                                                                    if (shareLink)
-                                                                        node.shareLink = shareLink;
-                                                                } else {
-                                                                    node.shareLink = response.data.links[0];
-                                                                }
-
                                                                 setModalNodeTarget(node);
                                                                 setShowShareLinkModal(true);
                                                             }}/>
-                                                            <ContextMenuItem name={t("generic.action.manage-permissions")} icon={faUsersCog} action={() => {
-                                                                props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
-                                                            }}/>
+                                                            <ContextMenuItem name={t("generic.action.view-history")} icon={faListUl} href={`/activity?node=${node.id}`} />
                                                             <ContextMenuItem name={t("generic.action.lock-file")} icon={faLock} action={() => {
                                                                 props.addToast({type: "info", title: t("generic.toast.wip.title"), message: t("generic.toast.wip.message")});
                                                             }}/>
@@ -408,7 +394,7 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                         setModalNodeTarget(null);
                     }} submitCallback={async () => {
                         const response = await request("DELETE", `${publicRuntimeConfig.apiUrl}/file-system/${modalNodeTarget.id}`, {});
-                        if (response.status === "SUCCESS")
+                        if (response.status === Status.SUCCESS)
                             props.addToast({
                                 type: "success",
                                 title: t.rich("pages.file.list.toast.delete.success.title", {type: t(`generic.node.${modalNodeTarget?.type.toLowerCase()}`)}).toString(),
@@ -454,8 +440,8 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                         await fetchFilesystem();
                     }} />
                 }
-                {showShareLinkModal && modalNodeTarget && modalNodeTarget.shareLink &&
-                    <ShareLinkModal closeCallback={() => setShowShareLinkModal(false)} sharelink={modalNodeTarget.shareLink} />
+                {showShareLinkModal && modalNodeTarget &&
+                    <ShareModal closeCallback={() => setShowShareLinkModal(false)} node={modalNodeTarget} addToast={props.addToast} />
                 }
             </>
         );

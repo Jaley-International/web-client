@@ -1,4 +1,4 @@
-import {request} from "../helper/communication";
+import {request, Status} from "../helper/communication";
 import getConfig from "next/config";
 import User from "../model/User";
 
@@ -10,7 +10,7 @@ export async function getGroupsJobsSuggestions(): Promise<string[][]> {
     const {publicRuntimeConfig} = getConfig();
 
     const usersListResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/users`, {});
-    if (usersListResponse.status !== "SUCCESS")
+    if (usersListResponse.status !== Status.SUCCESS)
         return [[], []];
 
     const users = usersListResponse.data.users;
