@@ -15,6 +15,7 @@ import Log, {ActivityType} from "../../model/Log";
 import FileUploadActivity from "../../components/activities/FileUploadActivity";
 import FileSharingActivity from "../../components/activities/FileSharingActivity";
 import FileOverwriteActivity from "../../components/activities/FileOverwriteActivity";
+import FileMovingActivity from "../../components/activities/FileMovingActivity";
 
 function ActivityPage(): JSX.Element {
 
@@ -46,7 +47,8 @@ function ActivityPage(): JSX.Element {
                     job: rawUser.job || "Unknown",
                     group: rawUser.group || "Unknown",
                     accessLevel: rawUser.accessLevel,
-                    createdAt: rawUser.createdAt
+                    createdAt: rawUser.createdAt,
+                    userStatus: rawUser.userStatus,
                 });
             } else {
                 setUser(null);
@@ -128,6 +130,7 @@ function ActivityPage(): JSX.Element {
                                     let node: Node | null;
 
                                     switch (activity.activityType) {
+
                                         /*
                                         // user
                                         case ActivityType.USER_CREATION:
