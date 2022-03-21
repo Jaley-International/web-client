@@ -12,7 +12,7 @@ import {faCalendar, faFile, faFileWord} from "@fortawesome/free-regular-svg-icon
 import Badge from "../../components/Badge";
 import User, {UserAccessLevel} from "../../model/User";
 import TextInput from "../../components/inputs/TextInput";
-import {request} from "../../helper/communication";
+import {request, Status} from "../../helper/communication";
 import getConfig from "next/config";
 import {capitalize} from "../../util/string";
 import {deleteAccount, updateAccount} from "../../helper/processes";
@@ -42,7 +42,7 @@ function UserPage(): JSX.Element {
 
     const fetchUser = async (username: string) => {
         const response = await request("GET", `${publicRuntimeConfig.apiUrl}/users/${username}`, {});
-        if (response.status === "SUCCESS") {
+        if (response.status === Status.SUCCESS) {
             const rawUser = response.data.user;
             setUser({
                 username: rawUser.username,
@@ -53,7 +53,8 @@ function UserPage(): JSX.Element {
                 job: rawUser.job || "Unknown",
                 group: rawUser.group || "Unknown",
                 accessLevel: rawUser.accessLevel,
-                createdAt: rawUser.createdAt
+                createdAt: rawUser.createdAt,
+                userStatus: rawUser.userStatus
             });
         } else {
             setUser(null);
@@ -295,7 +296,7 @@ function UserPage(): JSX.Element {
 
                                         const status = await updateAccount(user, firstname, lastname, email, group, job, accessLevel as UserAccessLevel);
 
-                                        if (status === "SUCCESS")
+                                        if (status === Status.SUCCESS)
                                             addToast({
                                                 type: "success",
                                                 title: t("pages.user.details.toast.success.title"),
@@ -419,7 +420,7 @@ function UserPage(): JSX.Element {
             {showDeleteModal && user &&
                 <DeleteUserModal user={user} submitCallback={async () => {
                         const statusCode = await deleteAccount(user.username);
-                        if (statusCode === "SUCCESS") {
+                        if (statusCode === Status.SUCCESS) {
                             addToast({
                                 type: "success",
                                 title: t("pages.user.list.toast.success.title"),

@@ -1,11 +1,23 @@
 import axios, {AxiosRequestConfig, AxiosRequestHeaders, Method} from "axios";
 import {getCookie} from "cookies-next";
 
+export enum Status {
+    SUCCESS = "SUCCESS",
+    ERROR_UNKNOWN = "ERROR_UNKNOWN",
+    ERROR_INVALID_ACCESS_LEVEL = "ERROR_INVALID_ACCESS_LEVEL",
+    ERROR_FETCH = "ERROR_FETCH",
+    ERROR_DECRYPT = "ERROR_DECRYPT",
+    ERROR_USERNAME_ALREADY_USED = "ERROR_USERNAME_ALREADY_USED",
+    ERROR_EMAIL_ALREADY_USED = "ERROR_EMAIL_ALREADY_USED",
+    ERROR_INVALID_REGISTER_KEY = "ERROR_INVALID_REGISTER_KEY"
+}
+
 export interface APIResponse {
-    status: string;
+    status: Status;
     verbose: string;
     data?: any;
 }
+
 
 /**
  * Makes an HTTP request to the API
@@ -16,13 +28,7 @@ export interface APIResponse {
  * @param {AxiosRequestConfig}  additionalOptions   Additional axios config.
  * @return {Promise<APIResponse>}
  */
-export async function request(
-    method: Method,
-    url: string,
-    data: object,
-    additionalHeaders?: AxiosRequestHeaders,
-    additionalOptions?: AxiosRequestConfig
-): Promise<APIResponse> {
+export async function request(method: Method, url: string, data: object, additionalHeaders?: AxiosRequestHeaders, additionalOptions?: AxiosRequestConfig): Promise<APIResponse> {
 
     const sessionJSON = getCookie("session");
     let sessionId: string;
@@ -44,7 +50,7 @@ export async function request(
                 resolve(response.data);
             else
                 resolve({
-                    status: "SUCCESS",
+                    status: Status.SUCCESS,
                     verbose: "",
                     data: response
                 })
@@ -58,7 +64,7 @@ export async function request(
                 });
             } catch (_) {
                 resolve({
-                    status: "ERROR_UNKNOWN",
+                    status: Status.ERROR_UNKNOWN,
                     verbose: reason.request.response,
                     data: {}
                 });

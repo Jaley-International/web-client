@@ -20,7 +20,6 @@
             "preview": "Preview",
             "download": "Download",
             "share": "Share",
-            "manage-permissions": "Manage permission",
             "lock-file": "Lock file",
             "lock-folder": "Lock folder",
             "overwrite": "Overwrite",
@@ -97,9 +96,15 @@
                 "folder-name": "Folder name",
                 "submit": "Create folder"
             },
-            "link-share": {
-                "title": "Share by link",
-                "link": "Private share link"
+            "share": {
+                "title": "Share",
+                "link": {
+                    "label": "Private share link",
+                    "folder-wip": "Folder sharing by link is a work in progress feature."
+                },
+                "internal": {
+
+                }
             }
         }
     },

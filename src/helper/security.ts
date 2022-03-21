@@ -117,6 +117,18 @@ export function rsaPrivateDecrypt(key: string, value: Hex): Hex {
 
 
 /**
+ * Encrypts a string using RSA (public key)
+ * @param {Hex}         key             RSA Public key
+ * @param {Hex}         value           String to encrypt
+ * @return {Hex}                        Encrypted value
+ */
+export function rsaPublicEncrypt(key: string, value: Hex): Hex {
+    const publicKey = forge.pki.publicKeyFromPem(key);
+    return forge.util.bytesToHex(publicKey.encrypt(forge.util.hexToBytes(value)));
+}
+
+
+/**
  * Encrypts a buffer using RSA-GCM
  * @param {Buffer}      buffer          Buffer to encrypt
  * @param {Hex}         key             Encryption key
