@@ -1,9 +1,22 @@
 import forge, {Hex} from "node-forge";
 import {APIResponse, request, Status} from "./communication";
 import {removeCookies, setCookies} from "cookies-next";
-import {addPadding, decrypt, decryptBuffer, encrypt, encryptBuffer, generateRSAKeyPair, pbkdf2, rsaPrivateDecrypt, sha256, sha512} from "./security";
+import {
+    addPadding,
+    decrypt,
+    decryptBuffer,
+    encrypt,
+    encryptBuffer,
+    generateRSAKeyPair,
+    pbkdf2,
+    rsaPrivateDecrypt,
+    rsaPublicEncrypt,
+    sha256,
+    sha512
+} from "./security";
 import getConfig from "next/config";
 import User, {UserAccessLevel} from "../model/User";
+import Share from "../model/Share";
 
 export interface EncryptedNode {
     id: number;
@@ -14,6 +27,9 @@ export interface EncryptedNode {
     type: "FOLDER" | "FILE";
     ref: string;
     parentEncryptedKey: Hex;
+    owner: User,
+    shares: Share[];
+    parent: EncryptedNode;
     children: EncryptedNode[];
 }
 
@@ -34,7 +50,9 @@ export interface Node {
     type: "FOLDER" | "FILE";
     ref: string;
     parentKey: Hex;
+    owner?: User;
     children: Node[];
+    shares: Share[];
     shareLink?: ShareLink;
 }
 
@@ -115,7 +133,7 @@ export async function register(registerKey: string, password: string, update: (s
         encryptedMasterKey: encryptedMasterKey,
         hashedAuthenticationKey: hashedAuthenticationKey,
         encryptedRsaPrivateSharingKey: encryptedPrivateSharingKey,
-        rsaPublicSharingKey: publicSharingKey
+        rsaPublicSharingKey: publicSharingKey,
     };
 
     update(RegisterStep.SUBMITTING);
@@ -163,13 +181,13 @@ export async function authenticate(username: string, password: string, update: (
 
     // Decrypting keys
     update(AuthenticationStep.DECRYPTING_KEYS);
-    const masterKey = decrypt("AES-CTR", derivedEncryptionKey, salt, authResponse.data.loginDetails.encryptedMasterKey);
-    const privateSharingKey = decrypt("AES-CTR", masterKey, salt, authResponse.data.loginDetails.encryptedRsaPrivateSharingKey);
+    const masterKey = decrypt("AES-CTR", derivedEncryptionKey, salt, authResponse.data.loginDetails.user.encryptedMasterKey);
+    const privateSharingKey = decrypt("AES-CTR", masterKey, salt, authResponse.data.loginDetails.user.encryptedRsaPrivateSharingKey);
     const sessionIdentifier = rsaPrivateDecrypt(privateSharingKey, authResponse.data.loginDetails.encryptedSessionIdentifier);
 
     // Storing keys to the session storage
     localStorage.setItem("masterKey", masterKey);
-    localStorage.setItem("publicSharingKey", authResponse.data.loginDetails.rsaPublicSharingKey);
+    localStorage.setItem("publicSharingKey", authResponse.data.loginDetails.user.rsaPublicSharingKey);
     localStorage.setItem("privateSharingKey", privateSharingKey);
 
     // Storing session in cookies
@@ -180,6 +198,15 @@ export async function authenticate(username: string, password: string, update: (
         sameSite: true,
         secure: true
     });
+
+    // Saving current user to local storage
+    localStorage.setItem("username", authResponse.data.loginDetails.user.username);
+    localStorage.setItem("email", authResponse.data.loginDetails.user.email);
+    localStorage.setItem("firstName", authResponse.data.loginDetails.user.firstName);
+    localStorage.setItem("lastName", authResponse.data.loginDetails.user.lastName);
+    localStorage.setItem("group", authResponse.data.loginDetails.user.group);
+    localStorage.setItem("job", authResponse.data.loginDetails.user.job);
+    localStorage.setItem("accessLevel", authResponse.data.loginDetails.user.accessLevel);
 
     return true;
 }
@@ -452,6 +479,8 @@ export async function createNodeShareLink(node: Node): Promise<ShareLink | null>
  */
 export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number = 0): Node | null {
 
+    const username = localStorage.getItem("username"); // current user username
+
     // Fetch Master Key
     const masterKey = localStorage.getItem("masterKey");
     if (!masterKey)
@@ -461,10 +490,18 @@ export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number
     if (maxDepth < 0)
         return null;
 
-    let node: Node | null;
+    // Checking if node is shared with user
+    let share: Share | null = null;
+    for (let s of encryptedNode.shares)
+        if (s.recipient.username === username)
+            share = s;
 
-    // Decrypt current node
+    let node: Node | null = null;
+
+
     if (encryptedNode.id === 1) {
+
+        // No decryption when node is root
         node = {
             id: encryptedNode.id,
             children: [],
@@ -474,34 +511,56 @@ export function decryptFileSystem(encryptedNode: EncryptedNode, maxDepth: number
             parentKey: "",
             metaData: {name: "root"},
             ref: encryptedNode.ref,
-            type: encryptedNode.type
+            type: encryptedNode.type,
+            shares: []
         };
+
     } else {
+
+        let nodeKey: Hex | null = null;
         const iv = forge.util.hexToBytes(encryptedNode.iv);
-        const nodeKey = decrypt("AES-CTR", masterKey, iv, encryptedNode.encryptedNodeKey);
-        node = {
-            id: encryptedNode.id,
-            children: [],
-            iv: encryptedNode.iv,
-            tag: encryptedNode.tag,
-            nodeKey: nodeKey,
-            parentKey: decrypt("AES-CTR", nodeKey, encryptedNode.iv, encryptedNode.parentEncryptedKey),
-            metaData: JSON.parse(decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedMetadata)),
-            ref: encryptedNode.ref,
-            type: encryptedNode.type
+
+        if (encryptedNode.owner.username === username) {
+
+            // Decryption when user owns the node
+            nodeKey = decrypt("AES-CTR", masterKey, iv, encryptedNode.encryptedNodeKey);
+
+        } else if (share) {
+
+            // Decryption when node is shared with user
+            const privateSharingKey = localStorage.getItem("privateSharingKey");
+            if (privateSharingKey)
+                nodeKey = rsaPrivateDecrypt(privateSharingKey, share.shareKey);
+        }
+
+        //TODO Decryption when user is admin
+
+        if (nodeKey) {
+            node = {
+                id: encryptedNode.id,
+                children: [],
+                iv: encryptedNode.iv,
+                tag: encryptedNode.tag,
+                nodeKey: nodeKey,
+                parentKey: decrypt("AES-CTR", nodeKey, encryptedNode.iv, encryptedNode.parentEncryptedKey),
+                metaData: JSON.parse(decrypt("AES-CTR", nodeKey, iv, encryptedNode.encryptedMetadata)),
+                ref: encryptedNode.ref,
+                type: encryptedNode.type,
+                owner: encryptedNode.owner,
+                shares: encryptedNode.shares
+            }
         }
     }
 
     // Decrypt children
     if (maxDepth > 0) {
         for (const encryptedChild of encryptedNode.children) {
-            // TODO Check node ownership
             try {
                 const child = decryptFileSystem(encryptedChild, maxDepth - 1);
-                if (child)
+                if (node && child)
                     node.children.push(child);
             } catch (_) {
-                console.warn(`Could not decrypt node ${encryptedChild.id}. Not owner ?`);
+                console.warn(`Could not decrypt node ${encryptedChild.id}.`);
             }
         }
     }
@@ -602,4 +661,31 @@ export async function updateAccount(user: User, firstName?: string, lastName?: s
     });
 
     return response.status;
+}
+
+
+export async function shareNode(node: Node, recipient: User): Promise<boolean> {
+    const {publicRuntimeConfig} = getConfig();
+
+    // getting recipient's public sharing key
+    const sharingKeysResponse = await request("GET", `${publicRuntimeConfig.apiUrl}/users/${recipient.username}/sharing-keys`, {});
+    const recipientPublicSharingKey = sharingKeysResponse.data.keys.publicSharingKey;
+
+    // getting sender's public sharing key
+    const senderPublicSharingKey = localStorage.getItem("publicSharingKey");
+    if (!senderPublicSharingKey)
+        return false;
+
+    // keys encryption
+    const shareKey = rsaPublicEncrypt(recipientPublicSharingKey, node.nodeKey);
+    const shareSignature = rsaPublicEncrypt(senderPublicSharingKey, node.nodeKey);
+
+    // api call
+    const shareResponse = await request("POST", `${publicRuntimeConfig.apiUrl}/shares`, {
+        nodeId: node.id,
+        recipientUsername: recipient.username,
+        shareKey: shareKey,
+        shareSignature: shareSignature
+    });
+    return shareResponse.status === Status.SUCCESS;
 }

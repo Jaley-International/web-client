@@ -53,7 +53,8 @@ function UserPage(): JSX.Element {
                 job: rawUser.job || "Unknown",
                 group: rawUser.group || "Unknown",
                 accessLevel: rawUser.accessLevel,
-                createdAt: rawUser.createdAt
+                createdAt: rawUser.createdAt,
+                userStatus: rawUser.userStatus
             });
         } else {
             setUser(null);
