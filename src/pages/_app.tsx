@@ -5,6 +5,7 @@ import ExtendSessionModal from "../components/containers/modals/ExtendSessionMod
 import ToastProvider from "../components/toast/ToastProvider";
 import {AnimatePresence} from "framer-motion";
 import {NextIntlProvider} from "next-intl";
+import FileTransferProvider from "../components/transfers/FileTransferProvider";
 
 class MyApp extends App {
     render() {
@@ -34,12 +35,14 @@ class MyApp extends App {
                 <main>
                     <NextIntlProvider messages={pageProps.messages}>
                         <ToastProvider>
-                            <>
-                                <AnimatePresence>
-                                    <Component {...pageProps} />
-                                </AnimatePresence>
-                                <ExtendSessionModal />
-                            </>
+                            <FileTransferProvider>
+                                <>
+                                    <AnimatePresence>
+                                        <Component {...pageProps} />
+                                    </AnimatePresence>
+                                    <ExtendSessionModal />
+                                </>
+                            </FileTransferProvider>
                         </ToastProvider>
                     </NextIntlProvider>
                 </main>

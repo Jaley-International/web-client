@@ -5,8 +5,6 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCloud} from "@fortawesome/free-solid-svg-icons";
 import {Heading3} from "../../text/Headings";
 import Link from "next/link";
-import {useState} from "react";
-import TransferList from "../../transfers/TransferList";
 import {terminateSession} from "../../../helper/processes";
 import {useRouter} from "next/router";
 import {GetStaticProps} from "next";
@@ -15,18 +13,10 @@ import {useTranslations} from "use-intl";
 function Navbar(): JSX.Element {
 
     const t = useTranslations();
-
-    const [showFileTransfers, setShowFileTransfers] = useState(false);
-
-    const toggleFileTransfers = () => {
-        setShowFileTransfers(prev => !prev);
-    }
-
     const router = useRouter();
 
     return (
         <>
-            <TransferList show={showFileTransfers}/>
             <nav className="w-14 lg:w-2/12 max-w-xs min-h-screen bg-white border-r-2 border-border relative">
 
                 <Link href="/" passHref>
@@ -53,10 +43,6 @@ function Navbar(): JSX.Element {
                     await terminateSession();
                     await router.reload();
                 }} />
-                {
-                    // FIXME File transfer view
-                    /* <NavbarItem name="File&nbsp;transfers" active={showFileTransfers} activeRoutes={[]} icon={faExchangeAlt} className="absolute inset-x-0 bottom-2" badge="3" action={() => toggleFileTransfers()} />*/
-                }
 
             </nav>
         </>

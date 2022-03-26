@@ -27,11 +27,11 @@ const ToastPortal = forwardRef((props, ref: Ref<ToastRef>) => {
 
     return loaded ? (
         createPortal(
-            <div>
+            <>
                 {toasts.map(t => (
                     <Toast key={t.key} type={t.type} title={t.title} message={t.message} onClose={() => t.key && removeToast(t.key)} />
                 ))}
-            </div>,
+            </>,
             document.getElementById(portalId) as Element
         )
     ) : (
