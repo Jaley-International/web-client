@@ -57,6 +57,12 @@ function NewShareModal(props: Props): JSX.Element {
             fetchShares().then(_ => {});
     });
 
+
+    const [targets, setTargets] = useState<User[]>([]);
+    const submitShares = () => {
+        targets.forEach(user => shareNode(props.node, user));
+    };
+
     return (
         <>
             <div className="z-10 fixed left-0 top-0 w-full h-full bg-white bg-opacity-40 firefox:bg-opacity-40 backdrop-filter backdrop-blur-sm" onClick={props.closeCallback} />
@@ -106,24 +112,21 @@ function NewShareModal(props: Props): JSX.Element {
                                         </td>
                                         <td className="text-center">
                                             <span className="text-txt-body">
-                                                <Button size="medium" type="regular" colour="green" onClick={async (e) => {
-                                                    if (await shareNode(props.node, user)) {
-                                                        const button = e.target as HTMLButtonElement;
-                                                        button.innerText = "Shared";
-                                                        button.disabled = true;
-                                                        button.classList.remove("bg-green");
-                                                        button.classList.add("bg-grey-500");
-                                                        props.updateCallback();
-                                                    } else {
-                                                        props.addToast({
-                                                            type: "error",
-                                                            title: "Fail to share with user",
-                                                            message: "An unexpected error occurred while sharing the file/folder."
-                                                        });
-                                                    }
-                                                }}>
-                                                    Grant access
-                                                </Button>
+                                                {targets.includes(user) ?
+                                                    <Button size="medium" type="regular" colour="orange" className="w-full" onClick={() => {
+                                                        const newTargets = targets.filter(target => target !== user);
+                                                        setTargets(newTargets);
+                                                    }}>
+                                                        Cancel
+                                                    </Button>
+                                                :
+                                                    <Button size="medium" type="regular" colour="green" className="w-full" onClick={() => {
+                                                        const newTargets = targets.concat(user);
+                                                        setTargets(newTargets);
+                                                    }}>
+                                                        Grant access
+                                                    </Button>
+                                                }
                                             </span>
                                         </td>
                                     </tr>
@@ -132,7 +135,11 @@ function NewShareModal(props: Props): JSX.Element {
                             </tbody>
                         </table>
 
-                        <div className="text-center mt-4">
+                        <div className="text-center mt-4 space-x-4">
+                            <Button size="medium" type="regular" colour="green" onClick={() => {
+                                submitShares();
+                                props.closeCallback();
+                            }}>Submit</Button>
                             <Button size="medium" type="regular" colour="dark" onClick={props.closeCallback}>Close</Button>
                         </div>
                     </div>
