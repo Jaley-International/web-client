@@ -47,6 +47,8 @@ export interface FileListViewRef {
     openUploadPrompt: () => void;
     openCreateFolderModal: () => void;
     changerFolder: (newFolderId: number) => void;
+    getDragNodeOrigin: () => Node | null;
+    moveDragNode: (origin: Node, destination: Node) => void;
 }
 
 const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
@@ -92,6 +94,22 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
         else
             router.replace("").then(_ => {});
     };
+
+    const moveDragNode = (origin: Node, destination: Node) => {
+        moveNode(origin, destination).then(status => {
+            if (status)
+                props.addToast({
+                    type: "success",
+                    title: `${capitalize(origin.type)} moved`,
+                    message: `${capitalize(capitalize(origin.type))} ${origin.metaData.name} moved to ${destination.metaData.name}.`});
+            else
+                props.addToast({
+                    type: "error",
+                    title: `Could not move ${capitalize(origin.type)}`,
+                    message: `An unexpected error occurred while moving the ${capitalize(origin.type)}.`});
+            fetchFilesystem().then(_ => {});
+        });
+    }
 
     const fetchFilesystem = async () => {
         const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${currentFolderId}`, {});
@@ -160,7 +178,11 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
         openCreateFolderModal() {
             setShowCreateFolderModal(true);
         },
-        changerFolder
+        changerFolder,
+        getDragNodeOrigin() {
+            return dragNodeOrigin;
+        },
+        moveDragNode
     }));
 
     if (loaded && !filesystem) {
@@ -253,19 +275,8 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                             onDrop={async (e) => {
                                                 e.preventDefault();
                                                 if (dragNodeOrigin && dragNodeDest) {
-                                                    const status = await moveNode(dragNodeOrigin, dragNodeDest);
-                                                    if (status)
-                                                        props.addToast({
-                                                            type: "success",
-                                                            title: `${capitalize(dragNodeOrigin.type)} moved`,
-                                                            message: `${capitalize(capitalize(dragNodeOrigin.type))} ${dragNodeOrigin.metaData.name} moved to ${dragNodeDest.metaData.name}.`});
-                                                    else
-                                                        props.addToast({
-                                                            type: "error",
-                                                            title: `Could not move ${capitalize(dragNodeOrigin.type)}`,
-                                                            message: `An unexpected error occurred while moving the ${capitalize(dragNodeOrigin.type)}.`});
+                                                    moveDragNode(dragNodeOrigin, dragNodeDest);
                                                     setDragNodeDest(null);
-                                                    await fetchFilesystem();
                                                 }
                                             }}
                                         >

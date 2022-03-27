@@ -9,7 +9,7 @@ interface Props {
 function Breadcrumb(props: Props): JSX.Element {
     if (props.items.length === 0) return <></>;
     return (
-        <nav className="space-x-2 text-2xs lg:space-x-4 lg:text-xs">
+        <nav className="space-x-2 text-2xs lg:space-x-3 lg:text-xs">
             {props.items.map((item, index) =>
                 <BreadcrumbItem key={index} {...item} />
             ).reduce((prev, curr) => <>

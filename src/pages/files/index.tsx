@@ -47,13 +47,29 @@ function FilesPage(): JSX.Element {
             });
 
             // Update breadcrumb
-            let newBreadcrumbItems: BreadcrumbItemProps[] = [{icon: faServer, action: () => fileListRef.current?.changerFolder(1)}];
+            let newBreadcrumbItems: BreadcrumbItemProps[] = [{
+                icon: faServer,
+                action: () => fileListRef.current?.changerFolder(1),
+                onDrop: () => {
+                    const origin = fileListRef.current?.getDragNodeOrigin();
+                    if (origin)
+                        fileListRef.current?.moveDragNode(origin, path[0]);
+                }
+            }];
             path.forEach((node, i) => {
                 if (node.id !== 1) {
                     if (i === path.length - 1) {
                         newBreadcrumbItems.push({title: node.metaData.name});
                     } else {
-                        newBreadcrumbItems.push({title: node.metaData.name, action: () => fileListRef.current?.changerFolder(node.id)});
+                        newBreadcrumbItems.push({
+                            title: node.metaData.name,
+                            action: () => fileListRef.current?.changerFolder(node.id),
+                            onDrop: () => {
+                                const origin = fileListRef.current?.getDragNodeOrigin();
+                                if (origin)
+                                    fileListRef.current?.moveDragNode(origin, node);
+                            }
+                        });
                     }
                 }
             });
@@ -99,7 +115,7 @@ export const getStaticProps: GetStaticProps = async ({locale}) => {
         props: {
             messages: require(`../../locales/${locale}.json`)
         }
-    }
+    };
 };
 
 export default FilesPage;
