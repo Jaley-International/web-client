@@ -1,16 +1,30 @@
 import Card from "../containers/Card";
 import TransferItem from "./TransferItem";
+import {useRouter} from "next/router";
+import {useState} from "react";
+import Button from "../buttons/Button";
+import {faRightLeft, faTimes} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-interface Props {
-    show: boolean;
-}
+function TransferList(): JSX.Element {
 
-function TransferList(props: Props): JSX.Element {
+    const [show, setShow] = useState<boolean>(false);
+
+    const router = useRouter();
+    // Hide if in auth page or no transfer in progress
+    if (router.route.match(/^\/auth.*$/))
+        return <></>;
 
     return (
         <>
-            {props.show ?
-                    <Card className="absolute left-14 lg:left-2/12 bottom-0 w-4/12 z-10 bg-bg-light">
+            <Button size="large" type="outline" colour="green" className="fixed pr-0 pl-0 h-14 w-14 right-8 bottom-8 rounded-full" onClick={() => setShow(!show)}>
+                <div className="animate-pulse">
+                    {show ? <FontAwesomeIcon icon={faTimes} /> : <FontAwesomeIcon icon={faRightLeft} />}
+                </div>
+            </Button>
+
+            {show &&
+                    <Card className="fixed right-28 bottom-8 w-4/12 z-10">
                         <>
                             <TransferItem
                                 filename={"Creditor bank details.docx"}
@@ -32,7 +46,7 @@ function TransferList(props: Props): JSX.Element {
                                 type={"download"}/>
                         </>
                     </Card>
-            : null}
+            }
         </>
     );
 }

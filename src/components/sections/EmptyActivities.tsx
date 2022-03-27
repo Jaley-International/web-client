@@ -1,8 +1,7 @@
 import Card from "../containers/Card";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faChevronCircleLeft, faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
+import {faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
 import {Heading2} from "../text/Headings";
-import Button from "../buttons/Button";
 import React from "react";
 import {useTranslations} from "use-intl";
 

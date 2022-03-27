@@ -25,7 +25,7 @@ const FileTransferPortal = forwardRef((props, ref: Ref<FileTransferInterface>) =
 
     return loaded ? (
         createPortal(
-            <TransferList show={true} />,
+            <TransferList />,
             document.getElementById(portalId) as Element
         )
     ) : (
