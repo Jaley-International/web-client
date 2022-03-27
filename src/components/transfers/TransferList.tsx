@@ -5,14 +5,19 @@ import {useState} from "react";
 import Button from "../buttons/Button";
 import {faRightLeft, faTimes} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {FileTransferProps} from "./FileTransferProvider";
 
-function TransferList(): JSX.Element {
+interface Props {
+    transfers: FileTransferProps[];
+}
+
+function TransferList(props: Props): JSX.Element {
 
     const [show, setShow] = useState<boolean>(false);
 
     const router = useRouter();
     // Hide if in auth page or no transfer in progress
-    if (router.route.match(/^\/auth.*$/))
+    if (props.transfers.length === 0 || router.route.match(/^\/auth.*$/))
         return <></>;
 
     return (
@@ -26,24 +31,7 @@ function TransferList(): JSX.Element {
             {show &&
                     <Card className="fixed right-28 bottom-8 w-4/12 z-10">
                         <>
-                            <TransferItem
-                                filename={"Creditor bank details.docx"}
-                                path={"/Cases/Case #42 Mr. Dupont/Bills and..."}
-                                progress={91}
-                                status={"Encrypting"}
-                                type={"upload"}/>
-                            <TransferItem
-                                filename={"Form no 829420.pdf"}
-                                path={"/Protocol/Forms"}
-                                progress={30}
-                                status={"Sending"}
-                                type={"upload"}/>
-                            <TransferItem
-                                filename={"Expenses.xlsx"}
-                                path={"/Cases/Case #44 SA Tupex/Bills and i..."}
-                                progress={58}
-                                status={"Receiving"}
-                                type={"download"}/>
+                            {props.transfers.map((transfer: FileTransferProps) => <TransferItem key={transfer.filename} transfer={transfer} />)}
                         </>
                     </Card>
             }

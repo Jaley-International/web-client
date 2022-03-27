@@ -2,22 +2,20 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEllipsisV, faArrowCircleUp, faArrowCircleDown} from "@fortawesome/free-solid-svg-icons";
 import Button from "../buttons/Button";
 import ProgressBar from "../ProgressBar";
+import {FileTransferProps} from "./FileTransferProvider";
+import {capitalize} from "../../util/string";
 
 interface Props {
-    type: "upload" | "download";
-    filename: string;
-    path: string;
-    status: "Sending" | "Receiving" | "Encrypting" | "Decrypting" | "Errored" | "Paused";
-    progress: number;
+    transfer: FileTransferProps;
 }
 
 const colorsFromStatus = {
-    "Sending": "blue",
-    "Receiving": "blue",
-    "Encrypting": "orange",
-    "Decrypting": "green",
-    "Errored": "red",
-    "Paused": "silver",
+    "SENDING": "blue",
+    "RECEIVING": "blue",
+    "ENCRYPTING": "orange",
+    "DECRYPTING": "green",
+    "ERRORED": "red",
+    "PAUSED": "silver",
 };
 
 function TransferItem(props: Props): JSX.Element {
@@ -27,24 +25,24 @@ function TransferItem(props: Props): JSX.Element {
             <div className="w-full px-3 py-2 space-y-1">
                 <div className="space-x-1 text-2xs flex">
                     <div className="w-4">
-                        <FontAwesomeIcon icon={props.type === "upload" ? faArrowCircleUp : faArrowCircleDown} className="text-txt-heading text-sm" />
+                        <FontAwesomeIcon icon={props.transfer.type === "UPLOAD" ? faArrowCircleUp : faArrowCircleDown} className="text-txt-heading text-sm" />
                     </div>
                     <div className="w-4/12">
-                        <span className="pl-1 font-semibold text-txt-heading">{props.filename}</span>
+                        <span className="pl-1 font-semibold text-txt-heading">{props.transfer.filename}</span>
                     </div>
                     <div className="w-7/12">
-                        <span className="pl-5 font-light text-txt-body-muted">{props.path}</span>
+                        <span className="pl-5 font-light text-txt-body-muted">{props.transfer.path}</span>
                     </div>
                 </div>
                 <div className="flex space-x-3 text-3xs font-medium">
                     <div className="w-8/12 my-auto">
-                        <ProgressBar value={props.progress} colour={colorsFromStatus[props.status]} size={1.5} />
+                        <ProgressBar value={props.transfer.progress} colour={colorsFromStatus[props.transfer.status]} size={1.5} />
                     </div>
                     <div className="w-1/12">
-                        <span className="text-txt-body-muted">{props.progress}%</span>
+                        <span className="text-txt-body-muted">{props.transfer.progress}%</span>
                     </div>
                     <div className="w-2/12">
-                        <span className="text-txt-body-muted">{props.status}...</span>
+                        <span className="text-txt-body-muted">{capitalize(props.transfer.status)}...</span>
                     </div>
                 </div>
             </div>

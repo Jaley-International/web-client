@@ -3,17 +3,18 @@ import {useRef} from "react";
 import FileTransferPortal from "./FileTransferPortal";
 
 export interface FileTransferProps {
-    type: "upload" | "download";
+    id?: string;
+    type: "UPLOAD" | "DOWNLOAD";
     filename: string;
     path: string;
-    status: "Sending" | "Receiving" | "Encrypting" | "Decrypting" | "Errored" | "Paused";
+    status: "SENDING" | "RECEIVING" | "ENCRYPTING" | "DECRYPTING" | "ERRORED" | "PAUSED";
     progress: number;
 }
 
 export interface FileTransferInterface {
-    add: (transfer: FileTransferProps) => number;
-    remove: (id: number) => void;
-    update: (id: number, transfer: FileTransferProps) => void;
+    add: (transfer: FileTransferProps) => FileTransferProps | null;
+    remove: (transfer: FileTransferProps) => void;
+    update: (transfer: FileTransferProps) => void;
 }
 
 interface Props {
@@ -25,22 +26,18 @@ function FileTransferProvider(props: Props): JSX.Element {
     const fileTransferRef = useRef<FileTransferInterface>(null);
 
     const fileTransferInterface: FileTransferInterface = {
-        add: (transfer: FileTransferProps): number => {
-            console.log("ADD");
-            if (fileTransferRef.current) {
+        add: (transfer: FileTransferProps): FileTransferProps | null => {
+            if (fileTransferRef.current)
                 return fileTransferRef.current.add(transfer);
-            }
-            return -1;
+            return null;
         },
-        remove: (id: number): void => {
-            if (fileTransferRef.current) {
-                fileTransferRef.current.remove(id);
-            }
+        remove: (transfer: FileTransferProps): void => {
+            if (fileTransferRef.current)
+                fileTransferRef.current.remove(transfer);
         },
-        update: (id: number, transfer: FileTransferProps): void => {
-            if (fileTransferRef.current) {
-                fileTransferRef.current.update(id, transfer);
-            }
+        update: (transfer: FileTransferProps): void => {
+            if (fileTransferRef.current)
+                fileTransferRef.current.update(transfer);
         }
     }
 
