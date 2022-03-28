@@ -112,6 +112,8 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
     }
 
     const fetchFilesystem = async () => {
+        if (props.onFolderChange)
+            props.onFolderChange(currentFolderId);
         const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${currentFolderId}`, {});
         if (response.status !== Status.SUCCESS) {
             setLoaded(true);
@@ -127,8 +129,6 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
             return;
         }
         setFilesystem(decrypted);
-        if (props.onFolderChange)
-            props.onFolderChange(decrypted.id);
         setLoaded(true);
     };
 
@@ -260,7 +260,47 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                             </thead>
                             <tbody className="overflow-y-scroll h-4/6">
 
-                            {filesystem && filesystem.children
+                            {!loaded &&
+                                [0, 1, 2].map(i => {
+                                    return (
+                                        <tr key={i} className="m-0.5 border-b border-grey-200">
+                                            <td className="py-2 px-4">
+                                                <div className="flex space-x-3">
+                                                    <div className="grid my-auto cursor-grab font-light">
+                                                        <FontAwesomeIcon icon={faGripLinesVertical} className="text-grey-300" />
+                                                    </div>
+                                                    <div className="grid h-9 w-9 rounded-full bg-silver my-auto">
+                                                        &nbsp;
+                                                    </div>
+                                                    <div className="grid content-center leading-4">
+                                                        <span className="text-txt-heading font-semibold text-2xs">
+                                                            <div className="w-64 h-4 mb-1 bg-grey-300 rounded-md animate-pulse" />
+                                                        </span>
+                                                        <span className="text-txt-body-muted font-light text-4xs">
+                                                            <div className="w-28 h-2.5 mt-1 bg-grey-300 rounded-md animate-pulse" />
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span className="text-txt-body text-xs">
+                                                    <div className="w-48 h-5 bg-grey-300 rounded-md animate-pulse" />
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="flex">
+                                                    {[0, 1, 2].map(i => {
+                                                        return (<div key={i} className="grid h-9 w-9 rounded-full bg-grey-300 my-auto -mr-3 animate-pulse">&nbsp;</div>);
+                                                    })}
+                                                </div>
+                                            </td>
+                                            <td> </td>
+                                        </tr>
+                                    );
+                                })
+                            }
+
+                            {loaded && filesystem && filesystem.children
                                 .sort((a, b) => a.metaData.name.toLowerCase() > b.metaData.name.toLowerCase() ? 1 : -1)
                                 .sort((a, b) => a.type === "FOLDER" ? (b.type === "FOLDER" ? 0 : -1) : (b.type === "FOLDER" ? 1 : 0))
                                 .map(node => {
@@ -394,7 +434,7 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                     );
                                 })}
 
-                                {filesystem && filesystem.children && filesystem.children.length === 0 &&
+                                {filesystem && loaded && filesystem.children.length === 0 &&
                                     <tr>
                                         <td colSpan={4} className="w-full text-center py-6">
                                             <span className="text-txt-body">{t("pages.file.list.empty-folder")}</span>
