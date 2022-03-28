@@ -331,7 +331,8 @@
                 "not-found": {
                     "title": "Dossier introuvable",
                     "message": "Le dossier demandé n'existe pas."
-                }
+                },
+                "empty-folder": "Ce dossier est vide."
             }
         },
         "link-share": {

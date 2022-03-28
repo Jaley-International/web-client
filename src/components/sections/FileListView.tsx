@@ -394,6 +394,14 @@ const FileListView = forwardRef((props: Props, ref: Ref<FileListViewRef>) => {
                                     );
                                 })}
 
+                                {filesystem && filesystem.children && filesystem.children.length === 0 &&
+                                    <tr>
+                                        <td colSpan={4} className="w-full text-center py-6">
+                                            <span className="text-txt-body">{t("pages.file.list.empty-folder")}</span>
+                                        </td>
+                                    </tr>
+                                }
+
                             </tbody>
                         </table>
                     </Card>

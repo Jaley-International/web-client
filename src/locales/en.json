@@ -332,7 +332,8 @@
                 "not-found": {
                     "title": "Folder not found",
                     "message": "The folder you requested does not exists."
-                }
+                },
+                "empty-folder": "This folder is empty."
             }
         },
         "link-share": {
