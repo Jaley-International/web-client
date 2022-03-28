@@ -213,43 +213,6 @@ export async function authenticate(username: string, password: string, update: (
 
 
 /**
- * File content upload to server.
- *
- * @param {File}        file                File to upload.
- * @param {Hex}         nodeKey             Node key.
- * @param {string}      iv                  Initialisation vector.
- * @return {string[]}                       Array with file ref and tag.
- */
-async function uploadFileContent(file: File, nodeKey: Hex, iv: string): Promise<[string, string] | [null, null]> {
-    const {publicRuntimeConfig} = getConfig();
-
-    // Reading file
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    // Encrypt file
-    // TODO compress file before encryption
-    // TODO make encryption process asynchronous
-    const [encryptedFile, tag] = encryptBuffer(buffer, nodeKey, iv);
-
-    // Sending file to the server
-    const ffile = new File([encryptedFile], "file.enc");
-    const formData = new FormData();
-    formData.append("file", ffile);
-
-    const contentResponse = await request(
-        "POST",
-        `${publicRuntimeConfig.apiUrl}/file-system/content`,
-        formData,
-        {"Content-Type": "multipart/form-data;"});
-
-    if (contentResponse.status !== Status.SUCCESS)
-        return [null, null];
-
-    return [contentResponse.data.ref, tag];
-}
-
-
-/**
  * File node creation client-side process
  * @see https://docs.google.com/document/d/1bid3hIqrj6cgmGY5IoCocDCYNTaqBXG9GW-ERx4-P5I/edit
  *
@@ -267,9 +230,11 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
     // Generate initialization vector (128 bits)
     const iv = forge.random.getBytesSync(16);
 
-    // server request to upload file content
-    const [ref, tag] = await uploadFileContent(file, nodeKey, iv);
-    if (!ref) return false;
+    // Encrypt file
+    const buffer = Buffer.from(await file.arrayBuffer());
+    // TODO compress file before encryption
+    // TODO make encryption process asynchronous
+    const [encryptedFile, tag] = encryptBuffer(buffer, nodeKey, iv);
 
     // Getting and encrypting file meta data
     const metaData = {
@@ -286,18 +251,25 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
     // Compute Parent Encrypted Key
     const parentEncryptedKey = parentFolderKey ? encrypt("AES-CTR", parentFolderKey, nodeKey, iv) : "";
 
-    // Submitting file data to the API
-    const fileResponse = await request("POST", `${publicRuntimeConfig.apiUrl}/file-system/file`, {
-        ref: ref,
-        iv: forge.util.bytesToHex(iv),
-        tag: tag,
-        encryptedNodeKey: encryptedNodeKey,
-        parentId: containingFolderID,
-        encryptedMetadata: encryptedMetadata,
-        parentEncryptedKey: parentEncryptedKey
-    });
+    // creating form to send to API
+    const formData = new FormData();
+    formData.append("file", new File([encryptedFile], "file.enc"));
+    formData.append("iv", forge.util.bytesToHex(iv));
+    formData.append("tag", tag);
+    formData.append("encryptedNodeKey", encryptedNodeKey);
+    formData.append("parentId", containingFolderID.toString());
+    formData.append("encryptedMetadata", encryptedMetadata);
+    formData.append("parentEncryptedKey", parentEncryptedKey);
 
-    return fileResponse.status === Status.SUCCESS;
+    // submit
+    const response = await request(
+        "POST",
+        `${publicRuntimeConfig.apiUrl}/file-system/file`,
+        formData,
+        {"Content-Type": "multipart/form-data;"}
+    );
+
+    return response.status === Status.SUCCESS;
 }
 
 
@@ -313,9 +285,11 @@ export async function uploadFile(file: File, containingFolderID: number, parentF
 export async function overwriteFile(file: File, nodeId: number, nodeKey: Hex, iv: string): Promise<boolean> {
     const {publicRuntimeConfig} = getConfig();
 
-    // server request to upload file content
-    const [ref, tag] = await uploadFileContent(file, nodeKey, forge.util.hexToBytes(iv));
-    if (!ref) return false;
+    // Encrypt file
+    const buffer = Buffer.from(await file.arrayBuffer());
+    // TODO compress file before encryption
+    // TODO make encryption process asynchronous
+    const [encryptedFile, tag] = encryptBuffer(buffer, nodeKey, forge.util.hexToBytes(iv));
 
     // Getting and encrypting file meta data
     const metaData = {
@@ -326,14 +300,21 @@ export async function overwriteFile(file: File, nodeId: number, nodeKey: Hex, iv
     }
     const encryptedMetadata = encrypt("AES-CTR", nodeKey, forge.util.hexToBytes(iv), JSON.stringify(metaData));
 
-    // sending node ref update request
-    const overwriteResponse = await request("PATCH", `${publicRuntimeConfig.apiUrl}/file-system/${nodeId}/ref`, {
-        newEncryptedMetadata: encryptedMetadata,
-        newRef: ref,
-        newTag: tag
-    });
+    // creating form to send to API
+    const formData = new FormData();
+    formData.append("file", new File([encryptedFile], "file.enc"));
+    formData.append("newEncryptedMetadata", encryptedMetadata);
+    formData.append("newTag", tag);
 
-    return overwriteResponse.status === Status.SUCCESS;
+    // submit
+    const response = await request(
+        "PATCH",
+        `${publicRuntimeConfig.apiUrl}/file-system/${nodeId}`,
+        formData,
+        {"Content-Type": "multipart/form-data;"}
+    );
+
+    return response.status === Status.SUCCESS;
 }
 
 
@@ -347,13 +328,15 @@ export async function overwriteFile(file: File, nodeId: number, nodeKey: Hex, iv
 export async function downloadFile(node: Node): Promise<string> {
     const {publicRuntimeConfig} = getConfig();
 
-    const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/content`, {}, {
+    const response = await request("GET", `${publicRuntimeConfig.apiUrl}/file-system/${node.id}/file`, {}, {
         "Content-Encoding": "identity"
     }, {
         responseType: "arraybuffer"
     });
 
-    if (!response)
+    // There's no status in this response,
+    // so we just check the existence of the response.
+    if (!response || (response.status && response.status !== Status.SUCCESS))
         return Status.ERROR_FETCH;
 
     const decrypted = decryptBuffer(
